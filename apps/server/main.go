@@ -10,6 +10,7 @@ import (
 
 	"github.com/LaysDragon/blog/apps/server/db/pgrepo"
 	"github.com/LaysDragon/blog/apps/server/service"
+	"github.com/LaysDragon/blog/apps/server/usecase"
 	"github.com/LaysDragon/blog/apps/server/web"
 	"github.com/gin-gonic/gin"
 )
@@ -44,8 +45,9 @@ func main() {
 	}
 
 	postRepo := pgrepo.NewPostRepo(db)
-	postService := service.NewPostService(postRepo)
-	postController := web.NewPostController(postService)
+	postService := service.NewPostService()
+	postUseCase := usecase.NewPostUseCase(postRepo, postService)
+	postController := web.NewPostController(postUseCase)
 
 	router := gin.Default()
 	router.GET("/post", postController.HandleGetPost)

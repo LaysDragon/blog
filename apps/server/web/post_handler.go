@@ -4,20 +4,20 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/LaysDragon/blog/apps/server/service"
+	"github.com/LaysDragon/blog/apps/server/usecase"
 	"github.com/gin-gonic/gin"
 )
 
 type PostController struct {
-	service *service.PostService
+	usecase *usecase.PostUseCase
 }
 
-func NewPostController(service *service.PostService) *PostController {
-	return &PostController{service}
+func NewPostController(usecase *usecase.PostUseCase) *PostController {
+	return &PostController{usecase}
 }
 
 func (c *PostController) HandleGetPost(ctx *gin.Context) {
-	post, err := c.service.ById(0)
+	post, err := c.usecase.ById(0)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			ctx.Status(404)
