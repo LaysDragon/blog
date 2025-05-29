@@ -1,5 +1,23 @@
-language: 'go'
+language: "go"
 
+stack: backend
+type: application
 tasks:
-  run: 
-    command: 'go run main.go'
+  run:
+    # command: "go run main.go"
+    command: "air"
+    local: true
+    options:
+      persistent: true
+  gen/pg:
+    command:
+      - cd db/pgrepo &&
+      - sqlboiler psql
+    options:
+      cache: false
+  test/pg:
+    command:
+      - cd db/pgrepo &&
+      - go test ./models
+    options:
+      cache: false

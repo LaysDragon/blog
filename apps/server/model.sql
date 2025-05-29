@@ -42,6 +42,6 @@ CREATE TABLE
     access_log (
         id serial PRIMARY KEY,
         timestamp timestamptz NOT NULL default current_timestamp,
-        op_id int REFERENCES account (id),
-        op text NOT NULL
+        user_id int REFERENCES account (id),
+        method text NOT NULL
     );
