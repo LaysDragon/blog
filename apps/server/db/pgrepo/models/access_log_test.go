@@ -738,7 +738,7 @@ func testAccessLogsSelect(t *testing.T) {
 }
 
 var (
-	accessLogDBTypes = map[string]string{`ID`: `integer`, `Timestamp`: `timestamp with time zone`, `UserID`: `integer`, `Method`: `text`}
+	accessLogDBTypes = map[string]string{`ID`: `integer`, `CreatedAt`: `timestamp with time zone`, `UserID`: `integer`, `Method`: `text`}
 	_                = bytes.MinRead
 )
 

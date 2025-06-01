@@ -25,7 +25,7 @@ import (
 // AccessLog is an object representing the database table.
 type AccessLog struct {
 	ID        int       `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Timestamp time.Time `boil:"timestamp" json:"timestamp" toml:"timestamp" yaml:"timestamp"`
+	CreatedAt time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
 	UserID    null.Int  `boil:"user_id" json:"user_id,omitempty" toml:"user_id" yaml:"user_id,omitempty"`
 	Method    string    `boil:"method" json:"method" toml:"method" yaml:"method"`
 
@@ -35,24 +35,24 @@ type AccessLog struct {
 
 var AccessLogColumns = struct {
 	ID        string
-	Timestamp string
+	CreatedAt string
 	UserID    string
 	Method    string
 }{
 	ID:        "id",
-	Timestamp: "timestamp",
+	CreatedAt: "created_at",
 	UserID:    "user_id",
 	Method:    "method",
 }
 
 var AccessLogTableColumns = struct {
 	ID        string
-	Timestamp string
+	CreatedAt string
 	UserID    string
 	Method    string
 }{
 	ID:        "access_log.id",
-	Timestamp: "access_log.timestamp",
+	CreatedAt: "access_log.created_at",
 	UserID:    "access_log.user_id",
 	Method:    "access_log.method",
 }
@@ -174,12 +174,12 @@ func (w whereHelperstring) NIN(slice []string) qm.QueryMod {
 
 var AccessLogWhere = struct {
 	ID        whereHelperint
-	Timestamp whereHelpertime_Time
+	CreatedAt whereHelpertime_Time
 	UserID    whereHelpernull_Int
 	Method    whereHelperstring
 }{
 	ID:        whereHelperint{field: "\"access_log\".\"id\""},
-	Timestamp: whereHelpertime_Time{field: "\"access_log\".\"timestamp\""},
+	CreatedAt: whereHelpertime_Time{field: "\"access_log\".\"created_at\""},
 	UserID:    whereHelpernull_Int{field: "\"access_log\".\"user_id\""},
 	Method:    whereHelperstring{field: "\"access_log\".\"method\""},
 }
@@ -221,9 +221,9 @@ func (r *accessLogR) GetUser() *Account {
 type accessLogL struct{}
 
 var (
-	accessLogAllColumns            = []string{"id", "timestamp", "user_id", "method"}
+	accessLogAllColumns            = []string{"id", "created_at", "user_id", "method"}
 	accessLogColumnsWithoutDefault = []string{"method"}
-	accessLogColumnsWithDefault    = []string{"id", "timestamp", "user_id"}
+	accessLogColumnsWithDefault    = []string{"id", "created_at", "user_id"}
 	accessLogPrimaryKeyColumns     = []string{"id"}
 	accessLogGeneratedColumns      = []string{}
 )
@@ -797,6 +797,13 @@ func (o *AccessLog) Insert(ctx context.Context, exec boil.ContextExecutor, colum
 	}
 
 	var err error
+	if !boil.TimestampsAreSkipped(ctx) {
+		currTime := time.Now().In(boil.GetLocation())
+
+		if o.CreatedAt.IsZero() {
+			o.CreatedAt = currTime
+		}
+	}
 
 	if err := o.doBeforeInsertHooks(ctx, exec); err != nil {
 		return err
@@ -1001,6 +1008,13 @@ func (o AccessLogSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor
 func (o *AccessLog) Upsert(ctx context.Context, exec boil.ContextExecutor, updateOnConflict bool, conflictColumns []string, updateColumns, insertColumns boil.Columns, opts ...UpsertOptionFunc) error {
 	if o == nil {
 		return errors.New("models: no access_log provided for upsert")
+	}
+	if !boil.TimestampsAreSkipped(ctx) {
+		currTime := time.Now().In(boil.GetLocation())
+
+		if o.CreatedAt.IsZero() {
+			o.CreatedAt = currTime
+		}
 	}
 
 	if err := o.doBeforeUpsertHooks(ctx, exec); err != nil {
