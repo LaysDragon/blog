@@ -11,13 +11,16 @@ tasks:
       persistent: true
   gen/pg:
     command:
-      - cd db/pgrepo &&
       - sqlboiler psql
+    options:
+      cache: false
+  gen/pg-seed:
+    command:
+      - boilingseed psql --config sqlboiler.seed.toml
     options:
       cache: false
   test/pg:
     command:
-      - cd db/pgrepo &&
-      - go test ./models
+      - go test ./db/pgrepo/models
     options:
       cache: false

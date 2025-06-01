@@ -1,3 +1,5 @@
+output = "db/pgrepo/seeds"
+sqlboiler-models = "github.com/LaysDragon/blog/apps/server/db/pgrepo/models"
 wipe = true
 add-soft-deletes = true
 

@@ -1,0 +1,11 @@
+output = "db/pgrepo/models"
+wipe = true
+add-soft-deletes = true
+
+[psql]
+dbname = "dbname"
+host = "host"
+port = 5432
+pass = "pass"
+user = "user"
+sslmode = "disable"
