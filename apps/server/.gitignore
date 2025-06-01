@@ -1,3 +1,4 @@
 sqlboiler.toml
 sqlboiler.seed.toml
 config.yml
+config.yaml
