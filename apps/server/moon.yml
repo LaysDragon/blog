@@ -12,7 +12,7 @@ tasks:
   gen/pg:
     command:
       - cd db/pgrepo &&
-      - sqlboiler psql
+      - sqlboiler psql --wipe
     options:
       cache: false
   test/pg:
