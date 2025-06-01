@@ -608,6 +608,7 @@ func (accessLogL) LoadUser(ctx context.Context, e boil.ContextExecutor, singular
 	query := NewQuery(
 		qm.From(`account`),
 		qm.WhereIn(`account.id in ?`, argsSlice...),
+		qmhelper.WhereIsNull(`account.deleted_at`),
 	)
 	if mods != nil {
 		mods.Apply(query)

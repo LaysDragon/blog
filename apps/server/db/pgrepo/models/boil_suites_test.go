@@ -21,6 +21,27 @@ func TestParent(t *testing.T) {
 	t.Run("SiteRoles", testSiteRoles)
 }
 
+func TestSoftDelete(t *testing.T) {
+	t.Run("Accounts", testAccountsSoftDelete)
+	t.Run("Attachtments", testAttachtmentsSoftDelete)
+	t.Run("Posts", testPostsSoftDelete)
+	t.Run("Sites", testSitesSoftDelete)
+}
+
+func TestQuerySoftDeleteAll(t *testing.T) {
+	t.Run("Accounts", testAccountsQuerySoftDeleteAll)
+	t.Run("Attachtments", testAttachtmentsQuerySoftDeleteAll)
+	t.Run("Posts", testPostsQuerySoftDeleteAll)
+	t.Run("Sites", testSitesQuerySoftDeleteAll)
+}
+
+func TestSliceSoftDeleteAll(t *testing.T) {
+	t.Run("Accounts", testAccountsSliceSoftDeleteAll)
+	t.Run("Attachtments", testAttachtmentsSliceSoftDeleteAll)
+	t.Run("Posts", testPostsSliceSoftDeleteAll)
+	t.Run("Sites", testSitesSliceSoftDeleteAll)
+}
+
 func TestDelete(t *testing.T) {
 	t.Run("AccessLogs", testAccessLogsDelete)
 	t.Run("Accounts", testAccountsDelete)

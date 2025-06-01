@@ -31,6 +31,107 @@ func testPosts(t *testing.T) {
 	}
 }
 
+func testPostsSoftDelete(t *testing.T) {
+	t.Parallel()
+
+	seed := randomize.NewSeed()
+	var err error
+	o := &Post{}
+	if err = randomize.Struct(seed, o, postDBTypes, true, postColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Post struct: %s", err)
+	}
+
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+	if err = o.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Error(err)
+	}
+
+	if rowsAff, err := o.Delete(ctx, tx, false); err != nil {
+		t.Error(err)
+	} else if rowsAff != 1 {
+		t.Error("should only have deleted one row, but affected:", rowsAff)
+	}
+
+	count, err := Posts().Count(ctx, tx)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if count != 0 {
+		t.Error("want zero records, got:", count)
+	}
+}
+
+func testPostsQuerySoftDeleteAll(t *testing.T) {
+	t.Parallel()
+
+	seed := randomize.NewSeed()
+	var err error
+	o := &Post{}
+	if err = randomize.Struct(seed, o, postDBTypes, true, postColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Post struct: %s", err)
+	}
+
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+	if err = o.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Error(err)
+	}
+
+	if rowsAff, err := Posts().DeleteAll(ctx, tx, false); err != nil {
+		t.Error(err)
+	} else if rowsAff != 1 {
+		t.Error("should only have deleted one row, but affected:", rowsAff)
+	}
+
+	count, err := Posts().Count(ctx, tx)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if count != 0 {
+		t.Error("want zero records, got:", count)
+	}
+}
+
+func testPostsSliceSoftDeleteAll(t *testing.T) {
+	t.Parallel()
+
+	seed := randomize.NewSeed()
+	var err error
+	o := &Post{}
+	if err = randomize.Struct(seed, o, postDBTypes, true, postColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Post struct: %s", err)
+	}
+
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+	if err = o.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Error(err)
+	}
+
+	slice := PostSlice{o}
+
+	if rowsAff, err := slice.DeleteAll(ctx, tx, false); err != nil {
+		t.Error(err)
+	} else if rowsAff != 1 {
+		t.Error("should only have deleted one row, but affected:", rowsAff)
+	}
+
+	count, err := Posts().Count(ctx, tx)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if count != 0 {
+		t.Error("want zero records, got:", count)
+	}
+}
+
 func testPostsDelete(t *testing.T) {
 	t.Parallel()
 
@@ -48,7 +149,7 @@ func testPostsDelete(t *testing.T) {
 		t.Error(err)
 	}
 
-	if rowsAff, err := o.Delete(ctx, tx); err != nil {
+	if rowsAff, err := o.Delete(ctx, tx, true); err != nil {
 		t.Error(err)
 	} else if rowsAff != 1 {
 		t.Error("should only have deleted one row, but affected:", rowsAff)
@@ -81,7 +182,7 @@ func testPostsQueryDeleteAll(t *testing.T) {
 		t.Error(err)
 	}
 
-	if rowsAff, err := Posts().DeleteAll(ctx, tx); err != nil {
+	if rowsAff, err := Posts().DeleteAll(ctx, tx, true); err != nil {
 		t.Error(err)
 	} else if rowsAff != 1 {
 		t.Error("should only have deleted one row, but affected:", rowsAff)
@@ -116,7 +217,7 @@ func testPostsSliceDeleteAll(t *testing.T) {
 
 	slice := PostSlice{o}
 
-	if rowsAff, err := slice.DeleteAll(ctx, tx); err != nil {
+	if rowsAff, err := slice.DeleteAll(ctx, tx, true); err != nil {
 		t.Error(err)
 	} else if rowsAff != 1 {
 		t.Error("should only have deleted one row, but affected:", rowsAff)
@@ -993,7 +1094,7 @@ func testPostsSelect(t *testing.T) {
 }
 
 var (
-	postDBTypes = map[string]string{`ID`: `integer`, `CreatedAt`: `timestamp with time zone`, `UpdatedAt`: `timestamp with time zone`, `SiteID`: `integer`, `Content`: `text`}
+	postDBTypes = map[string]string{`ID`: `integer`, `CreatedAt`: `timestamp with time zone`, `UpdatedAt`: `timestamp with time zone`, `DeletedAt`: `timestamp with time zone`, `SiteID`: `integer`, `Content`: `text`}
 	_           = bytes.MinRead
 )
 

@@ -23,29 +23,39 @@ import (
 
 // SiteRole is an object representing the database table.
 type SiteRole struct {
-	AccountID int    `boil:"account_id" json:"account_id" toml:"account_id" yaml:"account_id"`
-	SiteID    int    `boil:"site_id" json:"site_id" toml:"site_id" yaml:"site_id"`
-	Role      string `boil:"role" json:"role" toml:"role" yaml:"role"`
+	CreatedAt time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	UpdatedAt time.Time `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
+	AccountID int       `boil:"account_id" json:"account_id" toml:"account_id" yaml:"account_id"`
+	SiteID    int       `boil:"site_id" json:"site_id" toml:"site_id" yaml:"site_id"`
+	Role      string    `boil:"role" json:"role" toml:"role" yaml:"role"`
 
 	R *siteRoleR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L siteRoleL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 var SiteRoleColumns = struct {
+	CreatedAt string
+	UpdatedAt string
 	AccountID string
 	SiteID    string
 	Role      string
 }{
+	CreatedAt: "created_at",
+	UpdatedAt: "updated_at",
 	AccountID: "account_id",
 	SiteID:    "site_id",
 	Role:      "role",
 }
 
 var SiteRoleTableColumns = struct {
+	CreatedAt string
+	UpdatedAt string
 	AccountID string
 	SiteID    string
 	Role      string
 }{
+	CreatedAt: "site_role.created_at",
+	UpdatedAt: "site_role.updated_at",
 	AccountID: "site_role.account_id",
 	SiteID:    "site_role.site_id",
 	Role:      "site_role.role",
@@ -54,10 +64,14 @@ var SiteRoleTableColumns = struct {
 // Generated where
 
 var SiteRoleWhere = struct {
+	CreatedAt whereHelpertime_Time
+	UpdatedAt whereHelpertime_Time
 	AccountID whereHelperint
 	SiteID    whereHelperint
 	Role      whereHelperstring
 }{
+	CreatedAt: whereHelpertime_Time{field: "\"site_role\".\"created_at\""},
+	UpdatedAt: whereHelpertime_Time{field: "\"site_role\".\"updated_at\""},
 	AccountID: whereHelperint{field: "\"site_role\".\"account_id\""},
 	SiteID:    whereHelperint{field: "\"site_role\".\"site_id\""},
 	Role:      whereHelperstring{field: "\"site_role\".\"role\""},
@@ -119,9 +133,9 @@ func (r *siteRoleR) GetSite() *Site {
 type siteRoleL struct{}
 
 var (
-	siteRoleAllColumns            = []string{"account_id", "site_id", "role"}
+	siteRoleAllColumns            = []string{"created_at", "updated_at", "account_id", "site_id", "role"}
 	siteRoleColumnsWithoutDefault = []string{"account_id", "site_id", "role"}
-	siteRoleColumnsWithDefault    = []string{}
+	siteRoleColumnsWithDefault    = []string{"created_at", "updated_at"}
 	siteRolePrimaryKeyColumns     = []string{"account_id", "site_id"}
 	siteRoleGeneratedColumns      = []string{}
 )
@@ -513,6 +527,7 @@ func (siteRoleL) LoadAccount(ctx context.Context, e boil.ContextExecutor, singul
 	query := NewQuery(
 		qm.From(`account`),
 		qm.WhereIn(`account.id in ?`, argsSlice...),
+		qmhelper.WhereIsNull(`account.deleted_at`),
 	)
 	if mods != nil {
 		mods.Apply(query)
@@ -633,6 +648,7 @@ func (siteRoleL) LoadSite(ctx context.Context, e boil.ContextExecutor, singular 
 	query := NewQuery(
 		qm.From(`site`),
 		qm.WhereIn(`site.id in ?`, argsSlice...),
+		qmhelper.WhereIsNull(`site.deleted_at`),
 	)
 	if mods != nil {
 		mods.Apply(query)
@@ -836,6 +852,16 @@ func (o *SiteRole) Insert(ctx context.Context, exec boil.ContextExecutor, column
 	}
 
 	var err error
+	if !boil.TimestampsAreSkipped(ctx) {
+		currTime := time.Now().In(boil.GetLocation())
+
+		if o.CreatedAt.IsZero() {
+			o.CreatedAt = currTime
+		}
+		if o.UpdatedAt.IsZero() {
+			o.UpdatedAt = currTime
+		}
+	}
 
 	if err := o.doBeforeInsertHooks(ctx, exec); err != nil {
 		return err
@@ -911,6 +937,12 @@ func (o *SiteRole) Insert(ctx context.Context, exec boil.ContextExecutor, column
 // See boil.Columns.UpdateColumnSet documentation to understand column list inference for updates.
 // Update does not automatically update the record in case of default values. Use .Reload() to refresh the records.
 func (o *SiteRole) Update(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) (int64, error) {
+	if !boil.TimestampsAreSkipped(ctx) {
+		currTime := time.Now().In(boil.GetLocation())
+
+		o.UpdatedAt = currTime
+	}
+
 	var err error
 	if err = o.doBeforeUpdateHooks(ctx, exec); err != nil {
 		return 0, err
@@ -1040,6 +1072,14 @@ func (o SiteRoleSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor,
 func (o *SiteRole) Upsert(ctx context.Context, exec boil.ContextExecutor, updateOnConflict bool, conflictColumns []string, updateColumns, insertColumns boil.Columns, opts ...UpsertOptionFunc) error {
 	if o == nil {
 		return errors.New("models: no site_role provided for upsert")
+	}
+	if !boil.TimestampsAreSkipped(ctx) {
+		currTime := time.Now().In(boil.GetLocation())
+
+		if o.CreatedAt.IsZero() {
+			o.CreatedAt = currTime
+		}
+		o.UpdatedAt = currTime
 	}
 
 	if err := o.doBeforeUpsertHooks(ctx, exec); err != nil {

@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/friendsofgo/errors"
+	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -26,6 +27,7 @@ type Account struct {
 	ID         int       `boil:"id" json:"id" toml:"id" yaml:"id"`
 	CreatedAt  time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
 	UpdatedAt  time.Time `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
+	DeletedAt  null.Time `boil:"deleted_at" json:"deleted_at,omitempty" toml:"deleted_at" yaml:"deleted_at,omitempty"`
 	Username   string    `boil:"username" json:"username" toml:"username" yaml:"username"`
 	Role       string    `boil:"role" json:"role" toml:"role" yaml:"role"`
 	Email      string    `boil:"email" json:"email" toml:"email" yaml:"email"`
@@ -39,6 +41,7 @@ var AccountColumns = struct {
 	ID         string
 	CreatedAt  string
 	UpdatedAt  string
+	DeletedAt  string
 	Username   string
 	Role       string
 	Email      string
@@ -47,6 +50,7 @@ var AccountColumns = struct {
 	ID:         "id",
 	CreatedAt:  "created_at",
 	UpdatedAt:  "updated_at",
+	DeletedAt:  "deleted_at",
 	Username:   "username",
 	Role:       "role",
 	Email:      "email",
@@ -57,6 +61,7 @@ var AccountTableColumns = struct {
 	ID         string
 	CreatedAt  string
 	UpdatedAt  string
+	DeletedAt  string
 	Username   string
 	Role       string
 	Email      string
@@ -65,6 +70,7 @@ var AccountTableColumns = struct {
 	ID:         "account.id",
 	CreatedAt:  "account.created_at",
 	UpdatedAt:  "account.updated_at",
+	DeletedAt:  "account.deleted_at",
 	Username:   "account.username",
 	Role:       "account.role",
 	Email:      "account.email",
@@ -73,10 +79,35 @@ var AccountTableColumns = struct {
 
 // Generated where
 
+type whereHelpernull_Time struct{ field string }
+
+func (w whereHelpernull_Time) EQ(x null.Time) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, false, x)
+}
+func (w whereHelpernull_Time) NEQ(x null.Time) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, true, x)
+}
+func (w whereHelpernull_Time) LT(x null.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelpernull_Time) LTE(x null.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelpernull_Time) GT(x null.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelpernull_Time) GTE(x null.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+
+func (w whereHelpernull_Time) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
+func (w whereHelpernull_Time) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
+
 var AccountWhere = struct {
 	ID         whereHelperint
 	CreatedAt  whereHelpertime_Time
 	UpdatedAt  whereHelpertime_Time
+	DeletedAt  whereHelpernull_Time
 	Username   whereHelperstring
 	Role       whereHelperstring
 	Email      whereHelperstring
@@ -85,6 +116,7 @@ var AccountWhere = struct {
 	ID:         whereHelperint{field: "\"account\".\"id\""},
 	CreatedAt:  whereHelpertime_Time{field: "\"account\".\"created_at\""},
 	UpdatedAt:  whereHelpertime_Time{field: "\"account\".\"updated_at\""},
+	DeletedAt:  whereHelpernull_Time{field: "\"account\".\"deleted_at\""},
 	Username:   whereHelperstring{field: "\"account\".\"username\""},
 	Role:       whereHelperstring{field: "\"account\".\"role\""},
 	Email:      whereHelperstring{field: "\"account\".\"email\""},
@@ -147,9 +179,9 @@ func (r *accountR) GetSiteRoles() SiteRoleSlice {
 type accountL struct{}
 
 var (
-	accountAllColumns            = []string{"id", "created_at", "updated_at", "username", "role", "email", "passwd_hash"}
+	accountAllColumns            = []string{"id", "created_at", "updated_at", "deleted_at", "username", "role", "email", "passwd_hash"}
 	accountColumnsWithoutDefault = []string{"username", "role", "email", "passwd_hash"}
-	accountColumnsWithDefault    = []string{"id", "created_at", "updated_at"}
+	accountColumnsWithDefault    = []string{"id", "created_at", "updated_at", "deleted_at"}
 	accountPrimaryKeyColumns     = []string{"id"}
 	accountGeneratedColumns      = []string{}
 )
@@ -895,7 +927,7 @@ func (o *Account) AddSiteRoles(ctx context.Context, exec boil.ContextExecutor, i
 
 // Accounts retrieves all the records using an executor.
 func Accounts(mods ...qm.QueryMod) accountQuery {
-	mods = append(mods, qm.From("\"account\""))
+	mods = append(mods, qm.From("\"account\""), qmhelper.WhereIsNull("\"account\".\"deleted_at\""))
 	q := NewQuery(mods...)
 	if len(queries.GetSelect(q)) == 0 {
 		queries.SetSelect(q, []string{"\"account\".*"})
@@ -914,7 +946,7 @@ func FindAccount(ctx context.Context, exec boil.ContextExecutor, iD int, selectC
 		sel = strings.Join(strmangle.IdentQuoteSlice(dialect.LQ, dialect.RQ, selectCols), ",")
 	}
 	query := fmt.Sprintf(
-		"select %s from \"account\" where \"id\"=$1", sel,
+		"select %s from \"account\" where \"id\"=$1 and \"deleted_at\" is null", sel,
 	)
 
 	q := queries.Raw(query, iD)
@@ -1289,7 +1321,7 @@ func (o *Account) Upsert(ctx context.Context, exec boil.ContextExecutor, updateO
 
 // Delete deletes a single Account record with an executor.
 // Delete will match against the primary key column to find the record to delete.
-func (o *Account) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (o *Account) Delete(ctx context.Context, exec boil.ContextExecutor, hardDelete bool) (int64, error) {
 	if o == nil {
 		return 0, errors.New("models: no Account provided for delete")
 	}
@@ -1298,8 +1330,26 @@ func (o *Account) Delete(ctx context.Context, exec boil.ContextExecutor) (int64,
 		return 0, err
 	}
 
-	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), accountPrimaryKeyMapping)
-	sql := "DELETE FROM \"account\" WHERE \"id\"=$1"
+	var (
+		sql  string
+		args []interface{}
+	)
+	if hardDelete {
+		args = queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), accountPrimaryKeyMapping)
+		sql = "DELETE FROM \"account\" WHERE \"id\"=$1"
+	} else {
+		currTime := time.Now().In(boil.GetLocation())
+		o.DeletedAt = null.TimeFrom(currTime)
+		wl := []string{"deleted_at"}
+		sql = fmt.Sprintf("UPDATE \"account\" SET %s WHERE \"id\"=$2",
+			strmangle.SetParamNames("\"", "\"", 1, wl),
+		)
+		valueMapping, err := queries.BindMapping(accountType, accountMapping, append(wl, accountPrimaryKeyColumns...))
+		if err != nil {
+			return 0, err
+		}
+		args = queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), valueMapping)
+	}
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -1324,12 +1374,17 @@ func (o *Account) Delete(ctx context.Context, exec boil.ContextExecutor) (int64,
 }
 
 // DeleteAll deletes all matching rows.
-func (q accountQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (q accountQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor, hardDelete bool) (int64, error) {
 	if q.Query == nil {
 		return 0, errors.New("models: no accountQuery provided for delete all")
 	}
 
-	queries.SetDelete(q.Query)
+	if hardDelete {
+		queries.SetDelete(q.Query)
+	} else {
+		currTime := time.Now().In(boil.GetLocation())
+		queries.SetUpdate(q.Query, M{"deleted_at": currTime})
+	}
 
 	result, err := q.Query.ExecContext(ctx, exec)
 	if err != nil {
@@ -1345,7 +1400,7 @@ func (q accountQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) 
 }
 
 // DeleteAll deletes all rows in the slice, using an executor.
-func (o AccountSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (o AccountSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor, hardDelete bool) (int64, error) {
 	if len(o) == 0 {
 		return 0, nil
 	}
@@ -1358,14 +1413,31 @@ func (o AccountSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) 
 		}
 	}
 
-	var args []interface{}
-	for _, obj := range o {
-		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), accountPrimaryKeyMapping)
-		args = append(args, pkeyArgs...)
+	var (
+		sql  string
+		args []interface{}
+	)
+	if hardDelete {
+		for _, obj := range o {
+			pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), accountPrimaryKeyMapping)
+			args = append(args, pkeyArgs...)
+		}
+		sql = "DELETE FROM \"account\" WHERE " +
+			strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, accountPrimaryKeyColumns, len(o))
+	} else {
+		currTime := time.Now().In(boil.GetLocation())
+		for _, obj := range o {
+			pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), accountPrimaryKeyMapping)
+			args = append(args, pkeyArgs...)
+			obj.DeletedAt = null.TimeFrom(currTime)
+		}
+		wl := []string{"deleted_at"}
+		sql = fmt.Sprintf("UPDATE \"account\" SET %s WHERE "+
+			strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 2, accountPrimaryKeyColumns, len(o)),
+			strmangle.SetParamNames("\"", "\"", 1, wl),
+		)
+		args = append([]interface{}{currTime}, args...)
 	}
-
-	sql := "DELETE FROM \"account\" WHERE " +
-		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, accountPrimaryKeyColumns, len(o))
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -1420,7 +1492,8 @@ func (o *AccountSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor)
 	}
 
 	sql := "SELECT \"account\".* FROM \"account\" WHERE " +
-		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, accountPrimaryKeyColumns, len(*o))
+		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, accountPrimaryKeyColumns, len(*o)) +
+		"and \"deleted_at\" is null"
 
 	q := queries.Raw(sql, args...)
 
@@ -1437,7 +1510,7 @@ func (o *AccountSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor)
 // AccountExists checks if the Account row exists.
 func AccountExists(ctx context.Context, exec boil.ContextExecutor, iD int) (bool, error) {
 	var exists bool
-	sql := "select exists(select 1 from \"account\" where \"id\"=$1 limit 1)"
+	sql := "select exists(select 1 from \"account\" where \"id\"=$1 and \"deleted_at\" is null limit 1)"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)

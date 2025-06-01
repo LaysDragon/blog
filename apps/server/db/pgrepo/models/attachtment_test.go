@@ -31,6 +31,107 @@ func testAttachtments(t *testing.T) {
 	}
 }
 
+func testAttachtmentsSoftDelete(t *testing.T) {
+	t.Parallel()
+
+	seed := randomize.NewSeed()
+	var err error
+	o := &Attachtment{}
+	if err = randomize.Struct(seed, o, attachtmentDBTypes, true, attachtmentColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Attachtment struct: %s", err)
+	}
+
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+	if err = o.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Error(err)
+	}
+
+	if rowsAff, err := o.Delete(ctx, tx, false); err != nil {
+		t.Error(err)
+	} else if rowsAff != 1 {
+		t.Error("should only have deleted one row, but affected:", rowsAff)
+	}
+
+	count, err := Attachtments().Count(ctx, tx)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if count != 0 {
+		t.Error("want zero records, got:", count)
+	}
+}
+
+func testAttachtmentsQuerySoftDeleteAll(t *testing.T) {
+	t.Parallel()
+
+	seed := randomize.NewSeed()
+	var err error
+	o := &Attachtment{}
+	if err = randomize.Struct(seed, o, attachtmentDBTypes, true, attachtmentColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Attachtment struct: %s", err)
+	}
+
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+	if err = o.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Error(err)
+	}
+
+	if rowsAff, err := Attachtments().DeleteAll(ctx, tx, false); err != nil {
+		t.Error(err)
+	} else if rowsAff != 1 {
+		t.Error("should only have deleted one row, but affected:", rowsAff)
+	}
+
+	count, err := Attachtments().Count(ctx, tx)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if count != 0 {
+		t.Error("want zero records, got:", count)
+	}
+}
+
+func testAttachtmentsSliceSoftDeleteAll(t *testing.T) {
+	t.Parallel()
+
+	seed := randomize.NewSeed()
+	var err error
+	o := &Attachtment{}
+	if err = randomize.Struct(seed, o, attachtmentDBTypes, true, attachtmentColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Attachtment struct: %s", err)
+	}
+
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+	if err = o.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Error(err)
+	}
+
+	slice := AttachtmentSlice{o}
+
+	if rowsAff, err := slice.DeleteAll(ctx, tx, false); err != nil {
+		t.Error(err)
+	} else if rowsAff != 1 {
+		t.Error("should only have deleted one row, but affected:", rowsAff)
+	}
+
+	count, err := Attachtments().Count(ctx, tx)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if count != 0 {
+		t.Error("want zero records, got:", count)
+	}
+}
+
 func testAttachtmentsDelete(t *testing.T) {
 	t.Parallel()
 
@@ -48,7 +149,7 @@ func testAttachtmentsDelete(t *testing.T) {
 		t.Error(err)
 	}
 
-	if rowsAff, err := o.Delete(ctx, tx); err != nil {
+	if rowsAff, err := o.Delete(ctx, tx, true); err != nil {
 		t.Error(err)
 	} else if rowsAff != 1 {
 		t.Error("should only have deleted one row, but affected:", rowsAff)
@@ -81,7 +182,7 @@ func testAttachtmentsQueryDeleteAll(t *testing.T) {
 		t.Error(err)
 	}
 
-	if rowsAff, err := Attachtments().DeleteAll(ctx, tx); err != nil {
+	if rowsAff, err := Attachtments().DeleteAll(ctx, tx, true); err != nil {
 		t.Error(err)
 	} else if rowsAff != 1 {
 		t.Error("should only have deleted one row, but affected:", rowsAff)
@@ -116,7 +217,7 @@ func testAttachtmentsSliceDeleteAll(t *testing.T) {
 
 	slice := AttachtmentSlice{o}
 
-	if rowsAff, err := slice.DeleteAll(ctx, tx); err != nil {
+	if rowsAff, err := slice.DeleteAll(ctx, tx, true); err != nil {
 		t.Error(err)
 	} else if rowsAff != 1 {
 		t.Error("should only have deleted one row, but affected:", rowsAff)
@@ -805,7 +906,7 @@ func testAttachtmentsSelect(t *testing.T) {
 }
 
 var (
-	attachtmentDBTypes = map[string]string{`ID`: `integer`, `CreatedAt`: `timestamp with time zone`, `UpdatedAt`: `timestamp with time zone`, `SiteID`: `integer`, `RelatedID`: `integer`, `URL`: `text`}
+	attachtmentDBTypes = map[string]string{`ID`: `integer`, `CreatedAt`: `timestamp with time zone`, `UpdatedAt`: `timestamp with time zone`, `DeletedAt`: `timestamp with time zone`, `SiteID`: `integer`, `RelatedID`: `integer`, `URL`: `text`}
 	_                  = bytes.MinRead
 )
 

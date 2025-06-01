@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/friendsofgo/errors"
+	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -26,6 +27,7 @@ type Attachtment struct {
 	ID        int       `boil:"id" json:"id" toml:"id" yaml:"id"`
 	CreatedAt time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
 	UpdatedAt time.Time `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
+	DeletedAt null.Time `boil:"deleted_at" json:"deleted_at,omitempty" toml:"deleted_at" yaml:"deleted_at,omitempty"`
 	SiteID    int       `boil:"site_id" json:"site_id" toml:"site_id" yaml:"site_id"`
 	RelatedID int       `boil:"related_id" json:"related_id" toml:"related_id" yaml:"related_id"`
 	URL       string    `boil:"url" json:"url" toml:"url" yaml:"url"`
@@ -38,6 +40,7 @@ var AttachtmentColumns = struct {
 	ID        string
 	CreatedAt string
 	UpdatedAt string
+	DeletedAt string
 	SiteID    string
 	RelatedID string
 	URL       string
@@ -45,6 +48,7 @@ var AttachtmentColumns = struct {
 	ID:        "id",
 	CreatedAt: "created_at",
 	UpdatedAt: "updated_at",
+	DeletedAt: "deleted_at",
 	SiteID:    "site_id",
 	RelatedID: "related_id",
 	URL:       "url",
@@ -54,6 +58,7 @@ var AttachtmentTableColumns = struct {
 	ID        string
 	CreatedAt string
 	UpdatedAt string
+	DeletedAt string
 	SiteID    string
 	RelatedID string
 	URL       string
@@ -61,6 +66,7 @@ var AttachtmentTableColumns = struct {
 	ID:        "attachtment.id",
 	CreatedAt: "attachtment.created_at",
 	UpdatedAt: "attachtment.updated_at",
+	DeletedAt: "attachtment.deleted_at",
 	SiteID:    "attachtment.site_id",
 	RelatedID: "attachtment.related_id",
 	URL:       "attachtment.url",
@@ -72,6 +78,7 @@ var AttachtmentWhere = struct {
 	ID        whereHelperint
 	CreatedAt whereHelpertime_Time
 	UpdatedAt whereHelpertime_Time
+	DeletedAt whereHelpernull_Time
 	SiteID    whereHelperint
 	RelatedID whereHelperint
 	URL       whereHelperstring
@@ -79,6 +86,7 @@ var AttachtmentWhere = struct {
 	ID:        whereHelperint{field: "\"attachtment\".\"id\""},
 	CreatedAt: whereHelpertime_Time{field: "\"attachtment\".\"created_at\""},
 	UpdatedAt: whereHelpertime_Time{field: "\"attachtment\".\"updated_at\""},
+	DeletedAt: whereHelpernull_Time{field: "\"attachtment\".\"deleted_at\""},
 	SiteID:    whereHelperint{field: "\"attachtment\".\"site_id\""},
 	RelatedID: whereHelperint{field: "\"attachtment\".\"related_id\""},
 	URL:       whereHelperstring{field: "\"attachtment\".\"url\""},
@@ -140,9 +148,9 @@ func (r *attachtmentR) GetSite() *Site {
 type attachtmentL struct{}
 
 var (
-	attachtmentAllColumns            = []string{"id", "created_at", "updated_at", "site_id", "related_id", "url"}
+	attachtmentAllColumns            = []string{"id", "created_at", "updated_at", "deleted_at", "site_id", "related_id", "url"}
 	attachtmentColumnsWithoutDefault = []string{"site_id", "related_id", "url"}
-	attachtmentColumnsWithDefault    = []string{"id", "created_at", "updated_at"}
+	attachtmentColumnsWithDefault    = []string{"id", "created_at", "updated_at", "deleted_at"}
 	attachtmentPrimaryKeyColumns     = []string{"id"}
 	attachtmentGeneratedColumns      = []string{}
 )
@@ -534,6 +542,7 @@ func (attachtmentL) LoadRelated(ctx context.Context, e boil.ContextExecutor, sin
 	query := NewQuery(
 		qm.From(`post`),
 		qm.WhereIn(`post.id in ?`, argsSlice...),
+		qmhelper.WhereIsNull(`post.deleted_at`),
 	)
 	if mods != nil {
 		mods.Apply(query)
@@ -654,6 +663,7 @@ func (attachtmentL) LoadSite(ctx context.Context, e boil.ContextExecutor, singul
 	query := NewQuery(
 		qm.From(`site`),
 		qm.WhereIn(`site.id in ?`, argsSlice...),
+		qmhelper.WhereIsNull(`site.deleted_at`),
 	)
 	if mods != nil {
 		mods.Apply(query)
@@ -810,7 +820,7 @@ func (o *Attachtment) SetSite(ctx context.Context, exec boil.ContextExecutor, in
 
 // Attachtments retrieves all the records using an executor.
 func Attachtments(mods ...qm.QueryMod) attachtmentQuery {
-	mods = append(mods, qm.From("\"attachtment\""))
+	mods = append(mods, qm.From("\"attachtment\""), qmhelper.WhereIsNull("\"attachtment\".\"deleted_at\""))
 	q := NewQuery(mods...)
 	if len(queries.GetSelect(q)) == 0 {
 		queries.SetSelect(q, []string{"\"attachtment\".*"})
@@ -829,7 +839,7 @@ func FindAttachtment(ctx context.Context, exec boil.ContextExecutor, iD int, sel
 		sel = strings.Join(strmangle.IdentQuoteSlice(dialect.LQ, dialect.RQ, selectCols), ",")
 	}
 	query := fmt.Sprintf(
-		"select %s from \"attachtment\" where \"id\"=$1", sel,
+		"select %s from \"attachtment\" where \"id\"=$1 and \"deleted_at\" is null", sel,
 	)
 
 	q := queries.Raw(query, iD)
@@ -1204,7 +1214,7 @@ func (o *Attachtment) Upsert(ctx context.Context, exec boil.ContextExecutor, upd
 
 // Delete deletes a single Attachtment record with an executor.
 // Delete will match against the primary key column to find the record to delete.
-func (o *Attachtment) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (o *Attachtment) Delete(ctx context.Context, exec boil.ContextExecutor, hardDelete bool) (int64, error) {
 	if o == nil {
 		return 0, errors.New("models: no Attachtment provided for delete")
 	}
@@ -1213,8 +1223,26 @@ func (o *Attachtment) Delete(ctx context.Context, exec boil.ContextExecutor) (in
 		return 0, err
 	}
 
-	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), attachtmentPrimaryKeyMapping)
-	sql := "DELETE FROM \"attachtment\" WHERE \"id\"=$1"
+	var (
+		sql  string
+		args []interface{}
+	)
+	if hardDelete {
+		args = queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), attachtmentPrimaryKeyMapping)
+		sql = "DELETE FROM \"attachtment\" WHERE \"id\"=$1"
+	} else {
+		currTime := time.Now().In(boil.GetLocation())
+		o.DeletedAt = null.TimeFrom(currTime)
+		wl := []string{"deleted_at"}
+		sql = fmt.Sprintf("UPDATE \"attachtment\" SET %s WHERE \"id\"=$2",
+			strmangle.SetParamNames("\"", "\"", 1, wl),
+		)
+		valueMapping, err := queries.BindMapping(attachtmentType, attachtmentMapping, append(wl, attachtmentPrimaryKeyColumns...))
+		if err != nil {
+			return 0, err
+		}
+		args = queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), valueMapping)
+	}
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -1239,12 +1267,17 @@ func (o *Attachtment) Delete(ctx context.Context, exec boil.ContextExecutor) (in
 }
 
 // DeleteAll deletes all matching rows.
-func (q attachtmentQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (q attachtmentQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor, hardDelete bool) (int64, error) {
 	if q.Query == nil {
 		return 0, errors.New("models: no attachtmentQuery provided for delete all")
 	}
 
-	queries.SetDelete(q.Query)
+	if hardDelete {
+		queries.SetDelete(q.Query)
+	} else {
+		currTime := time.Now().In(boil.GetLocation())
+		queries.SetUpdate(q.Query, M{"deleted_at": currTime})
+	}
 
 	result, err := q.Query.ExecContext(ctx, exec)
 	if err != nil {
@@ -1260,7 +1293,7 @@ func (q attachtmentQuery) DeleteAll(ctx context.Context, exec boil.ContextExecut
 }
 
 // DeleteAll deletes all rows in the slice, using an executor.
-func (o AttachtmentSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (o AttachtmentSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor, hardDelete bool) (int64, error) {
 	if len(o) == 0 {
 		return 0, nil
 	}
@@ -1273,14 +1306,31 @@ func (o AttachtmentSlice) DeleteAll(ctx context.Context, exec boil.ContextExecut
 		}
 	}
 
-	var args []interface{}
-	for _, obj := range o {
-		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), attachtmentPrimaryKeyMapping)
-		args = append(args, pkeyArgs...)
+	var (
+		sql  string
+		args []interface{}
+	)
+	if hardDelete {
+		for _, obj := range o {
+			pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), attachtmentPrimaryKeyMapping)
+			args = append(args, pkeyArgs...)
+		}
+		sql = "DELETE FROM \"attachtment\" WHERE " +
+			strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, attachtmentPrimaryKeyColumns, len(o))
+	} else {
+		currTime := time.Now().In(boil.GetLocation())
+		for _, obj := range o {
+			pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), attachtmentPrimaryKeyMapping)
+			args = append(args, pkeyArgs...)
+			obj.DeletedAt = null.TimeFrom(currTime)
+		}
+		wl := []string{"deleted_at"}
+		sql = fmt.Sprintf("UPDATE \"attachtment\" SET %s WHERE "+
+			strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 2, attachtmentPrimaryKeyColumns, len(o)),
+			strmangle.SetParamNames("\"", "\"", 1, wl),
+		)
+		args = append([]interface{}{currTime}, args...)
 	}
-
-	sql := "DELETE FROM \"attachtment\" WHERE " +
-		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, attachtmentPrimaryKeyColumns, len(o))
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -1335,7 +1385,8 @@ func (o *AttachtmentSlice) ReloadAll(ctx context.Context, exec boil.ContextExecu
 	}
 
 	sql := "SELECT \"attachtment\".* FROM \"attachtment\" WHERE " +
-		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, attachtmentPrimaryKeyColumns, len(*o))
+		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, attachtmentPrimaryKeyColumns, len(*o)) +
+		"and \"deleted_at\" is null"
 
 	q := queries.Raw(sql, args...)
 
@@ -1352,7 +1403,7 @@ func (o *AttachtmentSlice) ReloadAll(ctx context.Context, exec boil.ContextExecu
 // AttachtmentExists checks if the Attachtment row exists.
 func AttachtmentExists(ctx context.Context, exec boil.ContextExecutor, iD int) (bool, error) {
 	var exists bool
-	sql := "select exists(select 1 from \"attachtment\" where \"id\"=$1 limit 1)"
+	sql := "select exists(select 1 from \"attachtment\" where \"id\"=$1 and \"deleted_at\" is null limit 1)"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)

@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/friendsofgo/errors"
+	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -26,6 +27,7 @@ type Post struct {
 	ID        int       `boil:"id" json:"id" toml:"id" yaml:"id"`
 	CreatedAt time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
 	UpdatedAt time.Time `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
+	DeletedAt null.Time `boil:"deleted_at" json:"deleted_at,omitempty" toml:"deleted_at" yaml:"deleted_at,omitempty"`
 	SiteID    int       `boil:"site_id" json:"site_id" toml:"site_id" yaml:"site_id"`
 	Content   string    `boil:"content" json:"content" toml:"content" yaml:"content"`
 
@@ -37,12 +39,14 @@ var PostColumns = struct {
 	ID        string
 	CreatedAt string
 	UpdatedAt string
+	DeletedAt string
 	SiteID    string
 	Content   string
 }{
 	ID:        "id",
 	CreatedAt: "created_at",
 	UpdatedAt: "updated_at",
+	DeletedAt: "deleted_at",
 	SiteID:    "site_id",
 	Content:   "content",
 }
@@ -51,12 +55,14 @@ var PostTableColumns = struct {
 	ID        string
 	CreatedAt string
 	UpdatedAt string
+	DeletedAt string
 	SiteID    string
 	Content   string
 }{
 	ID:        "post.id",
 	CreatedAt: "post.created_at",
 	UpdatedAt: "post.updated_at",
+	DeletedAt: "post.deleted_at",
 	SiteID:    "post.site_id",
 	Content:   "post.content",
 }
@@ -67,12 +73,14 @@ var PostWhere = struct {
 	ID        whereHelperint
 	CreatedAt whereHelpertime_Time
 	UpdatedAt whereHelpertime_Time
+	DeletedAt whereHelpernull_Time
 	SiteID    whereHelperint
 	Content   whereHelperstring
 }{
 	ID:        whereHelperint{field: "\"post\".\"id\""},
 	CreatedAt: whereHelpertime_Time{field: "\"post\".\"created_at\""},
 	UpdatedAt: whereHelpertime_Time{field: "\"post\".\"updated_at\""},
+	DeletedAt: whereHelpernull_Time{field: "\"post\".\"deleted_at\""},
 	SiteID:    whereHelperint{field: "\"post\".\"site_id\""},
 	Content:   whereHelperstring{field: "\"post\".\"content\""},
 }
@@ -152,9 +160,9 @@ func (r *postR) GetComments() CommentSlice {
 type postL struct{}
 
 var (
-	postAllColumns            = []string{"id", "created_at", "updated_at", "site_id", "content"}
+	postAllColumns            = []string{"id", "created_at", "updated_at", "deleted_at", "site_id", "content"}
 	postColumnsWithoutDefault = []string{"site_id", "content"}
-	postColumnsWithDefault    = []string{"id", "created_at", "updated_at"}
+	postColumnsWithDefault    = []string{"id", "created_at", "updated_at", "deleted_at"}
 	postPrimaryKeyColumns     = []string{"id"}
 	postGeneratedColumns      = []string{}
 )
@@ -563,6 +571,7 @@ func (postL) LoadSite(ctx context.Context, e boil.ContextExecutor, singular bool
 	query := NewQuery(
 		qm.From(`site`),
 		qm.WhereIn(`site.id in ?`, argsSlice...),
+		qmhelper.WhereIsNull(`site.deleted_at`),
 	)
 	if mods != nil {
 		mods.Apply(query)
@@ -680,6 +689,7 @@ func (postL) LoadRelatedAttachtments(ctx context.Context, e boil.ContextExecutor
 	query := NewQuery(
 		qm.From(`attachtment`),
 		qm.WhereIn(`attachtment.related_id in ?`, argsSlice...),
+		qmhelper.WhereIsNull(`attachtment.deleted_at`),
 	)
 	if mods != nil {
 		mods.Apply(query)
@@ -1004,7 +1014,7 @@ func (o *Post) AddComments(ctx context.Context, exec boil.ContextExecutor, inser
 
 // Posts retrieves all the records using an executor.
 func Posts(mods ...qm.QueryMod) postQuery {
-	mods = append(mods, qm.From("\"post\""))
+	mods = append(mods, qm.From("\"post\""), qmhelper.WhereIsNull("\"post\".\"deleted_at\""))
 	q := NewQuery(mods...)
 	if len(queries.GetSelect(q)) == 0 {
 		queries.SetSelect(q, []string{"\"post\".*"})
@@ -1023,7 +1033,7 @@ func FindPost(ctx context.Context, exec boil.ContextExecutor, iD int, selectCols
 		sel = strings.Join(strmangle.IdentQuoteSlice(dialect.LQ, dialect.RQ, selectCols), ",")
 	}
 	query := fmt.Sprintf(
-		"select %s from \"post\" where \"id\"=$1", sel,
+		"select %s from \"post\" where \"id\"=$1 and \"deleted_at\" is null", sel,
 	)
 
 	q := queries.Raw(query, iD)
@@ -1398,7 +1408,7 @@ func (o *Post) Upsert(ctx context.Context, exec boil.ContextExecutor, updateOnCo
 
 // Delete deletes a single Post record with an executor.
 // Delete will match against the primary key column to find the record to delete.
-func (o *Post) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (o *Post) Delete(ctx context.Context, exec boil.ContextExecutor, hardDelete bool) (int64, error) {
 	if o == nil {
 		return 0, errors.New("models: no Post provided for delete")
 	}
@@ -1407,8 +1417,26 @@ func (o *Post) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, er
 		return 0, err
 	}
 
-	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), postPrimaryKeyMapping)
-	sql := "DELETE FROM \"post\" WHERE \"id\"=$1"
+	var (
+		sql  string
+		args []interface{}
+	)
+	if hardDelete {
+		args = queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), postPrimaryKeyMapping)
+		sql = "DELETE FROM \"post\" WHERE \"id\"=$1"
+	} else {
+		currTime := time.Now().In(boil.GetLocation())
+		o.DeletedAt = null.TimeFrom(currTime)
+		wl := []string{"deleted_at"}
+		sql = fmt.Sprintf("UPDATE \"post\" SET %s WHERE \"id\"=$2",
+			strmangle.SetParamNames("\"", "\"", 1, wl),
+		)
+		valueMapping, err := queries.BindMapping(postType, postMapping, append(wl, postPrimaryKeyColumns...))
+		if err != nil {
+			return 0, err
+		}
+		args = queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), valueMapping)
+	}
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -1433,12 +1461,17 @@ func (o *Post) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, er
 }
 
 // DeleteAll deletes all matching rows.
-func (q postQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (q postQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor, hardDelete bool) (int64, error) {
 	if q.Query == nil {
 		return 0, errors.New("models: no postQuery provided for delete all")
 	}
 
-	queries.SetDelete(q.Query)
+	if hardDelete {
+		queries.SetDelete(q.Query)
+	} else {
+		currTime := time.Now().In(boil.GetLocation())
+		queries.SetUpdate(q.Query, M{"deleted_at": currTime})
+	}
 
 	result, err := q.Query.ExecContext(ctx, exec)
 	if err != nil {
@@ -1454,7 +1487,7 @@ func (q postQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (in
 }
 
 // DeleteAll deletes all rows in the slice, using an executor.
-func (o PostSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (o PostSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor, hardDelete bool) (int64, error) {
 	if len(o) == 0 {
 		return 0, nil
 	}
@@ -1467,14 +1500,31 @@ func (o PostSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (in
 		}
 	}
 
-	var args []interface{}
-	for _, obj := range o {
-		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), postPrimaryKeyMapping)
-		args = append(args, pkeyArgs...)
+	var (
+		sql  string
+		args []interface{}
+	)
+	if hardDelete {
+		for _, obj := range o {
+			pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), postPrimaryKeyMapping)
+			args = append(args, pkeyArgs...)
+		}
+		sql = "DELETE FROM \"post\" WHERE " +
+			strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, postPrimaryKeyColumns, len(o))
+	} else {
+		currTime := time.Now().In(boil.GetLocation())
+		for _, obj := range o {
+			pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), postPrimaryKeyMapping)
+			args = append(args, pkeyArgs...)
+			obj.DeletedAt = null.TimeFrom(currTime)
+		}
+		wl := []string{"deleted_at"}
+		sql = fmt.Sprintf("UPDATE \"post\" SET %s WHERE "+
+			strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 2, postPrimaryKeyColumns, len(o)),
+			strmangle.SetParamNames("\"", "\"", 1, wl),
+		)
+		args = append([]interface{}{currTime}, args...)
 	}
-
-	sql := "DELETE FROM \"post\" WHERE " +
-		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, postPrimaryKeyColumns, len(o))
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -1529,7 +1579,8 @@ func (o *PostSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) er
 	}
 
 	sql := "SELECT \"post\".* FROM \"post\" WHERE " +
-		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, postPrimaryKeyColumns, len(*o))
+		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, postPrimaryKeyColumns, len(*o)) +
+		"and \"deleted_at\" is null"
 
 	q := queries.Raw(sql, args...)
 
@@ -1546,7 +1597,7 @@ func (o *PostSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) er
 // PostExists checks if the Post row exists.
 func PostExists(ctx context.Context, exec boil.ContextExecutor, iD int) (bool, error) {
 	var exists bool
-	sql := "select exists(select 1 from \"post\" where \"id\"=$1 limit 1)"
+	sql := "select exists(select 1 from \"post\" where \"id\"=$1 and \"deleted_at\" is null limit 1)"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)

@@ -797,7 +797,7 @@ func testSiteRolesSelect(t *testing.T) {
 }
 
 var (
-	siteRoleDBTypes = map[string]string{`AccountID`: `integer`, `SiteID`: `integer`, `Role`: `character varying`}
+	siteRoleDBTypes = map[string]string{`CreatedAt`: `timestamp with time zone`, `UpdatedAt`: `timestamp with time zone`, `AccountID`: `integer`, `SiteID`: `integer`, `Role`: `character varying`}
 	_               = bytes.MinRead
 )
 

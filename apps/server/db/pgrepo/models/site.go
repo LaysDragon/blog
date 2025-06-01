@@ -27,6 +27,7 @@ type Site struct {
 	ID        int         `boil:"id" json:"id" toml:"id" yaml:"id"`
 	CreatedAt time.Time   `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
 	UpdatedAt time.Time   `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
+	DeletedAt null.Time   `boil:"deleted_at" json:"deleted_at,omitempty" toml:"deleted_at" yaml:"deleted_at,omitempty"`
 	Name      null.String `boil:"name" json:"name,omitempty" toml:"name" yaml:"name,omitempty"`
 
 	R *siteR `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -37,11 +38,13 @@ var SiteColumns = struct {
 	ID        string
 	CreatedAt string
 	UpdatedAt string
+	DeletedAt string
 	Name      string
 }{
 	ID:        "id",
 	CreatedAt: "created_at",
 	UpdatedAt: "updated_at",
+	DeletedAt: "deleted_at",
 	Name:      "name",
 }
 
@@ -49,11 +52,13 @@ var SiteTableColumns = struct {
 	ID        string
 	CreatedAt string
 	UpdatedAt string
+	DeletedAt string
 	Name      string
 }{
 	ID:        "site.id",
 	CreatedAt: "site.created_at",
 	UpdatedAt: "site.updated_at",
+	DeletedAt: "site.deleted_at",
 	Name:      "site.name",
 }
 
@@ -119,11 +124,13 @@ var SiteWhere = struct {
 	ID        whereHelperint
 	CreatedAt whereHelpertime_Time
 	UpdatedAt whereHelpertime_Time
+	DeletedAt whereHelpernull_Time
 	Name      whereHelpernull_String
 }{
 	ID:        whereHelperint{field: "\"site\".\"id\""},
 	CreatedAt: whereHelpertime_Time{field: "\"site\".\"created_at\""},
 	UpdatedAt: whereHelpertime_Time{field: "\"site\".\"updated_at\""},
+	DeletedAt: whereHelpernull_Time{field: "\"site\".\"deleted_at\""},
 	Name:      whereHelpernull_String{field: "\"site\".\"name\""},
 }
 
@@ -202,9 +209,9 @@ func (r *siteR) GetSiteRoles() SiteRoleSlice {
 type siteL struct{}
 
 var (
-	siteAllColumns            = []string{"id", "created_at", "updated_at", "name"}
+	siteAllColumns            = []string{"id", "created_at", "updated_at", "deleted_at", "name"}
 	siteColumnsWithoutDefault = []string{}
-	siteColumnsWithDefault    = []string{"id", "created_at", "updated_at", "name"}
+	siteColumnsWithDefault    = []string{"id", "created_at", "updated_at", "deleted_at", "name"}
 	sitePrimaryKeyColumns     = []string{"id"}
 	siteGeneratedColumns      = []string{}
 )
@@ -613,6 +620,7 @@ func (siteL) LoadAttachtments(ctx context.Context, e boil.ContextExecutor, singu
 	query := NewQuery(
 		qm.From(`attachtment`),
 		qm.WhereIn(`attachtment.site_id in ?`, argsSlice...),
+		qmhelper.WhereIsNull(`attachtment.deleted_at`),
 	)
 	if mods != nil {
 		mods.Apply(query)
@@ -726,6 +734,7 @@ func (siteL) LoadPosts(ctx context.Context, e boil.ContextExecutor, singular boo
 	query := NewQuery(
 		qm.From(`post`),
 		qm.WhereIn(`post.site_id in ?`, argsSlice...),
+		qmhelper.WhereIsNull(`post.deleted_at`),
 	)
 	if mods != nil {
 		mods.Apply(query)
@@ -1056,7 +1065,7 @@ func (o *Site) AddSiteRoles(ctx context.Context, exec boil.ContextExecutor, inse
 
 // Sites retrieves all the records using an executor.
 func Sites(mods ...qm.QueryMod) siteQuery {
-	mods = append(mods, qm.From("\"site\""))
+	mods = append(mods, qm.From("\"site\""), qmhelper.WhereIsNull("\"site\".\"deleted_at\""))
 	q := NewQuery(mods...)
 	if len(queries.GetSelect(q)) == 0 {
 		queries.SetSelect(q, []string{"\"site\".*"})
@@ -1075,7 +1084,7 @@ func FindSite(ctx context.Context, exec boil.ContextExecutor, iD int, selectCols
 		sel = strings.Join(strmangle.IdentQuoteSlice(dialect.LQ, dialect.RQ, selectCols), ",")
 	}
 	query := fmt.Sprintf(
-		"select %s from \"site\" where \"id\"=$1", sel,
+		"select %s from \"site\" where \"id\"=$1 and \"deleted_at\" is null", sel,
 	)
 
 	q := queries.Raw(query, iD)
@@ -1450,7 +1459,7 @@ func (o *Site) Upsert(ctx context.Context, exec boil.ContextExecutor, updateOnCo
 
 // Delete deletes a single Site record with an executor.
 // Delete will match against the primary key column to find the record to delete.
-func (o *Site) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (o *Site) Delete(ctx context.Context, exec boil.ContextExecutor, hardDelete bool) (int64, error) {
 	if o == nil {
 		return 0, errors.New("models: no Site provided for delete")
 	}
@@ -1459,8 +1468,26 @@ func (o *Site) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, er
 		return 0, err
 	}
 
-	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), sitePrimaryKeyMapping)
-	sql := "DELETE FROM \"site\" WHERE \"id\"=$1"
+	var (
+		sql  string
+		args []interface{}
+	)
+	if hardDelete {
+		args = queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), sitePrimaryKeyMapping)
+		sql = "DELETE FROM \"site\" WHERE \"id\"=$1"
+	} else {
+		currTime := time.Now().In(boil.GetLocation())
+		o.DeletedAt = null.TimeFrom(currTime)
+		wl := []string{"deleted_at"}
+		sql = fmt.Sprintf("UPDATE \"site\" SET %s WHERE \"id\"=$2",
+			strmangle.SetParamNames("\"", "\"", 1, wl),
+		)
+		valueMapping, err := queries.BindMapping(siteType, siteMapping, append(wl, sitePrimaryKeyColumns...))
+		if err != nil {
+			return 0, err
+		}
+		args = queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), valueMapping)
+	}
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -1485,12 +1512,17 @@ func (o *Site) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, er
 }
 
 // DeleteAll deletes all matching rows.
-func (q siteQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (q siteQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor, hardDelete bool) (int64, error) {
 	if q.Query == nil {
 		return 0, errors.New("models: no siteQuery provided for delete all")
 	}
 
-	queries.SetDelete(q.Query)
+	if hardDelete {
+		queries.SetDelete(q.Query)
+	} else {
+		currTime := time.Now().In(boil.GetLocation())
+		queries.SetUpdate(q.Query, M{"deleted_at": currTime})
+	}
 
 	result, err := q.Query.ExecContext(ctx, exec)
 	if err != nil {
@@ -1506,7 +1538,7 @@ func (q siteQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (in
 }
 
 // DeleteAll deletes all rows in the slice, using an executor.
-func (o SiteSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (o SiteSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor, hardDelete bool) (int64, error) {
 	if len(o) == 0 {
 		return 0, nil
 	}
@@ -1519,14 +1551,31 @@ func (o SiteSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (in
 		}
 	}
 
-	var args []interface{}
-	for _, obj := range o {
-		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), sitePrimaryKeyMapping)
-		args = append(args, pkeyArgs...)
+	var (
+		sql  string
+		args []interface{}
+	)
+	if hardDelete {
+		for _, obj := range o {
+			pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), sitePrimaryKeyMapping)
+			args = append(args, pkeyArgs...)
+		}
+		sql = "DELETE FROM \"site\" WHERE " +
+			strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, sitePrimaryKeyColumns, len(o))
+	} else {
+		currTime := time.Now().In(boil.GetLocation())
+		for _, obj := range o {
+			pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), sitePrimaryKeyMapping)
+			args = append(args, pkeyArgs...)
+			obj.DeletedAt = null.TimeFrom(currTime)
+		}
+		wl := []string{"deleted_at"}
+		sql = fmt.Sprintf("UPDATE \"site\" SET %s WHERE "+
+			strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 2, sitePrimaryKeyColumns, len(o)),
+			strmangle.SetParamNames("\"", "\"", 1, wl),
+		)
+		args = append([]interface{}{currTime}, args...)
 	}
-
-	sql := "DELETE FROM \"site\" WHERE " +
-		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, sitePrimaryKeyColumns, len(o))
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -1581,7 +1630,8 @@ func (o *SiteSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) er
 	}
 
 	sql := "SELECT \"site\".* FROM \"site\" WHERE " +
-		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, sitePrimaryKeyColumns, len(*o))
+		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, sitePrimaryKeyColumns, len(*o)) +
+		"and \"deleted_at\" is null"
 
 	q := queries.Raw(sql, args...)
 
@@ -1598,7 +1648,7 @@ func (o *SiteSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) er
 // SiteExists checks if the Site row exists.
 func SiteExists(ctx context.Context, exec boil.ContextExecutor, iD int) (bool, error) {
 	var exists bool
-	sql := "select exists(select 1 from \"site\" where \"id\"=$1 limit 1)"
+	sql := "select exists(select 1 from \"site\" where \"id\"=$1 and \"deleted_at\" is null limit 1)"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)

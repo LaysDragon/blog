@@ -504,6 +504,7 @@ func (commentL) LoadPost(ctx context.Context, e boil.ContextExecutor, singular b
 	query := NewQuery(
 		qm.From(`post`),
 		qm.WhereIn(`post.id in ?`, argsSlice...),
+		qmhelper.WhereIsNull(`post.deleted_at`),
 	)
 	if mods != nil {
 		mods.Apply(query)
