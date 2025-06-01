@@ -2,10 +2,9 @@ package web
 
 import (
 	"database/sql"
-	"fmt"
-
 	"github.com/LaysDragon/blog/apps/server/usecase"
 	"github.com/gin-gonic/gin"
+	"log"
 )
 
 type PostController struct {
@@ -24,7 +23,7 @@ func (c *PostController) HandleGetPost(ctx *gin.Context) {
 		} else {
 			ctx.String(500, err.Error())
 		}
-		fmt.Println(err)
+		log.Println(err)
 		return
 	}
 	ctx.JSON(200, post)
