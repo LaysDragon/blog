@@ -9,10 +9,14 @@ var TableNames = struct {
 	Attachtment string
 	Comment     string
 	Post        string
+	Site        string
+	SiteRole    string
 }{
 	AccessLog:   "access_log",
 	Account:     "account",
 	Attachtment: "attachtment",
 	Comment:     "comment",
 	Post:        "post",
+	Site:        "site",
+	SiteRole:    "site_role",
 }

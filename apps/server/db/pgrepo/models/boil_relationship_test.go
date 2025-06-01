@@ -9,10 +9,12 @@ import "testing"
 // or deadlocks can occur.
 func TestToOne(t *testing.T) {
 	t.Run("AccessLogToAccountUsingUser", testAccessLogToOneAccountUsingUser)
-	t.Run("AttachtmentToAccountUsingOwner", testAttachtmentToOneAccountUsingOwner)
 	t.Run("AttachtmentToPostUsingRelated", testAttachtmentToOnePostUsingRelated)
+	t.Run("AttachtmentToSiteUsingSite", testAttachtmentToOneSiteUsingSite)
 	t.Run("CommentToPostUsingPost", testCommentToOnePostUsingPost)
-	t.Run("PostToAccountUsingOwner", testPostToOneAccountUsingOwner)
+	t.Run("PostToSiteUsingSite", testPostToOneSiteUsingSite)
+	t.Run("SiteRoleToAccountUsingAccount", testSiteRoleToOneAccountUsingAccount)
+	t.Run("SiteRoleToSiteUsingSite", testSiteRoleToOneSiteUsingSite)
 }
 
 // TestOneToOne tests cannot be run in parallel
@@ -23,20 +25,24 @@ func TestOneToOne(t *testing.T) {}
 // or deadlocks can occur.
 func TestToMany(t *testing.T) {
 	t.Run("AccountToUserAccessLogs", testAccountToManyUserAccessLogs)
-	t.Run("AccountToOwnerAttachtments", testAccountToManyOwnerAttachtments)
-	t.Run("AccountToOwnerPosts", testAccountToManyOwnerPosts)
+	t.Run("AccountToSiteRoles", testAccountToManySiteRoles)
 	t.Run("PostToRelatedAttachtments", testPostToManyRelatedAttachtments)
 	t.Run("PostToComments", testPostToManyComments)
+	t.Run("SiteToAttachtments", testSiteToManyAttachtments)
+	t.Run("SiteToPosts", testSiteToManyPosts)
+	t.Run("SiteToSiteRoles", testSiteToManySiteRoles)
 }
 
 // TestToOneSet tests cannot be run in parallel
 // or deadlocks can occur.
 func TestToOneSet(t *testing.T) {
 	t.Run("AccessLogToAccountUsingUserAccessLogs", testAccessLogToOneSetOpAccountUsingUser)
-	t.Run("AttachtmentToAccountUsingOwnerAttachtments", testAttachtmentToOneSetOpAccountUsingOwner)
 	t.Run("AttachtmentToPostUsingRelatedAttachtments", testAttachtmentToOneSetOpPostUsingRelated)
+	t.Run("AttachtmentToSiteUsingAttachtments", testAttachtmentToOneSetOpSiteUsingSite)
 	t.Run("CommentToPostUsingComments", testCommentToOneSetOpPostUsingPost)
-	t.Run("PostToAccountUsingOwnerPosts", testPostToOneSetOpAccountUsingOwner)
+	t.Run("PostToSiteUsingPosts", testPostToOneSetOpSiteUsingSite)
+	t.Run("SiteRoleToAccountUsingSiteRoles", testSiteRoleToOneSetOpAccountUsingAccount)
+	t.Run("SiteRoleToSiteUsingSiteRoles", testSiteRoleToOneSetOpSiteUsingSite)
 }
 
 // TestToOneRemove tests cannot be run in parallel
@@ -57,10 +63,12 @@ func TestOneToOneRemove(t *testing.T) {}
 // or deadlocks can occur.
 func TestToManyAdd(t *testing.T) {
 	t.Run("AccountToUserAccessLogs", testAccountToManyAddOpUserAccessLogs)
-	t.Run("AccountToOwnerAttachtments", testAccountToManyAddOpOwnerAttachtments)
-	t.Run("AccountToOwnerPosts", testAccountToManyAddOpOwnerPosts)
+	t.Run("AccountToSiteRoles", testAccountToManyAddOpSiteRoles)
 	t.Run("PostToRelatedAttachtments", testPostToManyAddOpRelatedAttachtments)
 	t.Run("PostToComments", testPostToManyAddOpComments)
+	t.Run("SiteToAttachtments", testSiteToManyAddOpAttachtments)
+	t.Run("SiteToPosts", testSiteToManyAddOpPosts)
+	t.Run("SiteToSiteRoles", testSiteToManyAddOpSiteRoles)
 }
 
 // TestToManySet tests cannot be run in parallel

@@ -15,4 +15,8 @@ func TestUpsert(t *testing.T) {
 	t.Run("Comments", testCommentsUpsert)
 
 	t.Run("Posts", testPostsUpsert)
+
+	t.Run("Sites", testSitesUpsert)
+
+	t.Run("SiteRoles", testSiteRolesUpsert)
 }

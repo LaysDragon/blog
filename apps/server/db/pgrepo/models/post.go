@@ -26,7 +26,7 @@ type Post struct {
 	ID          int       `boil:"id" json:"id" toml:"id" yaml:"id"`
 	CreatedDate time.Time `boil:"created_date" json:"created_date" toml:"created_date" yaml:"created_date"`
 	UpdatedDate time.Time `boil:"updated_date" json:"updated_date" toml:"updated_date" yaml:"updated_date"`
-	OwnerID     int       `boil:"owner_id" json:"owner_id" toml:"owner_id" yaml:"owner_id"`
+	SiteID      int       `boil:"site_id" json:"site_id" toml:"site_id" yaml:"site_id"`
 	Content     string    `boil:"content" json:"content" toml:"content" yaml:"content"`
 
 	R *postR `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -37,13 +37,13 @@ var PostColumns = struct {
 	ID          string
 	CreatedDate string
 	UpdatedDate string
-	OwnerID     string
+	SiteID      string
 	Content     string
 }{
 	ID:          "id",
 	CreatedDate: "created_date",
 	UpdatedDate: "updated_date",
-	OwnerID:     "owner_id",
+	SiteID:      "site_id",
 	Content:     "content",
 }
 
@@ -51,13 +51,13 @@ var PostTableColumns = struct {
 	ID          string
 	CreatedDate string
 	UpdatedDate string
-	OwnerID     string
+	SiteID      string
 	Content     string
 }{
 	ID:          "post.id",
 	CreatedDate: "post.created_date",
 	UpdatedDate: "post.updated_date",
-	OwnerID:     "post.owner_id",
+	SiteID:      "post.site_id",
 	Content:     "post.content",
 }
 
@@ -67,30 +67,30 @@ var PostWhere = struct {
 	ID          whereHelperint
 	CreatedDate whereHelpertime_Time
 	UpdatedDate whereHelpertime_Time
-	OwnerID     whereHelperint
+	SiteID      whereHelperint
 	Content     whereHelperstring
 }{
 	ID:          whereHelperint{field: "\"post\".\"id\""},
 	CreatedDate: whereHelpertime_Time{field: "\"post\".\"created_date\""},
 	UpdatedDate: whereHelpertime_Time{field: "\"post\".\"updated_date\""},
-	OwnerID:     whereHelperint{field: "\"post\".\"owner_id\""},
+	SiteID:      whereHelperint{field: "\"post\".\"site_id\""},
 	Content:     whereHelperstring{field: "\"post\".\"content\""},
 }
 
 // PostRels is where relationship names are stored.
 var PostRels = struct {
-	Owner               string
+	Site                string
 	RelatedAttachtments string
 	Comments            string
 }{
-	Owner:               "Owner",
+	Site:                "Site",
 	RelatedAttachtments: "RelatedAttachtments",
 	Comments:            "Comments",
 }
 
 // postR is where relationships are stored.
 type postR struct {
-	Owner               *Account         `boil:"Owner" json:"Owner" toml:"Owner" yaml:"Owner"`
+	Site                *Site            `boil:"Site" json:"Site" toml:"Site" yaml:"Site"`
 	RelatedAttachtments AttachtmentSlice `boil:"RelatedAttachtments" json:"RelatedAttachtments" toml:"RelatedAttachtments" yaml:"RelatedAttachtments"`
 	Comments            CommentSlice     `boil:"Comments" json:"Comments" toml:"Comments" yaml:"Comments"`
 }
@@ -100,20 +100,20 @@ func (*postR) NewStruct() *postR {
 	return &postR{}
 }
 
-func (o *Post) GetOwner() *Account {
+func (o *Post) GetSite() *Site {
 	if o == nil {
 		return nil
 	}
 
-	return o.R.GetOwner()
+	return o.R.GetSite()
 }
 
-func (r *postR) GetOwner() *Account {
+func (r *postR) GetSite() *Site {
 	if r == nil {
 		return nil
 	}
 
-	return r.Owner
+	return r.Site
 }
 
 func (o *Post) GetRelatedAttachtments() AttachtmentSlice {
@@ -152,8 +152,8 @@ func (r *postR) GetComments() CommentSlice {
 type postL struct{}
 
 var (
-	postAllColumns            = []string{"id", "created_date", "updated_date", "owner_id", "content"}
-	postColumnsWithoutDefault = []string{"owner_id", "content"}
+	postAllColumns            = []string{"id", "created_date", "updated_date", "site_id", "content"}
+	postColumnsWithoutDefault = []string{"site_id", "content"}
 	postColumnsWithDefault    = []string{"id", "created_date", "updated_date"}
 	postPrimaryKeyColumns     = []string{"id"}
 	postGeneratedColumns      = []string{}
@@ -464,15 +464,15 @@ func (q postQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bool,
 	return count > 0, nil
 }
 
-// Owner pointed to by the foreign key.
-func (o *Post) Owner(mods ...qm.QueryMod) accountQuery {
+// Site pointed to by the foreign key.
+func (o *Post) Site(mods ...qm.QueryMod) siteQuery {
 	queryMods := []qm.QueryMod{
-		qm.Where("\"id\" = ?", o.OwnerID),
+		qm.Where("\"id\" = ?", o.SiteID),
 	}
 
 	queryMods = append(queryMods, mods...)
 
-	return Accounts(queryMods...)
+	return Sites(queryMods...)
 }
 
 // RelatedAttachtments retrieves all the attachtment's Attachtments with an executor via related_id column.
@@ -503,9 +503,9 @@ func (o *Post) Comments(mods ...qm.QueryMod) commentQuery {
 	return Comments(queryMods...)
 }
 
-// LoadOwner allows an eager lookup of values, cached into the
+// LoadSite allows an eager lookup of values, cached into the
 // loaded structs of the objects. This is for an N-1 relationship.
-func (postL) LoadOwner(ctx context.Context, e boil.ContextExecutor, singular bool, maybePost interface{}, mods queries.Applicator) error {
+func (postL) LoadSite(ctx context.Context, e boil.ContextExecutor, singular bool, maybePost interface{}, mods queries.Applicator) error {
 	var slice []*Post
 	var object *Post
 
@@ -536,7 +536,7 @@ func (postL) LoadOwner(ctx context.Context, e boil.ContextExecutor, singular boo
 		if object.R == nil {
 			object.R = &postR{}
 		}
-		args[object.OwnerID] = struct{}{}
+		args[object.SiteID] = struct{}{}
 
 	} else {
 		for _, obj := range slice {
@@ -544,7 +544,7 @@ func (postL) LoadOwner(ctx context.Context, e boil.ContextExecutor, singular boo
 				obj.R = &postR{}
 			}
 
-			args[obj.OwnerID] = struct{}{}
+			args[obj.SiteID] = struct{}{}
 
 		}
 	}
@@ -561,8 +561,8 @@ func (postL) LoadOwner(ctx context.Context, e boil.ContextExecutor, singular boo
 	}
 
 	query := NewQuery(
-		qm.From(`account`),
-		qm.WhereIn(`account.id in ?`, argsSlice...),
+		qm.From(`site`),
+		qm.WhereIn(`site.id in ?`, argsSlice...),
 	)
 	if mods != nil {
 		mods.Apply(query)
@@ -570,22 +570,22 @@ func (postL) LoadOwner(ctx context.Context, e boil.ContextExecutor, singular boo
 
 	results, err := query.QueryContext(ctx, e)
 	if err != nil {
-		return errors.Wrap(err, "failed to eager load Account")
+		return errors.Wrap(err, "failed to eager load Site")
 	}
 
-	var resultSlice []*Account
+	var resultSlice []*Site
 	if err = queries.Bind(results, &resultSlice); err != nil {
-		return errors.Wrap(err, "failed to bind eager loaded slice Account")
+		return errors.Wrap(err, "failed to bind eager loaded slice Site")
 	}
 
 	if err = results.Close(); err != nil {
-		return errors.Wrap(err, "failed to close results of eager load for account")
+		return errors.Wrap(err, "failed to close results of eager load for site")
 	}
 	if err = results.Err(); err != nil {
-		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for account")
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for site")
 	}
 
-	if len(accountAfterSelectHooks) != 0 {
+	if len(siteAfterSelectHooks) != 0 {
 		for _, obj := range resultSlice {
 			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
 				return err
@@ -599,22 +599,22 @@ func (postL) LoadOwner(ctx context.Context, e boil.ContextExecutor, singular boo
 
 	if singular {
 		foreign := resultSlice[0]
-		object.R.Owner = foreign
+		object.R.Site = foreign
 		if foreign.R == nil {
-			foreign.R = &accountR{}
+			foreign.R = &siteR{}
 		}
-		foreign.R.OwnerPosts = append(foreign.R.OwnerPosts, object)
+		foreign.R.Posts = append(foreign.R.Posts, object)
 		return nil
 	}
 
 	for _, local := range slice {
 		for _, foreign := range resultSlice {
-			if local.OwnerID == foreign.ID {
-				local.R.Owner = foreign
+			if local.SiteID == foreign.ID {
+				local.R.Site = foreign
 				if foreign.R == nil {
-					foreign.R = &accountR{}
+					foreign.R = &siteR{}
 				}
-				foreign.R.OwnerPosts = append(foreign.R.OwnerPosts, local)
+				foreign.R.Posts = append(foreign.R.Posts, local)
 				break
 			}
 		}
@@ -849,10 +849,10 @@ func (postL) LoadComments(ctx context.Context, e boil.ContextExecutor, singular 
 	return nil
 }
 
-// SetOwner of the post to the related item.
-// Sets o.R.Owner to related.
-// Adds o to related.R.OwnerPosts.
-func (o *Post) SetOwner(ctx context.Context, exec boil.ContextExecutor, insert bool, related *Account) error {
+// SetSite of the post to the related item.
+// Sets o.R.Site to related.
+// Adds o to related.R.Posts.
+func (o *Post) SetSite(ctx context.Context, exec boil.ContextExecutor, insert bool, related *Site) error {
 	var err error
 	if insert {
 		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
@@ -862,7 +862,7 @@ func (o *Post) SetOwner(ctx context.Context, exec boil.ContextExecutor, insert b
 
 	updateQuery := fmt.Sprintf(
 		"UPDATE \"post\" SET %s WHERE %s",
-		strmangle.SetParamNames("\"", "\"", 1, []string{"owner_id"}),
+		strmangle.SetParamNames("\"", "\"", 1, []string{"site_id"}),
 		strmangle.WhereClause("\"", "\"", 2, postPrimaryKeyColumns),
 	)
 	values := []interface{}{related.ID, o.ID}
@@ -876,21 +876,21 @@ func (o *Post) SetOwner(ctx context.Context, exec boil.ContextExecutor, insert b
 		return errors.Wrap(err, "failed to update local table")
 	}
 
-	o.OwnerID = related.ID
+	o.SiteID = related.ID
 	if o.R == nil {
 		o.R = &postR{
-			Owner: related,
+			Site: related,
 		}
 	} else {
-		o.R.Owner = related
+		o.R.Site = related
 	}
 
 	if related.R == nil {
-		related.R = &accountR{
-			OwnerPosts: PostSlice{o},
+		related.R = &siteR{
+			Posts: PostSlice{o},
 		}
 	} else {
-		related.R.OwnerPosts = append(related.R.OwnerPosts, o)
+		related.R.Posts = append(related.R.Posts, o)
 	}
 
 	return nil

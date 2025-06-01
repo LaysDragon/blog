@@ -571,14 +571,14 @@ func testAccountToManyUserAccessLogs(t *testing.T) {
 	}
 }
 
-func testAccountToManyOwnerAttachtments(t *testing.T) {
+func testAccountToManySiteRoles(t *testing.T) {
 	var err error
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
 
 	var a Account
-	var b, c Attachtment
+	var b, c SiteRole
 
 	seed := randomize.NewSeed()
 	if err = randomize.Struct(seed, &a, accountDBTypes, true, accountColumnsWithDefault...); err != nil {
@@ -589,15 +589,15 @@ func testAccountToManyOwnerAttachtments(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err = randomize.Struct(seed, &b, attachtmentDBTypes, false, attachtmentColumnsWithDefault...); err != nil {
+	if err = randomize.Struct(seed, &b, siteRoleDBTypes, false, siteRoleColumnsWithDefault...); err != nil {
 		t.Fatal(err)
 	}
-	if err = randomize.Struct(seed, &c, attachtmentDBTypes, false, attachtmentColumnsWithDefault...); err != nil {
+	if err = randomize.Struct(seed, &c, siteRoleDBTypes, false, siteRoleColumnsWithDefault...); err != nil {
 		t.Fatal(err)
 	}
 
-	b.OwnerID = a.ID
-	c.OwnerID = a.ID
+	b.AccountID = a.ID
+	c.AccountID = a.ID
 
 	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Fatal(err)
@@ -606,17 +606,17 @@ func testAccountToManyOwnerAttachtments(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	check, err := a.OwnerAttachtments().All(ctx, tx)
+	check, err := a.SiteRoles().All(ctx, tx)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	bFound, cFound := false, false
 	for _, v := range check {
-		if v.OwnerID == b.OwnerID {
+		if v.AccountID == b.AccountID {
 			bFound = true
 		}
-		if v.OwnerID == c.OwnerID {
+		if v.AccountID == c.AccountID {
 			cFound = true
 		}
 	}
@@ -629,96 +629,18 @@ func testAccountToManyOwnerAttachtments(t *testing.T) {
 	}
 
 	slice := AccountSlice{&a}
-	if err = a.L.LoadOwnerAttachtments(ctx, tx, false, (*[]*Account)(&slice), nil); err != nil {
+	if err = a.L.LoadSiteRoles(ctx, tx, false, (*[]*Account)(&slice), nil); err != nil {
 		t.Fatal(err)
 	}
-	if got := len(a.R.OwnerAttachtments); got != 2 {
+	if got := len(a.R.SiteRoles); got != 2 {
 		t.Error("number of eager loaded records wrong, got:", got)
 	}
 
-	a.R.OwnerAttachtments = nil
-	if err = a.L.LoadOwnerAttachtments(ctx, tx, true, &a, nil); err != nil {
+	a.R.SiteRoles = nil
+	if err = a.L.LoadSiteRoles(ctx, tx, true, &a, nil); err != nil {
 		t.Fatal(err)
 	}
-	if got := len(a.R.OwnerAttachtments); got != 2 {
-		t.Error("number of eager loaded records wrong, got:", got)
-	}
-
-	if t.Failed() {
-		t.Logf("%#v", check)
-	}
-}
-
-func testAccountToManyOwnerPosts(t *testing.T) {
-	var err error
-	ctx := context.Background()
-	tx := MustTx(boil.BeginTx(ctx, nil))
-	defer func() { _ = tx.Rollback() }()
-
-	var a Account
-	var b, c Post
-
-	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, accountDBTypes, true, accountColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Account struct: %s", err)
-	}
-
-	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-
-	if err = randomize.Struct(seed, &b, postDBTypes, false, postColumnsWithDefault...); err != nil {
-		t.Fatal(err)
-	}
-	if err = randomize.Struct(seed, &c, postDBTypes, false, postColumnsWithDefault...); err != nil {
-		t.Fatal(err)
-	}
-
-	b.OwnerID = a.ID
-	c.OwnerID = a.ID
-
-	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-	if err = c.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-
-	check, err := a.OwnerPosts().All(ctx, tx)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	bFound, cFound := false, false
-	for _, v := range check {
-		if v.OwnerID == b.OwnerID {
-			bFound = true
-		}
-		if v.OwnerID == c.OwnerID {
-			cFound = true
-		}
-	}
-
-	if !bFound {
-		t.Error("expected to find b")
-	}
-	if !cFound {
-		t.Error("expected to find c")
-	}
-
-	slice := AccountSlice{&a}
-	if err = a.L.LoadOwnerPosts(ctx, tx, false, (*[]*Account)(&slice), nil); err != nil {
-		t.Fatal(err)
-	}
-	if got := len(a.R.OwnerPosts); got != 2 {
-		t.Error("number of eager loaded records wrong, got:", got)
-	}
-
-	a.R.OwnerPosts = nil
-	if err = a.L.LoadOwnerPosts(ctx, tx, true, &a, nil); err != nil {
-		t.Fatal(err)
-	}
-	if got := len(a.R.OwnerPosts); got != 2 {
+	if got := len(a.R.SiteRoles); got != 2 {
 		t.Error("number of eager loaded records wrong, got:", got)
 	}
 
@@ -978,7 +900,7 @@ func testAccountToManyRemoveOpUserAccessLogs(t *testing.T) {
 	}
 }
 
-func testAccountToManyAddOpOwnerAttachtments(t *testing.T) {
+func testAccountToManyAddOpSiteRoles(t *testing.T) {
 	var err error
 
 	ctx := context.Background()
@@ -986,15 +908,15 @@ func testAccountToManyAddOpOwnerAttachtments(t *testing.T) {
 	defer func() { _ = tx.Rollback() }()
 
 	var a Account
-	var b, c, d, e Attachtment
+	var b, c, d, e SiteRole
 
 	seed := randomize.NewSeed()
 	if err = randomize.Struct(seed, &a, accountDBTypes, false, strmangle.SetComplement(accountPrimaryKeyColumns, accountColumnsWithoutDefault)...); err != nil {
 		t.Fatal(err)
 	}
-	foreigners := []*Attachtment{&b, &c, &d, &e}
+	foreigners := []*SiteRole{&b, &c, &d, &e}
 	for _, x := range foreigners {
-		if err = randomize.Struct(seed, x, attachtmentDBTypes, false, strmangle.SetComplement(attachtmentPrimaryKeyColumns, attachtmentColumnsWithoutDefault)...); err != nil {
+		if err = randomize.Struct(seed, x, siteRoleDBTypes, false, strmangle.SetComplement(siteRolePrimaryKeyColumns, siteRoleColumnsWithoutDefault)...); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -1009,13 +931,13 @@ func testAccountToManyAddOpOwnerAttachtments(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	foreignersSplitByInsertion := [][]*Attachtment{
+	foreignersSplitByInsertion := [][]*SiteRole{
 		{&b, &c},
 		{&d, &e},
 	}
 
 	for i, x := range foreignersSplitByInsertion {
-		err = a.AddOwnerAttachtments(ctx, tx, i != 0, x...)
+		err = a.AddSiteRoles(ctx, tx, i != 0, x...)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -1023,103 +945,28 @@ func testAccountToManyAddOpOwnerAttachtments(t *testing.T) {
 		first := x[0]
 		second := x[1]
 
-		if a.ID != first.OwnerID {
-			t.Error("foreign key was wrong value", a.ID, first.OwnerID)
+		if a.ID != first.AccountID {
+			t.Error("foreign key was wrong value", a.ID, first.AccountID)
 		}
-		if a.ID != second.OwnerID {
-			t.Error("foreign key was wrong value", a.ID, second.OwnerID)
+		if a.ID != second.AccountID {
+			t.Error("foreign key was wrong value", a.ID, second.AccountID)
 		}
 
-		if first.R.Owner != &a {
+		if first.R.Account != &a {
 			t.Error("relationship was not added properly to the foreign slice")
 		}
-		if second.R.Owner != &a {
-			t.Error("relationship was not added properly to the foreign slice")
-		}
-
-		if a.R.OwnerAttachtments[i*2] != first {
-			t.Error("relationship struct slice not set to correct value")
-		}
-		if a.R.OwnerAttachtments[i*2+1] != second {
-			t.Error("relationship struct slice not set to correct value")
-		}
-
-		count, err := a.OwnerAttachtments().Count(ctx, tx)
-		if err != nil {
-			t.Fatal(err)
-		}
-		if want := int64((i + 1) * 2); count != want {
-			t.Error("want", want, "got", count)
-		}
-	}
-}
-func testAccountToManyAddOpOwnerPosts(t *testing.T) {
-	var err error
-
-	ctx := context.Background()
-	tx := MustTx(boil.BeginTx(ctx, nil))
-	defer func() { _ = tx.Rollback() }()
-
-	var a Account
-	var b, c, d, e Post
-
-	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, accountDBTypes, false, strmangle.SetComplement(accountPrimaryKeyColumns, accountColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-	foreigners := []*Post{&b, &c, &d, &e}
-	for _, x := range foreigners {
-		if err = randomize.Struct(seed, x, postDBTypes, false, strmangle.SetComplement(postPrimaryKeyColumns, postColumnsWithoutDefault)...); err != nil {
-			t.Fatal(err)
-		}
-	}
-
-	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-	if err = c.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-
-	foreignersSplitByInsertion := [][]*Post{
-		{&b, &c},
-		{&d, &e},
-	}
-
-	for i, x := range foreignersSplitByInsertion {
-		err = a.AddOwnerPosts(ctx, tx, i != 0, x...)
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		first := x[0]
-		second := x[1]
-
-		if a.ID != first.OwnerID {
-			t.Error("foreign key was wrong value", a.ID, first.OwnerID)
-		}
-		if a.ID != second.OwnerID {
-			t.Error("foreign key was wrong value", a.ID, second.OwnerID)
-		}
-
-		if first.R.Owner != &a {
-			t.Error("relationship was not added properly to the foreign slice")
-		}
-		if second.R.Owner != &a {
+		if second.R.Account != &a {
 			t.Error("relationship was not added properly to the foreign slice")
 		}
 
-		if a.R.OwnerPosts[i*2] != first {
+		if a.R.SiteRoles[i*2] != first {
 			t.Error("relationship struct slice not set to correct value")
 		}
-		if a.R.OwnerPosts[i*2+1] != second {
+		if a.R.SiteRoles[i*2+1] != second {
 			t.Error("relationship struct slice not set to correct value")
 		}
 
-		count, err := a.OwnerPosts().Count(ctx, tx)
+		count, err := a.SiteRoles().Count(ctx, tx)
 		if err != nil {
 			t.Fatal(err)
 		}

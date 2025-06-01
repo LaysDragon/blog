@@ -21,24 +21,24 @@ var (
 	_ = queries.Equal
 )
 
-func testPosts(t *testing.T) {
+func testSites(t *testing.T) {
 	t.Parallel()
 
-	query := Posts()
+	query := Sites()
 
 	if query.Query == nil {
 		t.Error("expected a query, got nothing")
 	}
 }
 
-func testPostsDelete(t *testing.T) {
+func testSitesDelete(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Post{}
-	if err = randomize.Struct(seed, o, postDBTypes, true, postColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Post struct: %s", err)
+	o := &Site{}
+	if err = randomize.Struct(seed, o, siteDBTypes, true, siteColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Site struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -54,7 +54,7 @@ func testPostsDelete(t *testing.T) {
 		t.Error("should only have deleted one row, but affected:", rowsAff)
 	}
 
-	count, err := Posts().Count(ctx, tx)
+	count, err := Sites().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -64,14 +64,14 @@ func testPostsDelete(t *testing.T) {
 	}
 }
 
-func testPostsQueryDeleteAll(t *testing.T) {
+func testSitesQueryDeleteAll(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Post{}
-	if err = randomize.Struct(seed, o, postDBTypes, true, postColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Post struct: %s", err)
+	o := &Site{}
+	if err = randomize.Struct(seed, o, siteDBTypes, true, siteColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Site struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -81,13 +81,13 @@ func testPostsQueryDeleteAll(t *testing.T) {
 		t.Error(err)
 	}
 
-	if rowsAff, err := Posts().DeleteAll(ctx, tx); err != nil {
+	if rowsAff, err := Sites().DeleteAll(ctx, tx); err != nil {
 		t.Error(err)
 	} else if rowsAff != 1 {
 		t.Error("should only have deleted one row, but affected:", rowsAff)
 	}
 
-	count, err := Posts().Count(ctx, tx)
+	count, err := Sites().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -97,14 +97,14 @@ func testPostsQueryDeleteAll(t *testing.T) {
 	}
 }
 
-func testPostsSliceDeleteAll(t *testing.T) {
+func testSitesSliceDeleteAll(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Post{}
-	if err = randomize.Struct(seed, o, postDBTypes, true, postColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Post struct: %s", err)
+	o := &Site{}
+	if err = randomize.Struct(seed, o, siteDBTypes, true, siteColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Site struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -114,7 +114,7 @@ func testPostsSliceDeleteAll(t *testing.T) {
 		t.Error(err)
 	}
 
-	slice := PostSlice{o}
+	slice := SiteSlice{o}
 
 	if rowsAff, err := slice.DeleteAll(ctx, tx); err != nil {
 		t.Error(err)
@@ -122,7 +122,7 @@ func testPostsSliceDeleteAll(t *testing.T) {
 		t.Error("should only have deleted one row, but affected:", rowsAff)
 	}
 
-	count, err := Posts().Count(ctx, tx)
+	count, err := Sites().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -132,14 +132,14 @@ func testPostsSliceDeleteAll(t *testing.T) {
 	}
 }
 
-func testPostsExists(t *testing.T) {
+func testSitesExists(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Post{}
-	if err = randomize.Struct(seed, o, postDBTypes, true, postColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Post struct: %s", err)
+	o := &Site{}
+	if err = randomize.Struct(seed, o, siteDBTypes, true, siteColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Site struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -149,23 +149,23 @@ func testPostsExists(t *testing.T) {
 		t.Error(err)
 	}
 
-	e, err := PostExists(ctx, tx, o.ID)
+	e, err := SiteExists(ctx, tx, o.ID)
 	if err != nil {
-		t.Errorf("Unable to check if Post exists: %s", err)
+		t.Errorf("Unable to check if Site exists: %s", err)
 	}
 	if !e {
-		t.Errorf("Expected PostExists to return true, but got false.")
+		t.Errorf("Expected SiteExists to return true, but got false.")
 	}
 }
 
-func testPostsFind(t *testing.T) {
+func testSitesFind(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Post{}
-	if err = randomize.Struct(seed, o, postDBTypes, true, postColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Post struct: %s", err)
+	o := &Site{}
+	if err = randomize.Struct(seed, o, siteDBTypes, true, siteColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Site struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -175,24 +175,24 @@ func testPostsFind(t *testing.T) {
 		t.Error(err)
 	}
 
-	postFound, err := FindPost(ctx, tx, o.ID)
+	siteFound, err := FindSite(ctx, tx, o.ID)
 	if err != nil {
 		t.Error(err)
 	}
 
-	if postFound == nil {
+	if siteFound == nil {
 		t.Error("want a record, got nil")
 	}
 }
 
-func testPostsBind(t *testing.T) {
+func testSitesBind(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Post{}
-	if err = randomize.Struct(seed, o, postDBTypes, true, postColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Post struct: %s", err)
+	o := &Site{}
+	if err = randomize.Struct(seed, o, siteDBTypes, true, siteColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Site struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -202,19 +202,19 @@ func testPostsBind(t *testing.T) {
 		t.Error(err)
 	}
 
-	if err = Posts().Bind(ctx, tx, o); err != nil {
+	if err = Sites().Bind(ctx, tx, o); err != nil {
 		t.Error(err)
 	}
 }
 
-func testPostsOne(t *testing.T) {
+func testSitesOne(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Post{}
-	if err = randomize.Struct(seed, o, postDBTypes, true, postColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Post struct: %s", err)
+	o := &Site{}
+	if err = randomize.Struct(seed, o, siteDBTypes, true, siteColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Site struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -224,38 +224,38 @@ func testPostsOne(t *testing.T) {
 		t.Error(err)
 	}
 
-	if x, err := Posts().One(ctx, tx); err != nil {
+	if x, err := Sites().One(ctx, tx); err != nil {
 		t.Error(err)
 	} else if x == nil {
 		t.Error("expected to get a non nil record")
 	}
 }
 
-func testPostsAll(t *testing.T) {
+func testSitesAll(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	postOne := &Post{}
-	postTwo := &Post{}
-	if err = randomize.Struct(seed, postOne, postDBTypes, false, postColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Post struct: %s", err)
+	siteOne := &Site{}
+	siteTwo := &Site{}
+	if err = randomize.Struct(seed, siteOne, siteDBTypes, false, siteColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Site struct: %s", err)
 	}
-	if err = randomize.Struct(seed, postTwo, postDBTypes, false, postColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Post struct: %s", err)
+	if err = randomize.Struct(seed, siteTwo, siteDBTypes, false, siteColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Site struct: %s", err)
 	}
 
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
-	if err = postOne.Insert(ctx, tx, boil.Infer()); err != nil {
+	if err = siteOne.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Error(err)
 	}
-	if err = postTwo.Insert(ctx, tx, boil.Infer()); err != nil {
+	if err = siteTwo.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Error(err)
 	}
 
-	slice, err := Posts().All(ctx, tx)
+	slice, err := Sites().All(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -265,31 +265,31 @@ func testPostsAll(t *testing.T) {
 	}
 }
 
-func testPostsCount(t *testing.T) {
+func testSitesCount(t *testing.T) {
 	t.Parallel()
 
 	var err error
 	seed := randomize.NewSeed()
-	postOne := &Post{}
-	postTwo := &Post{}
-	if err = randomize.Struct(seed, postOne, postDBTypes, false, postColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Post struct: %s", err)
+	siteOne := &Site{}
+	siteTwo := &Site{}
+	if err = randomize.Struct(seed, siteOne, siteDBTypes, false, siteColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Site struct: %s", err)
 	}
-	if err = randomize.Struct(seed, postTwo, postDBTypes, false, postColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Post struct: %s", err)
+	if err = randomize.Struct(seed, siteTwo, siteDBTypes, false, siteColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Site struct: %s", err)
 	}
 
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
-	if err = postOne.Insert(ctx, tx, boil.Infer()); err != nil {
+	if err = siteOne.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Error(err)
 	}
-	if err = postTwo.Insert(ctx, tx, boil.Infer()); err != nil {
+	if err = siteTwo.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Error(err)
 	}
 
-	count, err := Posts().Count(ctx, tx)
+	count, err := Sites().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -299,155 +299,155 @@ func testPostsCount(t *testing.T) {
 	}
 }
 
-func postBeforeInsertHook(ctx context.Context, e boil.ContextExecutor, o *Post) error {
-	*o = Post{}
+func siteBeforeInsertHook(ctx context.Context, e boil.ContextExecutor, o *Site) error {
+	*o = Site{}
 	return nil
 }
 
-func postAfterInsertHook(ctx context.Context, e boil.ContextExecutor, o *Post) error {
-	*o = Post{}
+func siteAfterInsertHook(ctx context.Context, e boil.ContextExecutor, o *Site) error {
+	*o = Site{}
 	return nil
 }
 
-func postAfterSelectHook(ctx context.Context, e boil.ContextExecutor, o *Post) error {
-	*o = Post{}
+func siteAfterSelectHook(ctx context.Context, e boil.ContextExecutor, o *Site) error {
+	*o = Site{}
 	return nil
 }
 
-func postBeforeUpdateHook(ctx context.Context, e boil.ContextExecutor, o *Post) error {
-	*o = Post{}
+func siteBeforeUpdateHook(ctx context.Context, e boil.ContextExecutor, o *Site) error {
+	*o = Site{}
 	return nil
 }
 
-func postAfterUpdateHook(ctx context.Context, e boil.ContextExecutor, o *Post) error {
-	*o = Post{}
+func siteAfterUpdateHook(ctx context.Context, e boil.ContextExecutor, o *Site) error {
+	*o = Site{}
 	return nil
 }
 
-func postBeforeDeleteHook(ctx context.Context, e boil.ContextExecutor, o *Post) error {
-	*o = Post{}
+func siteBeforeDeleteHook(ctx context.Context, e boil.ContextExecutor, o *Site) error {
+	*o = Site{}
 	return nil
 }
 
-func postAfterDeleteHook(ctx context.Context, e boil.ContextExecutor, o *Post) error {
-	*o = Post{}
+func siteAfterDeleteHook(ctx context.Context, e boil.ContextExecutor, o *Site) error {
+	*o = Site{}
 	return nil
 }
 
-func postBeforeUpsertHook(ctx context.Context, e boil.ContextExecutor, o *Post) error {
-	*o = Post{}
+func siteBeforeUpsertHook(ctx context.Context, e boil.ContextExecutor, o *Site) error {
+	*o = Site{}
 	return nil
 }
 
-func postAfterUpsertHook(ctx context.Context, e boil.ContextExecutor, o *Post) error {
-	*o = Post{}
+func siteAfterUpsertHook(ctx context.Context, e boil.ContextExecutor, o *Site) error {
+	*o = Site{}
 	return nil
 }
 
-func testPostsHooks(t *testing.T) {
+func testSitesHooks(t *testing.T) {
 	t.Parallel()
 
 	var err error
 
 	ctx := context.Background()
-	empty := &Post{}
-	o := &Post{}
+	empty := &Site{}
+	o := &Site{}
 
 	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, o, postDBTypes, false); err != nil {
-		t.Errorf("Unable to randomize Post object: %s", err)
+	if err = randomize.Struct(seed, o, siteDBTypes, false); err != nil {
+		t.Errorf("Unable to randomize Site object: %s", err)
 	}
 
-	AddPostHook(boil.BeforeInsertHook, postBeforeInsertHook)
+	AddSiteHook(boil.BeforeInsertHook, siteBeforeInsertHook)
 	if err = o.doBeforeInsertHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doBeforeInsertHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected BeforeInsertHook function to empty object, but got: %#v", o)
 	}
-	postBeforeInsertHooks = []PostHook{}
+	siteBeforeInsertHooks = []SiteHook{}
 
-	AddPostHook(boil.AfterInsertHook, postAfterInsertHook)
+	AddSiteHook(boil.AfterInsertHook, siteAfterInsertHook)
 	if err = o.doAfterInsertHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doAfterInsertHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected AfterInsertHook function to empty object, but got: %#v", o)
 	}
-	postAfterInsertHooks = []PostHook{}
+	siteAfterInsertHooks = []SiteHook{}
 
-	AddPostHook(boil.AfterSelectHook, postAfterSelectHook)
+	AddSiteHook(boil.AfterSelectHook, siteAfterSelectHook)
 	if err = o.doAfterSelectHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doAfterSelectHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected AfterSelectHook function to empty object, but got: %#v", o)
 	}
-	postAfterSelectHooks = []PostHook{}
+	siteAfterSelectHooks = []SiteHook{}
 
-	AddPostHook(boil.BeforeUpdateHook, postBeforeUpdateHook)
+	AddSiteHook(boil.BeforeUpdateHook, siteBeforeUpdateHook)
 	if err = o.doBeforeUpdateHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doBeforeUpdateHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected BeforeUpdateHook function to empty object, but got: %#v", o)
 	}
-	postBeforeUpdateHooks = []PostHook{}
+	siteBeforeUpdateHooks = []SiteHook{}
 
-	AddPostHook(boil.AfterUpdateHook, postAfterUpdateHook)
+	AddSiteHook(boil.AfterUpdateHook, siteAfterUpdateHook)
 	if err = o.doAfterUpdateHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doAfterUpdateHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected AfterUpdateHook function to empty object, but got: %#v", o)
 	}
-	postAfterUpdateHooks = []PostHook{}
+	siteAfterUpdateHooks = []SiteHook{}
 
-	AddPostHook(boil.BeforeDeleteHook, postBeforeDeleteHook)
+	AddSiteHook(boil.BeforeDeleteHook, siteBeforeDeleteHook)
 	if err = o.doBeforeDeleteHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doBeforeDeleteHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected BeforeDeleteHook function to empty object, but got: %#v", o)
 	}
-	postBeforeDeleteHooks = []PostHook{}
+	siteBeforeDeleteHooks = []SiteHook{}
 
-	AddPostHook(boil.AfterDeleteHook, postAfterDeleteHook)
+	AddSiteHook(boil.AfterDeleteHook, siteAfterDeleteHook)
 	if err = o.doAfterDeleteHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doAfterDeleteHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected AfterDeleteHook function to empty object, but got: %#v", o)
 	}
-	postAfterDeleteHooks = []PostHook{}
+	siteAfterDeleteHooks = []SiteHook{}
 
-	AddPostHook(boil.BeforeUpsertHook, postBeforeUpsertHook)
+	AddSiteHook(boil.BeforeUpsertHook, siteBeforeUpsertHook)
 	if err = o.doBeforeUpsertHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doBeforeUpsertHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected BeforeUpsertHook function to empty object, but got: %#v", o)
 	}
-	postBeforeUpsertHooks = []PostHook{}
+	siteBeforeUpsertHooks = []SiteHook{}
 
-	AddPostHook(boil.AfterUpsertHook, postAfterUpsertHook)
+	AddSiteHook(boil.AfterUpsertHook, siteAfterUpsertHook)
 	if err = o.doAfterUpsertHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doAfterUpsertHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected AfterUpsertHook function to empty object, but got: %#v", o)
 	}
-	postAfterUpsertHooks = []PostHook{}
+	siteAfterUpsertHooks = []SiteHook{}
 }
 
-func testPostsInsert(t *testing.T) {
+func testSitesInsert(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Post{}
-	if err = randomize.Struct(seed, o, postDBTypes, true, postColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Post struct: %s", err)
+	o := &Site{}
+	if err = randomize.Struct(seed, o, siteDBTypes, true, siteColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Site struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -457,7 +457,7 @@ func testPostsInsert(t *testing.T) {
 		t.Error(err)
 	}
 
-	count, err := Posts().Count(ctx, tx)
+	count, err := Sites().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -467,24 +467,24 @@ func testPostsInsert(t *testing.T) {
 	}
 }
 
-func testPostsInsertWhitelist(t *testing.T) {
+func testSitesInsertWhitelist(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Post{}
-	if err = randomize.Struct(seed, o, postDBTypes, true); err != nil {
-		t.Errorf("Unable to randomize Post struct: %s", err)
+	o := &Site{}
+	if err = randomize.Struct(seed, o, siteDBTypes, true); err != nil {
+		t.Errorf("Unable to randomize Site struct: %s", err)
 	}
 
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
-	if err = o.Insert(ctx, tx, boil.Whitelist(strmangle.SetMerge(postPrimaryKeyColumns, postColumnsWithoutDefault)...)); err != nil {
+	if err = o.Insert(ctx, tx, boil.Whitelist(strmangle.SetMerge(sitePrimaryKeyColumns, siteColumnsWithoutDefault)...)); err != nil {
 		t.Error(err)
 	}
 
-	count, err := Posts().Count(ctx, tx)
+	count, err := Sites().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -494,18 +494,18 @@ func testPostsInsertWhitelist(t *testing.T) {
 	}
 }
 
-func testPostToManyRelatedAttachtments(t *testing.T) {
+func testSiteToManyAttachtments(t *testing.T) {
 	var err error
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
 
-	var a Post
+	var a Site
 	var b, c Attachtment
 
 	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, postDBTypes, true, postColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Post struct: %s", err)
+	if err = randomize.Struct(seed, &a, siteDBTypes, true, siteColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Site struct: %s", err)
 	}
 
 	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
@@ -519,8 +519,8 @@ func testPostToManyRelatedAttachtments(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	b.RelatedID = a.ID
-	c.RelatedID = a.ID
+	b.SiteID = a.ID
+	c.SiteID = a.ID
 
 	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Fatal(err)
@@ -529,17 +529,17 @@ func testPostToManyRelatedAttachtments(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	check, err := a.RelatedAttachtments().All(ctx, tx)
+	check, err := a.Attachtments().All(ctx, tx)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	bFound, cFound := false, false
 	for _, v := range check {
-		if v.RelatedID == b.RelatedID {
+		if v.SiteID == b.SiteID {
 			bFound = true
 		}
-		if v.RelatedID == c.RelatedID {
+		if v.SiteID == c.SiteID {
 			cFound = true
 		}
 	}
@@ -551,19 +551,19 @@ func testPostToManyRelatedAttachtments(t *testing.T) {
 		t.Error("expected to find c")
 	}
 
-	slice := PostSlice{&a}
-	if err = a.L.LoadRelatedAttachtments(ctx, tx, false, (*[]*Post)(&slice), nil); err != nil {
+	slice := SiteSlice{&a}
+	if err = a.L.LoadAttachtments(ctx, tx, false, (*[]*Site)(&slice), nil); err != nil {
 		t.Fatal(err)
 	}
-	if got := len(a.R.RelatedAttachtments); got != 2 {
+	if got := len(a.R.Attachtments); got != 2 {
 		t.Error("number of eager loaded records wrong, got:", got)
 	}
 
-	a.R.RelatedAttachtments = nil
-	if err = a.L.LoadRelatedAttachtments(ctx, tx, true, &a, nil); err != nil {
+	a.R.Attachtments = nil
+	if err = a.L.LoadAttachtments(ctx, tx, true, &a, nil); err != nil {
 		t.Fatal(err)
 	}
-	if got := len(a.R.RelatedAttachtments); got != 2 {
+	if got := len(a.R.Attachtments); got != 2 {
 		t.Error("number of eager loaded records wrong, got:", got)
 	}
 
@@ -572,33 +572,33 @@ func testPostToManyRelatedAttachtments(t *testing.T) {
 	}
 }
 
-func testPostToManyComments(t *testing.T) {
+func testSiteToManyPosts(t *testing.T) {
 	var err error
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
 
-	var a Post
-	var b, c Comment
+	var a Site
+	var b, c Post
 
 	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, postDBTypes, true, postColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Post struct: %s", err)
+	if err = randomize.Struct(seed, &a, siteDBTypes, true, siteColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Site struct: %s", err)
 	}
 
 	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Fatal(err)
 	}
 
-	if err = randomize.Struct(seed, &b, commentDBTypes, false, commentColumnsWithDefault...); err != nil {
+	if err = randomize.Struct(seed, &b, postDBTypes, false, postColumnsWithDefault...); err != nil {
 		t.Fatal(err)
 	}
-	if err = randomize.Struct(seed, &c, commentDBTypes, false, commentColumnsWithDefault...); err != nil {
+	if err = randomize.Struct(seed, &c, postDBTypes, false, postColumnsWithDefault...); err != nil {
 		t.Fatal(err)
 	}
 
-	b.PostID = a.ID
-	c.PostID = a.ID
+	b.SiteID = a.ID
+	c.SiteID = a.ID
 
 	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Fatal(err)
@@ -607,17 +607,17 @@ func testPostToManyComments(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	check, err := a.Comments().All(ctx, tx)
+	check, err := a.Posts().All(ctx, tx)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	bFound, cFound := false, false
 	for _, v := range check {
-		if v.PostID == b.PostID {
+		if v.SiteID == b.SiteID {
 			bFound = true
 		}
-		if v.PostID == c.PostID {
+		if v.SiteID == c.SiteID {
 			cFound = true
 		}
 	}
@@ -629,19 +629,19 @@ func testPostToManyComments(t *testing.T) {
 		t.Error("expected to find c")
 	}
 
-	slice := PostSlice{&a}
-	if err = a.L.LoadComments(ctx, tx, false, (*[]*Post)(&slice), nil); err != nil {
+	slice := SiteSlice{&a}
+	if err = a.L.LoadPosts(ctx, tx, false, (*[]*Site)(&slice), nil); err != nil {
 		t.Fatal(err)
 	}
-	if got := len(a.R.Comments); got != 2 {
+	if got := len(a.R.Posts); got != 2 {
 		t.Error("number of eager loaded records wrong, got:", got)
 	}
 
-	a.R.Comments = nil
-	if err = a.L.LoadComments(ctx, tx, true, &a, nil); err != nil {
+	a.R.Posts = nil
+	if err = a.L.LoadPosts(ctx, tx, true, &a, nil); err != nil {
 		t.Fatal(err)
 	}
-	if got := len(a.R.Comments); got != 2 {
+	if got := len(a.R.Posts); got != 2 {
 		t.Error("number of eager loaded records wrong, got:", got)
 	}
 
@@ -650,18 +650,96 @@ func testPostToManyComments(t *testing.T) {
 	}
 }
 
-func testPostToManyAddOpRelatedAttachtments(t *testing.T) {
+func testSiteToManySiteRoles(t *testing.T) {
+	var err error
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+
+	var a Site
+	var b, c SiteRole
+
+	seed := randomize.NewSeed()
+	if err = randomize.Struct(seed, &a, siteDBTypes, true, siteColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Site struct: %s", err)
+	}
+
+	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	if err = randomize.Struct(seed, &b, siteRoleDBTypes, false, siteRoleColumnsWithDefault...); err != nil {
+		t.Fatal(err)
+	}
+	if err = randomize.Struct(seed, &c, siteRoleDBTypes, false, siteRoleColumnsWithDefault...); err != nil {
+		t.Fatal(err)
+	}
+
+	b.SiteID = a.ID
+	c.SiteID = a.ID
+
+	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+	if err = c.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	check, err := a.SiteRoles().All(ctx, tx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	bFound, cFound := false, false
+	for _, v := range check {
+		if v.SiteID == b.SiteID {
+			bFound = true
+		}
+		if v.SiteID == c.SiteID {
+			cFound = true
+		}
+	}
+
+	if !bFound {
+		t.Error("expected to find b")
+	}
+	if !cFound {
+		t.Error("expected to find c")
+	}
+
+	slice := SiteSlice{&a}
+	if err = a.L.LoadSiteRoles(ctx, tx, false, (*[]*Site)(&slice), nil); err != nil {
+		t.Fatal(err)
+	}
+	if got := len(a.R.SiteRoles); got != 2 {
+		t.Error("number of eager loaded records wrong, got:", got)
+	}
+
+	a.R.SiteRoles = nil
+	if err = a.L.LoadSiteRoles(ctx, tx, true, &a, nil); err != nil {
+		t.Fatal(err)
+	}
+	if got := len(a.R.SiteRoles); got != 2 {
+		t.Error("number of eager loaded records wrong, got:", got)
+	}
+
+	if t.Failed() {
+		t.Logf("%#v", check)
+	}
+}
+
+func testSiteToManyAddOpAttachtments(t *testing.T) {
 	var err error
 
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
 
-	var a Post
+	var a Site
 	var b, c, d, e Attachtment
 
 	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, postDBTypes, false, strmangle.SetComplement(postPrimaryKeyColumns, postColumnsWithoutDefault)...); err != nil {
+	if err = randomize.Struct(seed, &a, siteDBTypes, false, strmangle.SetComplement(sitePrimaryKeyColumns, siteColumnsWithoutDefault)...); err != nil {
 		t.Fatal(err)
 	}
 	foreigners := []*Attachtment{&b, &c, &d, &e}
@@ -687,7 +765,7 @@ func testPostToManyAddOpRelatedAttachtments(t *testing.T) {
 	}
 
 	for i, x := range foreignersSplitByInsertion {
-		err = a.AddRelatedAttachtments(ctx, tx, i != 0, x...)
+		err = a.AddAttachtments(ctx, tx, i != 0, x...)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -695,28 +773,28 @@ func testPostToManyAddOpRelatedAttachtments(t *testing.T) {
 		first := x[0]
 		second := x[1]
 
-		if a.ID != first.RelatedID {
-			t.Error("foreign key was wrong value", a.ID, first.RelatedID)
+		if a.ID != first.SiteID {
+			t.Error("foreign key was wrong value", a.ID, first.SiteID)
 		}
-		if a.ID != second.RelatedID {
-			t.Error("foreign key was wrong value", a.ID, second.RelatedID)
+		if a.ID != second.SiteID {
+			t.Error("foreign key was wrong value", a.ID, second.SiteID)
 		}
 
-		if first.R.Related != &a {
+		if first.R.Site != &a {
 			t.Error("relationship was not added properly to the foreign slice")
 		}
-		if second.R.Related != &a {
+		if second.R.Site != &a {
 			t.Error("relationship was not added properly to the foreign slice")
 		}
 
-		if a.R.RelatedAttachtments[i*2] != first {
+		if a.R.Attachtments[i*2] != first {
 			t.Error("relationship struct slice not set to correct value")
 		}
-		if a.R.RelatedAttachtments[i*2+1] != second {
+		if a.R.Attachtments[i*2+1] != second {
 			t.Error("relationship struct slice not set to correct value")
 		}
 
-		count, err := a.RelatedAttachtments().Count(ctx, tx)
+		count, err := a.Attachtments().Count(ctx, tx)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -725,23 +803,23 @@ func testPostToManyAddOpRelatedAttachtments(t *testing.T) {
 		}
 	}
 }
-func testPostToManyAddOpComments(t *testing.T) {
+func testSiteToManyAddOpPosts(t *testing.T) {
 	var err error
 
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
 
-	var a Post
-	var b, c, d, e Comment
+	var a Site
+	var b, c, d, e Post
 
 	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, postDBTypes, false, strmangle.SetComplement(postPrimaryKeyColumns, postColumnsWithoutDefault)...); err != nil {
+	if err = randomize.Struct(seed, &a, siteDBTypes, false, strmangle.SetComplement(sitePrimaryKeyColumns, siteColumnsWithoutDefault)...); err != nil {
 		t.Fatal(err)
 	}
-	foreigners := []*Comment{&b, &c, &d, &e}
+	foreigners := []*Post{&b, &c, &d, &e}
 	for _, x := range foreigners {
-		if err = randomize.Struct(seed, x, commentDBTypes, false, strmangle.SetComplement(commentPrimaryKeyColumns, commentColumnsWithoutDefault)...); err != nil {
+		if err = randomize.Struct(seed, x, postDBTypes, false, strmangle.SetComplement(postPrimaryKeyColumns, postColumnsWithoutDefault)...); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -756,13 +834,13 @@ func testPostToManyAddOpComments(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	foreignersSplitByInsertion := [][]*Comment{
+	foreignersSplitByInsertion := [][]*Post{
 		{&b, &c},
 		{&d, &e},
 	}
 
 	for i, x := range foreignersSplitByInsertion {
-		err = a.AddComments(ctx, tx, i != 0, x...)
+		err = a.AddPosts(ctx, tx, i != 0, x...)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -770,28 +848,28 @@ func testPostToManyAddOpComments(t *testing.T) {
 		first := x[0]
 		second := x[1]
 
-		if a.ID != first.PostID {
-			t.Error("foreign key was wrong value", a.ID, first.PostID)
+		if a.ID != first.SiteID {
+			t.Error("foreign key was wrong value", a.ID, first.SiteID)
 		}
-		if a.ID != second.PostID {
-			t.Error("foreign key was wrong value", a.ID, second.PostID)
+		if a.ID != second.SiteID {
+			t.Error("foreign key was wrong value", a.ID, second.SiteID)
 		}
 
-		if first.R.Post != &a {
+		if first.R.Site != &a {
 			t.Error("relationship was not added properly to the foreign slice")
 		}
-		if second.R.Post != &a {
+		if second.R.Site != &a {
 			t.Error("relationship was not added properly to the foreign slice")
 		}
 
-		if a.R.Comments[i*2] != first {
+		if a.R.Posts[i*2] != first {
 			t.Error("relationship struct slice not set to correct value")
 		}
-		if a.R.Comments[i*2+1] != second {
+		if a.R.Posts[i*2+1] != second {
 			t.Error("relationship struct slice not set to correct value")
 		}
 
-		count, err := a.Comments().Count(ctx, tx)
+		count, err := a.Posts().Count(ctx, tx)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -800,86 +878,25 @@ func testPostToManyAddOpComments(t *testing.T) {
 		}
 	}
 }
-func testPostToOneSiteUsingSite(t *testing.T) {
-	ctx := context.Background()
-	tx := MustTx(boil.BeginTx(ctx, nil))
-	defer func() { _ = tx.Rollback() }()
-
-	var local Post
-	var foreign Site
-
-	seed := randomize.NewSeed()
-	if err := randomize.Struct(seed, &local, postDBTypes, false, postColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Post struct: %s", err)
-	}
-	if err := randomize.Struct(seed, &foreign, siteDBTypes, false, siteColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Site struct: %s", err)
-	}
-
-	if err := foreign.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-
-	local.SiteID = foreign.ID
-	if err := local.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-
-	check, err := local.Site().One(ctx, tx)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if check.ID != foreign.ID {
-		t.Errorf("want: %v, got %v", foreign.ID, check.ID)
-	}
-
-	ranAfterSelectHook := false
-	AddSiteHook(boil.AfterSelectHook, func(ctx context.Context, e boil.ContextExecutor, o *Site) error {
-		ranAfterSelectHook = true
-		return nil
-	})
-
-	slice := PostSlice{&local}
-	if err = local.L.LoadSite(ctx, tx, false, (*[]*Post)(&slice), nil); err != nil {
-		t.Fatal(err)
-	}
-	if local.R.Site == nil {
-		t.Error("struct should have been eager loaded")
-	}
-
-	local.R.Site = nil
-	if err = local.L.LoadSite(ctx, tx, true, &local, nil); err != nil {
-		t.Fatal(err)
-	}
-	if local.R.Site == nil {
-		t.Error("struct should have been eager loaded")
-	}
-
-	if !ranAfterSelectHook {
-		t.Error("failed to run AfterSelect hook for relationship")
-	}
-}
-
-func testPostToOneSetOpSiteUsingSite(t *testing.T) {
+func testSiteToManyAddOpSiteRoles(t *testing.T) {
 	var err error
 
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
 
-	var a Post
-	var b, c Site
+	var a Site
+	var b, c, d, e SiteRole
 
 	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, postDBTypes, false, strmangle.SetComplement(postPrimaryKeyColumns, postColumnsWithoutDefault)...); err != nil {
+	if err = randomize.Struct(seed, &a, siteDBTypes, false, strmangle.SetComplement(sitePrimaryKeyColumns, siteColumnsWithoutDefault)...); err != nil {
 		t.Fatal(err)
 	}
-	if err = randomize.Struct(seed, &b, siteDBTypes, false, strmangle.SetComplement(sitePrimaryKeyColumns, siteColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-	if err = randomize.Struct(seed, &c, siteDBTypes, false, strmangle.SetComplement(sitePrimaryKeyColumns, siteColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
+	foreigners := []*SiteRole{&b, &c, &d, &e}
+	for _, x := range foreigners {
+		if err = randomize.Struct(seed, x, siteRoleDBTypes, false, strmangle.SetComplement(siteRolePrimaryKeyColumns, siteRoleColumnsWithoutDefault)...); err != nil {
+			t.Fatal(err)
+		}
 	}
 
 	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
@@ -888,45 +905,63 @@ func testPostToOneSetOpSiteUsingSite(t *testing.T) {
 	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Fatal(err)
 	}
+	if err = c.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
 
-	for i, x := range []*Site{&b, &c} {
-		err = a.SetSite(ctx, tx, i != 0, x)
+	foreignersSplitByInsertion := [][]*SiteRole{
+		{&b, &c},
+		{&d, &e},
+	}
+
+	for i, x := range foreignersSplitByInsertion {
+		err = a.AddSiteRoles(ctx, tx, i != 0, x...)
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		if a.R.Site != x {
-			t.Error("relationship struct not set to correct value")
+		first := x[0]
+		second := x[1]
+
+		if a.ID != first.SiteID {
+			t.Error("foreign key was wrong value", a.ID, first.SiteID)
+		}
+		if a.ID != second.SiteID {
+			t.Error("foreign key was wrong value", a.ID, second.SiteID)
 		}
 
-		if x.R.Posts[0] != &a {
-			t.Error("failed to append to foreign relationship struct")
+		if first.R.Site != &a {
+			t.Error("relationship was not added properly to the foreign slice")
 		}
-		if a.SiteID != x.ID {
-			t.Error("foreign key was wrong value", a.SiteID)
-		}
-
-		zero := reflect.Zero(reflect.TypeOf(a.SiteID))
-		reflect.Indirect(reflect.ValueOf(&a.SiteID)).Set(zero)
-
-		if err = a.Reload(ctx, tx); err != nil {
-			t.Fatal("failed to reload", err)
+		if second.R.Site != &a {
+			t.Error("relationship was not added properly to the foreign slice")
 		}
 
-		if a.SiteID != x.ID {
-			t.Error("foreign key was wrong value", a.SiteID, x.ID)
+		if a.R.SiteRoles[i*2] != first {
+			t.Error("relationship struct slice not set to correct value")
+		}
+		if a.R.SiteRoles[i*2+1] != second {
+			t.Error("relationship struct slice not set to correct value")
+		}
+
+		count, err := a.SiteRoles().Count(ctx, tx)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if want := int64((i + 1) * 2); count != want {
+			t.Error("want", want, "got", count)
 		}
 	}
 }
 
-func testPostsReload(t *testing.T) {
+func testSitesReload(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Post{}
-	if err = randomize.Struct(seed, o, postDBTypes, true, postColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Post struct: %s", err)
+	o := &Site{}
+	if err = randomize.Struct(seed, o, siteDBTypes, true, siteColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Site struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -941,14 +976,14 @@ func testPostsReload(t *testing.T) {
 	}
 }
 
-func testPostsReloadAll(t *testing.T) {
+func testSitesReloadAll(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Post{}
-	if err = randomize.Struct(seed, o, postDBTypes, true, postColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Post struct: %s", err)
+	o := &Site{}
+	if err = randomize.Struct(seed, o, siteDBTypes, true, siteColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Site struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -958,21 +993,21 @@ func testPostsReloadAll(t *testing.T) {
 		t.Error(err)
 	}
 
-	slice := PostSlice{o}
+	slice := SiteSlice{o}
 
 	if err = slice.ReloadAll(ctx, tx); err != nil {
 		t.Error(err)
 	}
 }
 
-func testPostsSelect(t *testing.T) {
+func testSitesSelect(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Post{}
-	if err = randomize.Struct(seed, o, postDBTypes, true, postColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Post struct: %s", err)
+	o := &Site{}
+	if err = randomize.Struct(seed, o, siteDBTypes, true, siteColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Site struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -982,7 +1017,7 @@ func testPostsSelect(t *testing.T) {
 		t.Error(err)
 	}
 
-	slice, err := Posts().All(ctx, tx)
+	slice, err := Sites().All(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -993,25 +1028,25 @@ func testPostsSelect(t *testing.T) {
 }
 
 var (
-	postDBTypes = map[string]string{`ID`: `integer`, `CreatedDate`: `timestamp with time zone`, `UpdatedDate`: `timestamp with time zone`, `SiteID`: `integer`, `Content`: `text`}
+	siteDBTypes = map[string]string{`ID`: `integer`, `Name`: `character varying`, `CreatedDate`: `timestamp with time zone`, `UpdatedDate`: `timestamp with time zone`}
 	_           = bytes.MinRead
 )
 
-func testPostsUpdate(t *testing.T) {
+func testSitesUpdate(t *testing.T) {
 	t.Parallel()
 
-	if 0 == len(postPrimaryKeyColumns) {
+	if 0 == len(sitePrimaryKeyColumns) {
 		t.Skip("Skipping table with no primary key columns")
 	}
-	if len(postAllColumns) == len(postPrimaryKeyColumns) {
+	if len(siteAllColumns) == len(sitePrimaryKeyColumns) {
 		t.Skip("Skipping table with only primary key columns")
 	}
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Post{}
-	if err = randomize.Struct(seed, o, postDBTypes, true, postColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Post struct: %s", err)
+	o := &Site{}
+	if err = randomize.Struct(seed, o, siteDBTypes, true, siteColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Site struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -1021,7 +1056,7 @@ func testPostsUpdate(t *testing.T) {
 		t.Error(err)
 	}
 
-	count, err := Posts().Count(ctx, tx)
+	count, err := Sites().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -1030,8 +1065,8 @@ func testPostsUpdate(t *testing.T) {
 		t.Error("want one record, got:", count)
 	}
 
-	if err = randomize.Struct(seed, o, postDBTypes, true, postPrimaryKeyColumns...); err != nil {
-		t.Errorf("Unable to randomize Post struct: %s", err)
+	if err = randomize.Struct(seed, o, siteDBTypes, true, sitePrimaryKeyColumns...); err != nil {
+		t.Errorf("Unable to randomize Site struct: %s", err)
 	}
 
 	if rowsAff, err := o.Update(ctx, tx, boil.Infer()); err != nil {
@@ -1041,18 +1076,18 @@ func testPostsUpdate(t *testing.T) {
 	}
 }
 
-func testPostsSliceUpdateAll(t *testing.T) {
+func testSitesSliceUpdateAll(t *testing.T) {
 	t.Parallel()
 
-	if len(postAllColumns) == len(postPrimaryKeyColumns) {
+	if len(siteAllColumns) == len(sitePrimaryKeyColumns) {
 		t.Skip("Skipping table with only primary key columns")
 	}
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Post{}
-	if err = randomize.Struct(seed, o, postDBTypes, true, postColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Post struct: %s", err)
+	o := &Site{}
+	if err = randomize.Struct(seed, o, siteDBTypes, true, siteColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Site struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -1062,7 +1097,7 @@ func testPostsSliceUpdateAll(t *testing.T) {
 		t.Error(err)
 	}
 
-	count, err := Posts().Count(ctx, tx)
+	count, err := Sites().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -1071,18 +1106,18 @@ func testPostsSliceUpdateAll(t *testing.T) {
 		t.Error("want one record, got:", count)
 	}
 
-	if err = randomize.Struct(seed, o, postDBTypes, true, postPrimaryKeyColumns...); err != nil {
-		t.Errorf("Unable to randomize Post struct: %s", err)
+	if err = randomize.Struct(seed, o, siteDBTypes, true, sitePrimaryKeyColumns...); err != nil {
+		t.Errorf("Unable to randomize Site struct: %s", err)
 	}
 
 	// Remove Primary keys and unique columns from what we plan to update
 	var fields []string
-	if strmangle.StringSliceMatch(postAllColumns, postPrimaryKeyColumns) {
-		fields = postAllColumns
+	if strmangle.StringSliceMatch(siteAllColumns, sitePrimaryKeyColumns) {
+		fields = siteAllColumns
 	} else {
 		fields = strmangle.SetComplement(
-			postAllColumns,
-			postPrimaryKeyColumns,
+			siteAllColumns,
+			sitePrimaryKeyColumns,
 		)
 	}
 
@@ -1100,7 +1135,7 @@ func testPostsSliceUpdateAll(t *testing.T) {
 		}
 	}
 
-	slice := PostSlice{o}
+	slice := SiteSlice{o}
 	if rowsAff, err := slice.UpdateAll(ctx, tx, updateMap); err != nil {
 		t.Error(err)
 	} else if rowsAff != 1 {
@@ -1108,29 +1143,29 @@ func testPostsSliceUpdateAll(t *testing.T) {
 	}
 }
 
-func testPostsUpsert(t *testing.T) {
+func testSitesUpsert(t *testing.T) {
 	t.Parallel()
 
-	if len(postAllColumns) == len(postPrimaryKeyColumns) {
+	if len(siteAllColumns) == len(sitePrimaryKeyColumns) {
 		t.Skip("Skipping table with only primary key columns")
 	}
 
 	seed := randomize.NewSeed()
 	var err error
 	// Attempt the INSERT side of an UPSERT
-	o := Post{}
-	if err = randomize.Struct(seed, &o, postDBTypes, true); err != nil {
-		t.Errorf("Unable to randomize Post struct: %s", err)
+	o := Site{}
+	if err = randomize.Struct(seed, &o, siteDBTypes, true); err != nil {
+		t.Errorf("Unable to randomize Site struct: %s", err)
 	}
 
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
 	if err = o.Upsert(ctx, tx, false, nil, boil.Infer(), boil.Infer()); err != nil {
-		t.Errorf("Unable to upsert Post: %s", err)
+		t.Errorf("Unable to upsert Site: %s", err)
 	}
 
-	count, err := Posts().Count(ctx, tx)
+	count, err := Sites().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -1139,15 +1174,15 @@ func testPostsUpsert(t *testing.T) {
 	}
 
 	// Attempt the UPDATE side of an UPSERT
-	if err = randomize.Struct(seed, &o, postDBTypes, false, postPrimaryKeyColumns...); err != nil {
-		t.Errorf("Unable to randomize Post struct: %s", err)
+	if err = randomize.Struct(seed, &o, siteDBTypes, false, sitePrimaryKeyColumns...); err != nil {
+		t.Errorf("Unable to randomize Site struct: %s", err)
 	}
 
 	if err = o.Upsert(ctx, tx, true, nil, boil.Infer(), boil.Infer()); err != nil {
-		t.Errorf("Unable to upsert Post: %s", err)
+		t.Errorf("Unable to upsert Site: %s", err)
 	}
 
-	count, err = Posts().Count(ctx, tx)
+	count, err = Sites().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}

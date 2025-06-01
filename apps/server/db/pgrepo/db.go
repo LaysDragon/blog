@@ -6,7 +6,7 @@ import (
 
 	"github.com/LaysDragon/blog/apps/server/db/pgrepo/models"
 	"github.com/LaysDragon/blog/apps/server/domain"
-	"github.com/LaysDragon/blog/apps/server/service"
+	"github.com/LaysDragon/blog/apps/server/usecase"
 	. "github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
@@ -16,7 +16,7 @@ type PostRepo struct {
 
 // type Post struct{}
 
-func NewPostRepo(db *sql.DB) service.PostRepository {
+func NewPostRepo(db *sql.DB) usecase.PostRepository {
 	return &PostRepo{db}
 }
 

@@ -17,6 +17,8 @@ func TestParent(t *testing.T) {
 	t.Run("Attachtments", testAttachtments)
 	t.Run("Comments", testComments)
 	t.Run("Posts", testPosts)
+	t.Run("Sites", testSites)
+	t.Run("SiteRoles", testSiteRoles)
 }
 
 func TestDelete(t *testing.T) {
@@ -25,6 +27,8 @@ func TestDelete(t *testing.T) {
 	t.Run("Attachtments", testAttachtmentsDelete)
 	t.Run("Comments", testCommentsDelete)
 	t.Run("Posts", testPostsDelete)
+	t.Run("Sites", testSitesDelete)
+	t.Run("SiteRoles", testSiteRolesDelete)
 }
 
 func TestQueryDeleteAll(t *testing.T) {
@@ -33,6 +37,8 @@ func TestQueryDeleteAll(t *testing.T) {
 	t.Run("Attachtments", testAttachtmentsQueryDeleteAll)
 	t.Run("Comments", testCommentsQueryDeleteAll)
 	t.Run("Posts", testPostsQueryDeleteAll)
+	t.Run("Sites", testSitesQueryDeleteAll)
+	t.Run("SiteRoles", testSiteRolesQueryDeleteAll)
 }
 
 func TestSliceDeleteAll(t *testing.T) {
@@ -41,6 +47,8 @@ func TestSliceDeleteAll(t *testing.T) {
 	t.Run("Attachtments", testAttachtmentsSliceDeleteAll)
 	t.Run("Comments", testCommentsSliceDeleteAll)
 	t.Run("Posts", testPostsSliceDeleteAll)
+	t.Run("Sites", testSitesSliceDeleteAll)
+	t.Run("SiteRoles", testSiteRolesSliceDeleteAll)
 }
 
 func TestExists(t *testing.T) {
@@ -49,6 +57,8 @@ func TestExists(t *testing.T) {
 	t.Run("Attachtments", testAttachtmentsExists)
 	t.Run("Comments", testCommentsExists)
 	t.Run("Posts", testPostsExists)
+	t.Run("Sites", testSitesExists)
+	t.Run("SiteRoles", testSiteRolesExists)
 }
 
 func TestFind(t *testing.T) {
@@ -57,6 +67,8 @@ func TestFind(t *testing.T) {
 	t.Run("Attachtments", testAttachtmentsFind)
 	t.Run("Comments", testCommentsFind)
 	t.Run("Posts", testPostsFind)
+	t.Run("Sites", testSitesFind)
+	t.Run("SiteRoles", testSiteRolesFind)
 }
 
 func TestBind(t *testing.T) {
@@ -65,6 +77,8 @@ func TestBind(t *testing.T) {
 	t.Run("Attachtments", testAttachtmentsBind)
 	t.Run("Comments", testCommentsBind)
 	t.Run("Posts", testPostsBind)
+	t.Run("Sites", testSitesBind)
+	t.Run("SiteRoles", testSiteRolesBind)
 }
 
 func TestOne(t *testing.T) {
@@ -73,6 +87,8 @@ func TestOne(t *testing.T) {
 	t.Run("Attachtments", testAttachtmentsOne)
 	t.Run("Comments", testCommentsOne)
 	t.Run("Posts", testPostsOne)
+	t.Run("Sites", testSitesOne)
+	t.Run("SiteRoles", testSiteRolesOne)
 }
 
 func TestAll(t *testing.T) {
@@ -81,6 +97,8 @@ func TestAll(t *testing.T) {
 	t.Run("Attachtments", testAttachtmentsAll)
 	t.Run("Comments", testCommentsAll)
 	t.Run("Posts", testPostsAll)
+	t.Run("Sites", testSitesAll)
+	t.Run("SiteRoles", testSiteRolesAll)
 }
 
 func TestCount(t *testing.T) {
@@ -89,6 +107,8 @@ func TestCount(t *testing.T) {
 	t.Run("Attachtments", testAttachtmentsCount)
 	t.Run("Comments", testCommentsCount)
 	t.Run("Posts", testPostsCount)
+	t.Run("Sites", testSitesCount)
+	t.Run("SiteRoles", testSiteRolesCount)
 }
 
 func TestHooks(t *testing.T) {
@@ -97,6 +117,8 @@ func TestHooks(t *testing.T) {
 	t.Run("Attachtments", testAttachtmentsHooks)
 	t.Run("Comments", testCommentsHooks)
 	t.Run("Posts", testPostsHooks)
+	t.Run("Sites", testSitesHooks)
+	t.Run("SiteRoles", testSiteRolesHooks)
 }
 
 func TestInsert(t *testing.T) {
@@ -110,6 +132,10 @@ func TestInsert(t *testing.T) {
 	t.Run("Comments", testCommentsInsertWhitelist)
 	t.Run("Posts", testPostsInsert)
 	t.Run("Posts", testPostsInsertWhitelist)
+	t.Run("Sites", testSitesInsert)
+	t.Run("Sites", testSitesInsertWhitelist)
+	t.Run("SiteRoles", testSiteRolesInsert)
+	t.Run("SiteRoles", testSiteRolesInsertWhitelist)
 }
 
 func TestReload(t *testing.T) {
@@ -118,6 +144,8 @@ func TestReload(t *testing.T) {
 	t.Run("Attachtments", testAttachtmentsReload)
 	t.Run("Comments", testCommentsReload)
 	t.Run("Posts", testPostsReload)
+	t.Run("Sites", testSitesReload)
+	t.Run("SiteRoles", testSiteRolesReload)
 }
 
 func TestReloadAll(t *testing.T) {
@@ -126,6 +154,8 @@ func TestReloadAll(t *testing.T) {
 	t.Run("Attachtments", testAttachtmentsReloadAll)
 	t.Run("Comments", testCommentsReloadAll)
 	t.Run("Posts", testPostsReloadAll)
+	t.Run("Sites", testSitesReloadAll)
+	t.Run("SiteRoles", testSiteRolesReloadAll)
 }
 
 func TestSelect(t *testing.T) {
@@ -134,6 +164,8 @@ func TestSelect(t *testing.T) {
 	t.Run("Attachtments", testAttachtmentsSelect)
 	t.Run("Comments", testCommentsSelect)
 	t.Run("Posts", testPostsSelect)
+	t.Run("Sites", testSitesSelect)
+	t.Run("SiteRoles", testSiteRolesSelect)
 }
 
 func TestUpdate(t *testing.T) {
@@ -142,6 +174,8 @@ func TestUpdate(t *testing.T) {
 	t.Run("Attachtments", testAttachtmentsUpdate)
 	t.Run("Comments", testCommentsUpdate)
 	t.Run("Posts", testPostsUpdate)
+	t.Run("Sites", testSitesUpdate)
+	t.Run("SiteRoles", testSiteRolesUpdate)
 }
 
 func TestSliceUpdateAll(t *testing.T) {
@@ -150,4 +184,6 @@ func TestSliceUpdateAll(t *testing.T) {
 	t.Run("Attachtments", testAttachtmentsSliceUpdateAll)
 	t.Run("Comments", testCommentsSliceUpdateAll)
 	t.Run("Posts", testPostsSliceUpdateAll)
+	t.Run("Sites", testSitesSliceUpdateAll)
+	t.Run("SiteRoles", testSiteRolesSliceUpdateAll)
 }

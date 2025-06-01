@@ -27,7 +27,7 @@ type Attachtment struct {
 	ID          int       `boil:"id" json:"id" toml:"id" yaml:"id"`
 	CreatedDate null.Time `boil:"created_date" json:"created_date,omitempty" toml:"created_date" yaml:"created_date,omitempty"`
 	UpdatedDate null.Time `boil:"updated_date" json:"updated_date,omitempty" toml:"updated_date" yaml:"updated_date,omitempty"`
-	OwnerID     int       `boil:"owner_id" json:"owner_id" toml:"owner_id" yaml:"owner_id"`
+	SiteID      int       `boil:"site_id" json:"site_id" toml:"site_id" yaml:"site_id"`
 	RelatedID   int       `boil:"related_id" json:"related_id" toml:"related_id" yaml:"related_id"`
 	URL         string    `boil:"url" json:"url" toml:"url" yaml:"url"`
 
@@ -39,14 +39,14 @@ var AttachtmentColumns = struct {
 	ID          string
 	CreatedDate string
 	UpdatedDate string
-	OwnerID     string
+	SiteID      string
 	RelatedID   string
 	URL         string
 }{
 	ID:          "id",
 	CreatedDate: "created_date",
 	UpdatedDate: "updated_date",
-	OwnerID:     "owner_id",
+	SiteID:      "site_id",
 	RelatedID:   "related_id",
 	URL:         "url",
 }
@@ -55,14 +55,14 @@ var AttachtmentTableColumns = struct {
 	ID          string
 	CreatedDate string
 	UpdatedDate string
-	OwnerID     string
+	SiteID      string
 	RelatedID   string
 	URL         string
 }{
 	ID:          "attachtment.id",
 	CreatedDate: "attachtment.created_date",
 	UpdatedDate: "attachtment.updated_date",
-	OwnerID:     "attachtment.owner_id",
+	SiteID:      "attachtment.site_id",
 	RelatedID:   "attachtment.related_id",
 	URL:         "attachtment.url",
 }
@@ -97,52 +97,36 @@ var AttachtmentWhere = struct {
 	ID          whereHelperint
 	CreatedDate whereHelpernull_Time
 	UpdatedDate whereHelpernull_Time
-	OwnerID     whereHelperint
+	SiteID      whereHelperint
 	RelatedID   whereHelperint
 	URL         whereHelperstring
 }{
 	ID:          whereHelperint{field: "\"attachtment\".\"id\""},
 	CreatedDate: whereHelpernull_Time{field: "\"attachtment\".\"created_date\""},
 	UpdatedDate: whereHelpernull_Time{field: "\"attachtment\".\"updated_date\""},
-	OwnerID:     whereHelperint{field: "\"attachtment\".\"owner_id\""},
+	SiteID:      whereHelperint{field: "\"attachtment\".\"site_id\""},
 	RelatedID:   whereHelperint{field: "\"attachtment\".\"related_id\""},
 	URL:         whereHelperstring{field: "\"attachtment\".\"url\""},
 }
 
 // AttachtmentRels is where relationship names are stored.
 var AttachtmentRels = struct {
-	Owner   string
 	Related string
+	Site    string
 }{
-	Owner:   "Owner",
 	Related: "Related",
+	Site:    "Site",
 }
 
 // attachtmentR is where relationships are stored.
 type attachtmentR struct {
-	Owner   *Account `boil:"Owner" json:"Owner" toml:"Owner" yaml:"Owner"`
-	Related *Post    `boil:"Related" json:"Related" toml:"Related" yaml:"Related"`
+	Related *Post `boil:"Related" json:"Related" toml:"Related" yaml:"Related"`
+	Site    *Site `boil:"Site" json:"Site" toml:"Site" yaml:"Site"`
 }
 
 // NewStruct creates a new relationship struct
 func (*attachtmentR) NewStruct() *attachtmentR {
 	return &attachtmentR{}
-}
-
-func (o *Attachtment) GetOwner() *Account {
-	if o == nil {
-		return nil
-	}
-
-	return o.R.GetOwner()
-}
-
-func (r *attachtmentR) GetOwner() *Account {
-	if r == nil {
-		return nil
-	}
-
-	return r.Owner
 }
 
 func (o *Attachtment) GetRelated() *Post {
@@ -161,12 +145,28 @@ func (r *attachtmentR) GetRelated() *Post {
 	return r.Related
 }
 
+func (o *Attachtment) GetSite() *Site {
+	if o == nil {
+		return nil
+	}
+
+	return o.R.GetSite()
+}
+
+func (r *attachtmentR) GetSite() *Site {
+	if r == nil {
+		return nil
+	}
+
+	return r.Site
+}
+
 // attachtmentL is where Load methods for each relationship are stored.
 type attachtmentL struct{}
 
 var (
-	attachtmentAllColumns            = []string{"id", "created_date", "updated_date", "owner_id", "related_id", "url"}
-	attachtmentColumnsWithoutDefault = []string{"owner_id", "related_id", "url"}
+	attachtmentAllColumns            = []string{"id", "created_date", "updated_date", "site_id", "related_id", "url"}
+	attachtmentColumnsWithoutDefault = []string{"site_id", "related_id", "url"}
 	attachtmentColumnsWithDefault    = []string{"id", "created_date", "updated_date"}
 	attachtmentPrimaryKeyColumns     = []string{"id"}
 	attachtmentGeneratedColumns      = []string{}
@@ -477,17 +477,6 @@ func (q attachtmentQuery) Exists(ctx context.Context, exec boil.ContextExecutor)
 	return count > 0, nil
 }
 
-// Owner pointed to by the foreign key.
-func (o *Attachtment) Owner(mods ...qm.QueryMod) accountQuery {
-	queryMods := []qm.QueryMod{
-		qm.Where("\"id\" = ?", o.OwnerID),
-	}
-
-	queryMods = append(queryMods, mods...)
-
-	return Accounts(queryMods...)
-}
-
 // Related pointed to by the foreign key.
 func (o *Attachtment) Related(mods ...qm.QueryMod) postQuery {
 	queryMods := []qm.QueryMod{
@@ -499,124 +488,15 @@ func (o *Attachtment) Related(mods ...qm.QueryMod) postQuery {
 	return Posts(queryMods...)
 }
 
-// LoadOwner allows an eager lookup of values, cached into the
-// loaded structs of the objects. This is for an N-1 relationship.
-func (attachtmentL) LoadOwner(ctx context.Context, e boil.ContextExecutor, singular bool, maybeAttachtment interface{}, mods queries.Applicator) error {
-	var slice []*Attachtment
-	var object *Attachtment
-
-	if singular {
-		var ok bool
-		object, ok = maybeAttachtment.(*Attachtment)
-		if !ok {
-			object = new(Attachtment)
-			ok = queries.SetFromEmbeddedStruct(&object, &maybeAttachtment)
-			if !ok {
-				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeAttachtment))
-			}
-		}
-	} else {
-		s, ok := maybeAttachtment.(*[]*Attachtment)
-		if ok {
-			slice = *s
-		} else {
-			ok = queries.SetFromEmbeddedStruct(&slice, maybeAttachtment)
-			if !ok {
-				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeAttachtment))
-			}
-		}
+// Site pointed to by the foreign key.
+func (o *Attachtment) Site(mods ...qm.QueryMod) siteQuery {
+	queryMods := []qm.QueryMod{
+		qm.Where("\"id\" = ?", o.SiteID),
 	}
 
-	args := make(map[interface{}]struct{})
-	if singular {
-		if object.R == nil {
-			object.R = &attachtmentR{}
-		}
-		args[object.OwnerID] = struct{}{}
+	queryMods = append(queryMods, mods...)
 
-	} else {
-		for _, obj := range slice {
-			if obj.R == nil {
-				obj.R = &attachtmentR{}
-			}
-
-			args[obj.OwnerID] = struct{}{}
-
-		}
-	}
-
-	if len(args) == 0 {
-		return nil
-	}
-
-	argsSlice := make([]interface{}, len(args))
-	i := 0
-	for arg := range args {
-		argsSlice[i] = arg
-		i++
-	}
-
-	query := NewQuery(
-		qm.From(`account`),
-		qm.WhereIn(`account.id in ?`, argsSlice...),
-	)
-	if mods != nil {
-		mods.Apply(query)
-	}
-
-	results, err := query.QueryContext(ctx, e)
-	if err != nil {
-		return errors.Wrap(err, "failed to eager load Account")
-	}
-
-	var resultSlice []*Account
-	if err = queries.Bind(results, &resultSlice); err != nil {
-		return errors.Wrap(err, "failed to bind eager loaded slice Account")
-	}
-
-	if err = results.Close(); err != nil {
-		return errors.Wrap(err, "failed to close results of eager load for account")
-	}
-	if err = results.Err(); err != nil {
-		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for account")
-	}
-
-	if len(accountAfterSelectHooks) != 0 {
-		for _, obj := range resultSlice {
-			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
-				return err
-			}
-		}
-	}
-
-	if len(resultSlice) == 0 {
-		return nil
-	}
-
-	if singular {
-		foreign := resultSlice[0]
-		object.R.Owner = foreign
-		if foreign.R == nil {
-			foreign.R = &accountR{}
-		}
-		foreign.R.OwnerAttachtments = append(foreign.R.OwnerAttachtments, object)
-		return nil
-	}
-
-	for _, local := range slice {
-		for _, foreign := range resultSlice {
-			if local.OwnerID == foreign.ID {
-				local.R.Owner = foreign
-				if foreign.R == nil {
-					foreign.R = &accountR{}
-				}
-				foreign.R.OwnerAttachtments = append(foreign.R.OwnerAttachtments, local)
-				break
-			}
-		}
-	}
-
-	return nil
+	return Sites(queryMods...)
 }
 
 // LoadRelated allows an eager lookup of values, cached into the
@@ -739,48 +619,121 @@ func (attachtmentL) LoadRelated(ctx context.Context, e boil.ContextExecutor, sin
 	return nil
 }
 
-// SetOwner of the attachtment to the related item.
-// Sets o.R.Owner to related.
-// Adds o to related.R.OwnerAttachtments.
-func (o *Attachtment) SetOwner(ctx context.Context, exec boil.ContextExecutor, insert bool, related *Account) error {
-	var err error
-	if insert {
-		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
-			return errors.Wrap(err, "failed to insert into foreign table")
+// LoadSite allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for an N-1 relationship.
+func (attachtmentL) LoadSite(ctx context.Context, e boil.ContextExecutor, singular bool, maybeAttachtment interface{}, mods queries.Applicator) error {
+	var slice []*Attachtment
+	var object *Attachtment
+
+	if singular {
+		var ok bool
+		object, ok = maybeAttachtment.(*Attachtment)
+		if !ok {
+			object = new(Attachtment)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeAttachtment)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeAttachtment))
+			}
+		}
+	} else {
+		s, ok := maybeAttachtment.(*[]*Attachtment)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeAttachtment)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeAttachtment))
+			}
 		}
 	}
 
-	updateQuery := fmt.Sprintf(
-		"UPDATE \"attachtment\" SET %s WHERE %s",
-		strmangle.SetParamNames("\"", "\"", 1, []string{"owner_id"}),
-		strmangle.WhereClause("\"", "\"", 2, attachtmentPrimaryKeyColumns),
+	args := make(map[interface{}]struct{})
+	if singular {
+		if object.R == nil {
+			object.R = &attachtmentR{}
+		}
+		args[object.SiteID] = struct{}{}
+
+	} else {
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &attachtmentR{}
+			}
+
+			args[obj.SiteID] = struct{}{}
+
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	argsSlice := make([]interface{}, len(args))
+	i := 0
+	for arg := range args {
+		argsSlice[i] = arg
+		i++
+	}
+
+	query := NewQuery(
+		qm.From(`site`),
+		qm.WhereIn(`site.id in ?`, argsSlice...),
 	)
-	values := []interface{}{related.ID, o.ID}
-
-	if boil.IsDebug(ctx) {
-		writer := boil.DebugWriterFrom(ctx)
-		fmt.Fprintln(writer, updateQuery)
-		fmt.Fprintln(writer, values)
-	}
-	if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
-		return errors.Wrap(err, "failed to update local table")
+	if mods != nil {
+		mods.Apply(query)
 	}
 
-	o.OwnerID = related.ID
-	if o.R == nil {
-		o.R = &attachtmentR{
-			Owner: related,
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load Site")
+	}
+
+	var resultSlice []*Site
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice Site")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results of eager load for site")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for site")
+	}
+
+	if len(siteAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
 		}
-	} else {
-		o.R.Owner = related
 	}
 
-	if related.R == nil {
-		related.R = &accountR{
-			OwnerAttachtments: AttachtmentSlice{o},
+	if len(resultSlice) == 0 {
+		return nil
+	}
+
+	if singular {
+		foreign := resultSlice[0]
+		object.R.Site = foreign
+		if foreign.R == nil {
+			foreign.R = &siteR{}
 		}
-	} else {
-		related.R.OwnerAttachtments = append(related.R.OwnerAttachtments, o)
+		foreign.R.Attachtments = append(foreign.R.Attachtments, object)
+		return nil
+	}
+
+	for _, local := range slice {
+		for _, foreign := range resultSlice {
+			if local.SiteID == foreign.ID {
+				local.R.Site = foreign
+				if foreign.R == nil {
+					foreign.R = &siteR{}
+				}
+				foreign.R.Attachtments = append(foreign.R.Attachtments, local)
+				break
+			}
+		}
 	}
 
 	return nil
@@ -828,6 +781,53 @@ func (o *Attachtment) SetRelated(ctx context.Context, exec boil.ContextExecutor,
 		}
 	} else {
 		related.R.RelatedAttachtments = append(related.R.RelatedAttachtments, o)
+	}
+
+	return nil
+}
+
+// SetSite of the attachtment to the related item.
+// Sets o.R.Site to related.
+// Adds o to related.R.Attachtments.
+func (o *Attachtment) SetSite(ctx context.Context, exec boil.ContextExecutor, insert bool, related *Site) error {
+	var err error
+	if insert {
+		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
+			return errors.Wrap(err, "failed to insert into foreign table")
+		}
+	}
+
+	updateQuery := fmt.Sprintf(
+		"UPDATE \"attachtment\" SET %s WHERE %s",
+		strmangle.SetParamNames("\"", "\"", 1, []string{"site_id"}),
+		strmangle.WhereClause("\"", "\"", 2, attachtmentPrimaryKeyColumns),
+	)
+	values := []interface{}{related.ID, o.ID}
+
+	if boil.IsDebug(ctx) {
+		writer := boil.DebugWriterFrom(ctx)
+		fmt.Fprintln(writer, updateQuery)
+		fmt.Fprintln(writer, values)
+	}
+	if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+		return errors.Wrap(err, "failed to update local table")
+	}
+
+	o.SiteID = related.ID
+	if o.R == nil {
+		o.R = &attachtmentR{
+			Site: related,
+		}
+	} else {
+		o.R.Site = related
+	}
+
+	if related.R == nil {
+		related.R = &siteR{
+			Attachtments: AttachtmentSlice{o},
+		}
+	} else {
+		related.R.Attachtments = append(related.R.Attachtments, o)
 	}
 
 	return nil

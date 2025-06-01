@@ -93,20 +93,17 @@ var AccountWhere = struct {
 
 // AccountRels is where relationship names are stored.
 var AccountRels = struct {
-	UserAccessLogs    string
-	OwnerAttachtments string
-	OwnerPosts        string
+	UserAccessLogs string
+	SiteRoles      string
 }{
-	UserAccessLogs:    "UserAccessLogs",
-	OwnerAttachtments: "OwnerAttachtments",
-	OwnerPosts:        "OwnerPosts",
+	UserAccessLogs: "UserAccessLogs",
+	SiteRoles:      "SiteRoles",
 }
 
 // accountR is where relationships are stored.
 type accountR struct {
-	UserAccessLogs    AccessLogSlice   `boil:"UserAccessLogs" json:"UserAccessLogs" toml:"UserAccessLogs" yaml:"UserAccessLogs"`
-	OwnerAttachtments AttachtmentSlice `boil:"OwnerAttachtments" json:"OwnerAttachtments" toml:"OwnerAttachtments" yaml:"OwnerAttachtments"`
-	OwnerPosts        PostSlice        `boil:"OwnerPosts" json:"OwnerPosts" toml:"OwnerPosts" yaml:"OwnerPosts"`
+	UserAccessLogs AccessLogSlice `boil:"UserAccessLogs" json:"UserAccessLogs" toml:"UserAccessLogs" yaml:"UserAccessLogs"`
+	SiteRoles      SiteRoleSlice  `boil:"SiteRoles" json:"SiteRoles" toml:"SiteRoles" yaml:"SiteRoles"`
 }
 
 // NewStruct creates a new relationship struct
@@ -130,36 +127,20 @@ func (r *accountR) GetUserAccessLogs() AccessLogSlice {
 	return r.UserAccessLogs
 }
 
-func (o *Account) GetOwnerAttachtments() AttachtmentSlice {
+func (o *Account) GetSiteRoles() SiteRoleSlice {
 	if o == nil {
 		return nil
 	}
 
-	return o.R.GetOwnerAttachtments()
+	return o.R.GetSiteRoles()
 }
 
-func (r *accountR) GetOwnerAttachtments() AttachtmentSlice {
+func (r *accountR) GetSiteRoles() SiteRoleSlice {
 	if r == nil {
 		return nil
 	}
 
-	return r.OwnerAttachtments
-}
-
-func (o *Account) GetOwnerPosts() PostSlice {
-	if o == nil {
-		return nil
-	}
-
-	return o.R.GetOwnerPosts()
-}
-
-func (r *accountR) GetOwnerPosts() PostSlice {
-	if r == nil {
-		return nil
-	}
-
-	return r.OwnerPosts
+	return r.SiteRoles
 }
 
 // accountL is where Load methods for each relationship are stored.
@@ -492,32 +473,18 @@ func (o *Account) UserAccessLogs(mods ...qm.QueryMod) accessLogQuery {
 	return AccessLogs(queryMods...)
 }
 
-// OwnerAttachtments retrieves all the attachtment's Attachtments with an executor via owner_id column.
-func (o *Account) OwnerAttachtments(mods ...qm.QueryMod) attachtmentQuery {
+// SiteRoles retrieves all the site_role's SiteRoles with an executor.
+func (o *Account) SiteRoles(mods ...qm.QueryMod) siteRoleQuery {
 	var queryMods []qm.QueryMod
 	if len(mods) != 0 {
 		queryMods = append(queryMods, mods...)
 	}
 
 	queryMods = append(queryMods,
-		qm.Where("\"attachtment\".\"owner_id\"=?", o.ID),
+		qm.Where("\"site_role\".\"account_id\"=?", o.ID),
 	)
 
-	return Attachtments(queryMods...)
-}
-
-// OwnerPosts retrieves all the post's Posts with an executor via owner_id column.
-func (o *Account) OwnerPosts(mods ...qm.QueryMod) postQuery {
-	var queryMods []qm.QueryMod
-	if len(mods) != 0 {
-		queryMods = append(queryMods, mods...)
-	}
-
-	queryMods = append(queryMods,
-		qm.Where("\"post\".\"owner_id\"=?", o.ID),
-	)
-
-	return Posts(queryMods...)
+	return SiteRoles(queryMods...)
 }
 
 // LoadUserAccessLogs allows an eager lookup of values, cached into the
@@ -633,9 +600,9 @@ func (accountL) LoadUserAccessLogs(ctx context.Context, e boil.ContextExecutor, 
 	return nil
 }
 
-// LoadOwnerAttachtments allows an eager lookup of values, cached into the
+// LoadSiteRoles allows an eager lookup of values, cached into the
 // loaded structs of the objects. This is for a 1-M or N-M relationship.
-func (accountL) LoadOwnerAttachtments(ctx context.Context, e boil.ContextExecutor, singular bool, maybeAccount interface{}, mods queries.Applicator) error {
+func (accountL) LoadSiteRoles(ctx context.Context, e boil.ContextExecutor, singular bool, maybeAccount interface{}, mods queries.Applicator) error {
 	var slice []*Account
 	var object *Account
 
@@ -688,8 +655,8 @@ func (accountL) LoadOwnerAttachtments(ctx context.Context, e boil.ContextExecuto
 	}
 
 	query := NewQuery(
-		qm.From(`attachtment`),
-		qm.WhereIn(`attachtment.owner_id in ?`, argsSlice...),
+		qm.From(`site_role`),
+		qm.WhereIn(`site_role.account_id in ?`, argsSlice...),
 	)
 	if mods != nil {
 		mods.Apply(query)
@@ -697,22 +664,22 @@ func (accountL) LoadOwnerAttachtments(ctx context.Context, e boil.ContextExecuto
 
 	results, err := query.QueryContext(ctx, e)
 	if err != nil {
-		return errors.Wrap(err, "failed to eager load attachtment")
+		return errors.Wrap(err, "failed to eager load site_role")
 	}
 
-	var resultSlice []*Attachtment
+	var resultSlice []*SiteRole
 	if err = queries.Bind(results, &resultSlice); err != nil {
-		return errors.Wrap(err, "failed to bind eager loaded slice attachtment")
+		return errors.Wrap(err, "failed to bind eager loaded slice site_role")
 	}
 
 	if err = results.Close(); err != nil {
-		return errors.Wrap(err, "failed to close results in eager load on attachtment")
+		return errors.Wrap(err, "failed to close results in eager load on site_role")
 	}
 	if err = results.Err(); err != nil {
-		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for attachtment")
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for site_role")
 	}
 
-	if len(attachtmentAfterSelectHooks) != 0 {
+	if len(siteRoleAfterSelectHooks) != 0 {
 		for _, obj := range resultSlice {
 			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
 				return err
@@ -720,137 +687,24 @@ func (accountL) LoadOwnerAttachtments(ctx context.Context, e boil.ContextExecuto
 		}
 	}
 	if singular {
-		object.R.OwnerAttachtments = resultSlice
+		object.R.SiteRoles = resultSlice
 		for _, foreign := range resultSlice {
 			if foreign.R == nil {
-				foreign.R = &attachtmentR{}
+				foreign.R = &siteRoleR{}
 			}
-			foreign.R.Owner = object
+			foreign.R.Account = object
 		}
 		return nil
 	}
 
 	for _, foreign := range resultSlice {
 		for _, local := range slice {
-			if local.ID == foreign.OwnerID {
-				local.R.OwnerAttachtments = append(local.R.OwnerAttachtments, foreign)
+			if local.ID == foreign.AccountID {
+				local.R.SiteRoles = append(local.R.SiteRoles, foreign)
 				if foreign.R == nil {
-					foreign.R = &attachtmentR{}
+					foreign.R = &siteRoleR{}
 				}
-				foreign.R.Owner = local
-				break
-			}
-		}
-	}
-
-	return nil
-}
-
-// LoadOwnerPosts allows an eager lookup of values, cached into the
-// loaded structs of the objects. This is for a 1-M or N-M relationship.
-func (accountL) LoadOwnerPosts(ctx context.Context, e boil.ContextExecutor, singular bool, maybeAccount interface{}, mods queries.Applicator) error {
-	var slice []*Account
-	var object *Account
-
-	if singular {
-		var ok bool
-		object, ok = maybeAccount.(*Account)
-		if !ok {
-			object = new(Account)
-			ok = queries.SetFromEmbeddedStruct(&object, &maybeAccount)
-			if !ok {
-				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeAccount))
-			}
-		}
-	} else {
-		s, ok := maybeAccount.(*[]*Account)
-		if ok {
-			slice = *s
-		} else {
-			ok = queries.SetFromEmbeddedStruct(&slice, maybeAccount)
-			if !ok {
-				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeAccount))
-			}
-		}
-	}
-
-	args := make(map[interface{}]struct{})
-	if singular {
-		if object.R == nil {
-			object.R = &accountR{}
-		}
-		args[object.ID] = struct{}{}
-	} else {
-		for _, obj := range slice {
-			if obj.R == nil {
-				obj.R = &accountR{}
-			}
-			args[obj.ID] = struct{}{}
-		}
-	}
-
-	if len(args) == 0 {
-		return nil
-	}
-
-	argsSlice := make([]interface{}, len(args))
-	i := 0
-	for arg := range args {
-		argsSlice[i] = arg
-		i++
-	}
-
-	query := NewQuery(
-		qm.From(`post`),
-		qm.WhereIn(`post.owner_id in ?`, argsSlice...),
-	)
-	if mods != nil {
-		mods.Apply(query)
-	}
-
-	results, err := query.QueryContext(ctx, e)
-	if err != nil {
-		return errors.Wrap(err, "failed to eager load post")
-	}
-
-	var resultSlice []*Post
-	if err = queries.Bind(results, &resultSlice); err != nil {
-		return errors.Wrap(err, "failed to bind eager loaded slice post")
-	}
-
-	if err = results.Close(); err != nil {
-		return errors.Wrap(err, "failed to close results in eager load on post")
-	}
-	if err = results.Err(); err != nil {
-		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for post")
-	}
-
-	if len(postAfterSelectHooks) != 0 {
-		for _, obj := range resultSlice {
-			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
-				return err
-			}
-		}
-	}
-	if singular {
-		object.R.OwnerPosts = resultSlice
-		for _, foreign := range resultSlice {
-			if foreign.R == nil {
-				foreign.R = &postR{}
-			}
-			foreign.R.Owner = object
-		}
-		return nil
-	}
-
-	for _, foreign := range resultSlice {
-		for _, local := range slice {
-			if local.ID == foreign.OwnerID {
-				local.R.OwnerPosts = append(local.R.OwnerPosts, foreign)
-				if foreign.R == nil {
-					foreign.R = &postR{}
-				}
-				foreign.R.Owner = local
+				foreign.R.Account = local
 				break
 			}
 		}
@@ -986,25 +840,25 @@ func (o *Account) RemoveUserAccessLogs(ctx context.Context, exec boil.ContextExe
 	return nil
 }
 
-// AddOwnerAttachtments adds the given related objects to the existing relationships
+// AddSiteRoles adds the given related objects to the existing relationships
 // of the account, optionally inserting them as new records.
-// Appends related to o.R.OwnerAttachtments.
-// Sets related.R.Owner appropriately.
-func (o *Account) AddOwnerAttachtments(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Attachtment) error {
+// Appends related to o.R.SiteRoles.
+// Sets related.R.Account appropriately.
+func (o *Account) AddSiteRoles(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*SiteRole) error {
 	var err error
 	for _, rel := range related {
 		if insert {
-			rel.OwnerID = o.ID
+			rel.AccountID = o.ID
 			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
 				return errors.Wrap(err, "failed to insert into foreign table")
 			}
 		} else {
 			updateQuery := fmt.Sprintf(
-				"UPDATE \"attachtment\" SET %s WHERE %s",
-				strmangle.SetParamNames("\"", "\"", 1, []string{"owner_id"}),
-				strmangle.WhereClause("\"", "\"", 2, attachtmentPrimaryKeyColumns),
+				"UPDATE \"site_role\" SET %s WHERE %s",
+				strmangle.SetParamNames("\"", "\"", 1, []string{"account_id"}),
+				strmangle.WhereClause("\"", "\"", 2, siteRolePrimaryKeyColumns),
 			)
-			values := []interface{}{o.ID, rel.ID}
+			values := []interface{}{o.ID, rel.AccountID, rel.SiteID}
 
 			if boil.IsDebug(ctx) {
 				writer := boil.DebugWriterFrom(ctx)
@@ -1015,78 +869,25 @@ func (o *Account) AddOwnerAttachtments(ctx context.Context, exec boil.ContextExe
 				return errors.Wrap(err, "failed to update foreign table")
 			}
 
-			rel.OwnerID = o.ID
+			rel.AccountID = o.ID
 		}
 	}
 
 	if o.R == nil {
 		o.R = &accountR{
-			OwnerAttachtments: related,
+			SiteRoles: related,
 		}
 	} else {
-		o.R.OwnerAttachtments = append(o.R.OwnerAttachtments, related...)
+		o.R.SiteRoles = append(o.R.SiteRoles, related...)
 	}
 
 	for _, rel := range related {
 		if rel.R == nil {
-			rel.R = &attachtmentR{
-				Owner: o,
+			rel.R = &siteRoleR{
+				Account: o,
 			}
 		} else {
-			rel.R.Owner = o
-		}
-	}
-	return nil
-}
-
-// AddOwnerPosts adds the given related objects to the existing relationships
-// of the account, optionally inserting them as new records.
-// Appends related to o.R.OwnerPosts.
-// Sets related.R.Owner appropriately.
-func (o *Account) AddOwnerPosts(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Post) error {
-	var err error
-	for _, rel := range related {
-		if insert {
-			rel.OwnerID = o.ID
-			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
-				return errors.Wrap(err, "failed to insert into foreign table")
-			}
-		} else {
-			updateQuery := fmt.Sprintf(
-				"UPDATE \"post\" SET %s WHERE %s",
-				strmangle.SetParamNames("\"", "\"", 1, []string{"owner_id"}),
-				strmangle.WhereClause("\"", "\"", 2, postPrimaryKeyColumns),
-			)
-			values := []interface{}{o.ID, rel.ID}
-
-			if boil.IsDebug(ctx) {
-				writer := boil.DebugWriterFrom(ctx)
-				fmt.Fprintln(writer, updateQuery)
-				fmt.Fprintln(writer, values)
-			}
-			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
-				return errors.Wrap(err, "failed to update foreign table")
-			}
-
-			rel.OwnerID = o.ID
-		}
-	}
-
-	if o.R == nil {
-		o.R = &accountR{
-			OwnerPosts: related,
-		}
-	} else {
-		o.R.OwnerPosts = append(o.R.OwnerPosts, related...)
-	}
-
-	for _, rel := range related {
-		if rel.R == nil {
-			rel.R = &postR{
-				Owner: o,
-			}
-		} else {
-			rel.R.Owner = o
+			rel.R.Account = o
 		}
 	}
 	return nil

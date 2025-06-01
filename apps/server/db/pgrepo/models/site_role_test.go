@@ -21,24 +21,24 @@ var (
 	_ = queries.Equal
 )
 
-func testAttachtments(t *testing.T) {
+func testSiteRoles(t *testing.T) {
 	t.Parallel()
 
-	query := Attachtments()
+	query := SiteRoles()
 
 	if query.Query == nil {
 		t.Error("expected a query, got nothing")
 	}
 }
 
-func testAttachtmentsDelete(t *testing.T) {
+func testSiteRolesDelete(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Attachtment{}
-	if err = randomize.Struct(seed, o, attachtmentDBTypes, true, attachtmentColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Attachtment struct: %s", err)
+	o := &SiteRole{}
+	if err = randomize.Struct(seed, o, siteRoleDBTypes, true, siteRoleColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize SiteRole struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -54,7 +54,7 @@ func testAttachtmentsDelete(t *testing.T) {
 		t.Error("should only have deleted one row, but affected:", rowsAff)
 	}
 
-	count, err := Attachtments().Count(ctx, tx)
+	count, err := SiteRoles().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -64,14 +64,14 @@ func testAttachtmentsDelete(t *testing.T) {
 	}
 }
 
-func testAttachtmentsQueryDeleteAll(t *testing.T) {
+func testSiteRolesQueryDeleteAll(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Attachtment{}
-	if err = randomize.Struct(seed, o, attachtmentDBTypes, true, attachtmentColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Attachtment struct: %s", err)
+	o := &SiteRole{}
+	if err = randomize.Struct(seed, o, siteRoleDBTypes, true, siteRoleColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize SiteRole struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -81,13 +81,13 @@ func testAttachtmentsQueryDeleteAll(t *testing.T) {
 		t.Error(err)
 	}
 
-	if rowsAff, err := Attachtments().DeleteAll(ctx, tx); err != nil {
+	if rowsAff, err := SiteRoles().DeleteAll(ctx, tx); err != nil {
 		t.Error(err)
 	} else if rowsAff != 1 {
 		t.Error("should only have deleted one row, but affected:", rowsAff)
 	}
 
-	count, err := Attachtments().Count(ctx, tx)
+	count, err := SiteRoles().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -97,14 +97,14 @@ func testAttachtmentsQueryDeleteAll(t *testing.T) {
 	}
 }
 
-func testAttachtmentsSliceDeleteAll(t *testing.T) {
+func testSiteRolesSliceDeleteAll(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Attachtment{}
-	if err = randomize.Struct(seed, o, attachtmentDBTypes, true, attachtmentColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Attachtment struct: %s", err)
+	o := &SiteRole{}
+	if err = randomize.Struct(seed, o, siteRoleDBTypes, true, siteRoleColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize SiteRole struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -114,7 +114,7 @@ func testAttachtmentsSliceDeleteAll(t *testing.T) {
 		t.Error(err)
 	}
 
-	slice := AttachtmentSlice{o}
+	slice := SiteRoleSlice{o}
 
 	if rowsAff, err := slice.DeleteAll(ctx, tx); err != nil {
 		t.Error(err)
@@ -122,7 +122,7 @@ func testAttachtmentsSliceDeleteAll(t *testing.T) {
 		t.Error("should only have deleted one row, but affected:", rowsAff)
 	}
 
-	count, err := Attachtments().Count(ctx, tx)
+	count, err := SiteRoles().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -132,14 +132,14 @@ func testAttachtmentsSliceDeleteAll(t *testing.T) {
 	}
 }
 
-func testAttachtmentsExists(t *testing.T) {
+func testSiteRolesExists(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Attachtment{}
-	if err = randomize.Struct(seed, o, attachtmentDBTypes, true, attachtmentColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Attachtment struct: %s", err)
+	o := &SiteRole{}
+	if err = randomize.Struct(seed, o, siteRoleDBTypes, true, siteRoleColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize SiteRole struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -149,23 +149,23 @@ func testAttachtmentsExists(t *testing.T) {
 		t.Error(err)
 	}
 
-	e, err := AttachtmentExists(ctx, tx, o.ID)
+	e, err := SiteRoleExists(ctx, tx, o.AccountID, o.SiteID)
 	if err != nil {
-		t.Errorf("Unable to check if Attachtment exists: %s", err)
+		t.Errorf("Unable to check if SiteRole exists: %s", err)
 	}
 	if !e {
-		t.Errorf("Expected AttachtmentExists to return true, but got false.")
+		t.Errorf("Expected SiteRoleExists to return true, but got false.")
 	}
 }
 
-func testAttachtmentsFind(t *testing.T) {
+func testSiteRolesFind(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Attachtment{}
-	if err = randomize.Struct(seed, o, attachtmentDBTypes, true, attachtmentColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Attachtment struct: %s", err)
+	o := &SiteRole{}
+	if err = randomize.Struct(seed, o, siteRoleDBTypes, true, siteRoleColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize SiteRole struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -175,24 +175,24 @@ func testAttachtmentsFind(t *testing.T) {
 		t.Error(err)
 	}
 
-	attachtmentFound, err := FindAttachtment(ctx, tx, o.ID)
+	siteRoleFound, err := FindSiteRole(ctx, tx, o.AccountID, o.SiteID)
 	if err != nil {
 		t.Error(err)
 	}
 
-	if attachtmentFound == nil {
+	if siteRoleFound == nil {
 		t.Error("want a record, got nil")
 	}
 }
 
-func testAttachtmentsBind(t *testing.T) {
+func testSiteRolesBind(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Attachtment{}
-	if err = randomize.Struct(seed, o, attachtmentDBTypes, true, attachtmentColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Attachtment struct: %s", err)
+	o := &SiteRole{}
+	if err = randomize.Struct(seed, o, siteRoleDBTypes, true, siteRoleColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize SiteRole struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -202,19 +202,19 @@ func testAttachtmentsBind(t *testing.T) {
 		t.Error(err)
 	}
 
-	if err = Attachtments().Bind(ctx, tx, o); err != nil {
+	if err = SiteRoles().Bind(ctx, tx, o); err != nil {
 		t.Error(err)
 	}
 }
 
-func testAttachtmentsOne(t *testing.T) {
+func testSiteRolesOne(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Attachtment{}
-	if err = randomize.Struct(seed, o, attachtmentDBTypes, true, attachtmentColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Attachtment struct: %s", err)
+	o := &SiteRole{}
+	if err = randomize.Struct(seed, o, siteRoleDBTypes, true, siteRoleColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize SiteRole struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -224,38 +224,38 @@ func testAttachtmentsOne(t *testing.T) {
 		t.Error(err)
 	}
 
-	if x, err := Attachtments().One(ctx, tx); err != nil {
+	if x, err := SiteRoles().One(ctx, tx); err != nil {
 		t.Error(err)
 	} else if x == nil {
 		t.Error("expected to get a non nil record")
 	}
 }
 
-func testAttachtmentsAll(t *testing.T) {
+func testSiteRolesAll(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	attachtmentOne := &Attachtment{}
-	attachtmentTwo := &Attachtment{}
-	if err = randomize.Struct(seed, attachtmentOne, attachtmentDBTypes, false, attachtmentColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Attachtment struct: %s", err)
+	siteRoleOne := &SiteRole{}
+	siteRoleTwo := &SiteRole{}
+	if err = randomize.Struct(seed, siteRoleOne, siteRoleDBTypes, false, siteRoleColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize SiteRole struct: %s", err)
 	}
-	if err = randomize.Struct(seed, attachtmentTwo, attachtmentDBTypes, false, attachtmentColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Attachtment struct: %s", err)
+	if err = randomize.Struct(seed, siteRoleTwo, siteRoleDBTypes, false, siteRoleColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize SiteRole struct: %s", err)
 	}
 
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
-	if err = attachtmentOne.Insert(ctx, tx, boil.Infer()); err != nil {
+	if err = siteRoleOne.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Error(err)
 	}
-	if err = attachtmentTwo.Insert(ctx, tx, boil.Infer()); err != nil {
+	if err = siteRoleTwo.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Error(err)
 	}
 
-	slice, err := Attachtments().All(ctx, tx)
+	slice, err := SiteRoles().All(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -265,31 +265,31 @@ func testAttachtmentsAll(t *testing.T) {
 	}
 }
 
-func testAttachtmentsCount(t *testing.T) {
+func testSiteRolesCount(t *testing.T) {
 	t.Parallel()
 
 	var err error
 	seed := randomize.NewSeed()
-	attachtmentOne := &Attachtment{}
-	attachtmentTwo := &Attachtment{}
-	if err = randomize.Struct(seed, attachtmentOne, attachtmentDBTypes, false, attachtmentColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Attachtment struct: %s", err)
+	siteRoleOne := &SiteRole{}
+	siteRoleTwo := &SiteRole{}
+	if err = randomize.Struct(seed, siteRoleOne, siteRoleDBTypes, false, siteRoleColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize SiteRole struct: %s", err)
 	}
-	if err = randomize.Struct(seed, attachtmentTwo, attachtmentDBTypes, false, attachtmentColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Attachtment struct: %s", err)
+	if err = randomize.Struct(seed, siteRoleTwo, siteRoleDBTypes, false, siteRoleColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize SiteRole struct: %s", err)
 	}
 
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
-	if err = attachtmentOne.Insert(ctx, tx, boil.Infer()); err != nil {
+	if err = siteRoleOne.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Error(err)
 	}
-	if err = attachtmentTwo.Insert(ctx, tx, boil.Infer()); err != nil {
+	if err = siteRoleTwo.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Error(err)
 	}
 
-	count, err := Attachtments().Count(ctx, tx)
+	count, err := SiteRoles().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -299,155 +299,155 @@ func testAttachtmentsCount(t *testing.T) {
 	}
 }
 
-func attachtmentBeforeInsertHook(ctx context.Context, e boil.ContextExecutor, o *Attachtment) error {
-	*o = Attachtment{}
+func siteRoleBeforeInsertHook(ctx context.Context, e boil.ContextExecutor, o *SiteRole) error {
+	*o = SiteRole{}
 	return nil
 }
 
-func attachtmentAfterInsertHook(ctx context.Context, e boil.ContextExecutor, o *Attachtment) error {
-	*o = Attachtment{}
+func siteRoleAfterInsertHook(ctx context.Context, e boil.ContextExecutor, o *SiteRole) error {
+	*o = SiteRole{}
 	return nil
 }
 
-func attachtmentAfterSelectHook(ctx context.Context, e boil.ContextExecutor, o *Attachtment) error {
-	*o = Attachtment{}
+func siteRoleAfterSelectHook(ctx context.Context, e boil.ContextExecutor, o *SiteRole) error {
+	*o = SiteRole{}
 	return nil
 }
 
-func attachtmentBeforeUpdateHook(ctx context.Context, e boil.ContextExecutor, o *Attachtment) error {
-	*o = Attachtment{}
+func siteRoleBeforeUpdateHook(ctx context.Context, e boil.ContextExecutor, o *SiteRole) error {
+	*o = SiteRole{}
 	return nil
 }
 
-func attachtmentAfterUpdateHook(ctx context.Context, e boil.ContextExecutor, o *Attachtment) error {
-	*o = Attachtment{}
+func siteRoleAfterUpdateHook(ctx context.Context, e boil.ContextExecutor, o *SiteRole) error {
+	*o = SiteRole{}
 	return nil
 }
 
-func attachtmentBeforeDeleteHook(ctx context.Context, e boil.ContextExecutor, o *Attachtment) error {
-	*o = Attachtment{}
+func siteRoleBeforeDeleteHook(ctx context.Context, e boil.ContextExecutor, o *SiteRole) error {
+	*o = SiteRole{}
 	return nil
 }
 
-func attachtmentAfterDeleteHook(ctx context.Context, e boil.ContextExecutor, o *Attachtment) error {
-	*o = Attachtment{}
+func siteRoleAfterDeleteHook(ctx context.Context, e boil.ContextExecutor, o *SiteRole) error {
+	*o = SiteRole{}
 	return nil
 }
 
-func attachtmentBeforeUpsertHook(ctx context.Context, e boil.ContextExecutor, o *Attachtment) error {
-	*o = Attachtment{}
+func siteRoleBeforeUpsertHook(ctx context.Context, e boil.ContextExecutor, o *SiteRole) error {
+	*o = SiteRole{}
 	return nil
 }
 
-func attachtmentAfterUpsertHook(ctx context.Context, e boil.ContextExecutor, o *Attachtment) error {
-	*o = Attachtment{}
+func siteRoleAfterUpsertHook(ctx context.Context, e boil.ContextExecutor, o *SiteRole) error {
+	*o = SiteRole{}
 	return nil
 }
 
-func testAttachtmentsHooks(t *testing.T) {
+func testSiteRolesHooks(t *testing.T) {
 	t.Parallel()
 
 	var err error
 
 	ctx := context.Background()
-	empty := &Attachtment{}
-	o := &Attachtment{}
+	empty := &SiteRole{}
+	o := &SiteRole{}
 
 	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, o, attachtmentDBTypes, false); err != nil {
-		t.Errorf("Unable to randomize Attachtment object: %s", err)
+	if err = randomize.Struct(seed, o, siteRoleDBTypes, false); err != nil {
+		t.Errorf("Unable to randomize SiteRole object: %s", err)
 	}
 
-	AddAttachtmentHook(boil.BeforeInsertHook, attachtmentBeforeInsertHook)
+	AddSiteRoleHook(boil.BeforeInsertHook, siteRoleBeforeInsertHook)
 	if err = o.doBeforeInsertHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doBeforeInsertHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected BeforeInsertHook function to empty object, but got: %#v", o)
 	}
-	attachtmentBeforeInsertHooks = []AttachtmentHook{}
+	siteRoleBeforeInsertHooks = []SiteRoleHook{}
 
-	AddAttachtmentHook(boil.AfterInsertHook, attachtmentAfterInsertHook)
+	AddSiteRoleHook(boil.AfterInsertHook, siteRoleAfterInsertHook)
 	if err = o.doAfterInsertHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doAfterInsertHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected AfterInsertHook function to empty object, but got: %#v", o)
 	}
-	attachtmentAfterInsertHooks = []AttachtmentHook{}
+	siteRoleAfterInsertHooks = []SiteRoleHook{}
 
-	AddAttachtmentHook(boil.AfterSelectHook, attachtmentAfterSelectHook)
+	AddSiteRoleHook(boil.AfterSelectHook, siteRoleAfterSelectHook)
 	if err = o.doAfterSelectHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doAfterSelectHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected AfterSelectHook function to empty object, but got: %#v", o)
 	}
-	attachtmentAfterSelectHooks = []AttachtmentHook{}
+	siteRoleAfterSelectHooks = []SiteRoleHook{}
 
-	AddAttachtmentHook(boil.BeforeUpdateHook, attachtmentBeforeUpdateHook)
+	AddSiteRoleHook(boil.BeforeUpdateHook, siteRoleBeforeUpdateHook)
 	if err = o.doBeforeUpdateHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doBeforeUpdateHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected BeforeUpdateHook function to empty object, but got: %#v", o)
 	}
-	attachtmentBeforeUpdateHooks = []AttachtmentHook{}
+	siteRoleBeforeUpdateHooks = []SiteRoleHook{}
 
-	AddAttachtmentHook(boil.AfterUpdateHook, attachtmentAfterUpdateHook)
+	AddSiteRoleHook(boil.AfterUpdateHook, siteRoleAfterUpdateHook)
 	if err = o.doAfterUpdateHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doAfterUpdateHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected AfterUpdateHook function to empty object, but got: %#v", o)
 	}
-	attachtmentAfterUpdateHooks = []AttachtmentHook{}
+	siteRoleAfterUpdateHooks = []SiteRoleHook{}
 
-	AddAttachtmentHook(boil.BeforeDeleteHook, attachtmentBeforeDeleteHook)
+	AddSiteRoleHook(boil.BeforeDeleteHook, siteRoleBeforeDeleteHook)
 	if err = o.doBeforeDeleteHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doBeforeDeleteHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected BeforeDeleteHook function to empty object, but got: %#v", o)
 	}
-	attachtmentBeforeDeleteHooks = []AttachtmentHook{}
+	siteRoleBeforeDeleteHooks = []SiteRoleHook{}
 
-	AddAttachtmentHook(boil.AfterDeleteHook, attachtmentAfterDeleteHook)
+	AddSiteRoleHook(boil.AfterDeleteHook, siteRoleAfterDeleteHook)
 	if err = o.doAfterDeleteHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doAfterDeleteHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected AfterDeleteHook function to empty object, but got: %#v", o)
 	}
-	attachtmentAfterDeleteHooks = []AttachtmentHook{}
+	siteRoleAfterDeleteHooks = []SiteRoleHook{}
 
-	AddAttachtmentHook(boil.BeforeUpsertHook, attachtmentBeforeUpsertHook)
+	AddSiteRoleHook(boil.BeforeUpsertHook, siteRoleBeforeUpsertHook)
 	if err = o.doBeforeUpsertHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doBeforeUpsertHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected BeforeUpsertHook function to empty object, but got: %#v", o)
 	}
-	attachtmentBeforeUpsertHooks = []AttachtmentHook{}
+	siteRoleBeforeUpsertHooks = []SiteRoleHook{}
 
-	AddAttachtmentHook(boil.AfterUpsertHook, attachtmentAfterUpsertHook)
+	AddSiteRoleHook(boil.AfterUpsertHook, siteRoleAfterUpsertHook)
 	if err = o.doAfterUpsertHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doAfterUpsertHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected AfterUpsertHook function to empty object, but got: %#v", o)
 	}
-	attachtmentAfterUpsertHooks = []AttachtmentHook{}
+	siteRoleAfterUpsertHooks = []SiteRoleHook{}
 }
 
-func testAttachtmentsInsert(t *testing.T) {
+func testSiteRolesInsert(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Attachtment{}
-	if err = randomize.Struct(seed, o, attachtmentDBTypes, true, attachtmentColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Attachtment struct: %s", err)
+	o := &SiteRole{}
+	if err = randomize.Struct(seed, o, siteRoleDBTypes, true, siteRoleColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize SiteRole struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -457,7 +457,7 @@ func testAttachtmentsInsert(t *testing.T) {
 		t.Error(err)
 	}
 
-	count, err := Attachtments().Count(ctx, tx)
+	count, err := SiteRoles().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -467,24 +467,24 @@ func testAttachtmentsInsert(t *testing.T) {
 	}
 }
 
-func testAttachtmentsInsertWhitelist(t *testing.T) {
+func testSiteRolesInsertWhitelist(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Attachtment{}
-	if err = randomize.Struct(seed, o, attachtmentDBTypes, true); err != nil {
-		t.Errorf("Unable to randomize Attachtment struct: %s", err)
+	o := &SiteRole{}
+	if err = randomize.Struct(seed, o, siteRoleDBTypes, true); err != nil {
+		t.Errorf("Unable to randomize SiteRole struct: %s", err)
 	}
 
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
-	if err = o.Insert(ctx, tx, boil.Whitelist(strmangle.SetMerge(attachtmentPrimaryKeyColumns, attachtmentColumnsWithoutDefault)...)); err != nil {
+	if err = o.Insert(ctx, tx, boil.Whitelist(strmangle.SetMerge(siteRolePrimaryKeyColumns, siteRoleColumnsWithoutDefault)...)); err != nil {
 		t.Error(err)
 	}
 
-	count, err := Attachtments().Count(ctx, tx)
+	count, err := SiteRoles().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -494,32 +494,32 @@ func testAttachtmentsInsertWhitelist(t *testing.T) {
 	}
 }
 
-func testAttachtmentToOnePostUsingRelated(t *testing.T) {
+func testSiteRoleToOneAccountUsingAccount(t *testing.T) {
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
 
-	var local Attachtment
-	var foreign Post
+	var local SiteRole
+	var foreign Account
 
 	seed := randomize.NewSeed()
-	if err := randomize.Struct(seed, &local, attachtmentDBTypes, false, attachtmentColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Attachtment struct: %s", err)
+	if err := randomize.Struct(seed, &local, siteRoleDBTypes, false, siteRoleColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize SiteRole struct: %s", err)
 	}
-	if err := randomize.Struct(seed, &foreign, postDBTypes, false, postColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Post struct: %s", err)
+	if err := randomize.Struct(seed, &foreign, accountDBTypes, false, accountColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Account struct: %s", err)
 	}
 
 	if err := foreign.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Fatal(err)
 	}
 
-	local.RelatedID = foreign.ID
+	local.AccountID = foreign.ID
 	if err := local.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Fatal(err)
 	}
 
-	check, err := local.Related().One(ctx, tx)
+	check, err := local.Account().One(ctx, tx)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -529,24 +529,24 @@ func testAttachtmentToOnePostUsingRelated(t *testing.T) {
 	}
 
 	ranAfterSelectHook := false
-	AddPostHook(boil.AfterSelectHook, func(ctx context.Context, e boil.ContextExecutor, o *Post) error {
+	AddAccountHook(boil.AfterSelectHook, func(ctx context.Context, e boil.ContextExecutor, o *Account) error {
 		ranAfterSelectHook = true
 		return nil
 	})
 
-	slice := AttachtmentSlice{&local}
-	if err = local.L.LoadRelated(ctx, tx, false, (*[]*Attachtment)(&slice), nil); err != nil {
+	slice := SiteRoleSlice{&local}
+	if err = local.L.LoadAccount(ctx, tx, false, (*[]*SiteRole)(&slice), nil); err != nil {
 		t.Fatal(err)
 	}
-	if local.R.Related == nil {
+	if local.R.Account == nil {
 		t.Error("struct should have been eager loaded")
 	}
 
-	local.R.Related = nil
-	if err = local.L.LoadRelated(ctx, tx, true, &local, nil); err != nil {
+	local.R.Account = nil
+	if err = local.L.LoadAccount(ctx, tx, true, &local, nil); err != nil {
 		t.Fatal(err)
 	}
-	if local.R.Related == nil {
+	if local.R.Account == nil {
 		t.Error("struct should have been eager loaded")
 	}
 
@@ -555,17 +555,17 @@ func testAttachtmentToOnePostUsingRelated(t *testing.T) {
 	}
 }
 
-func testAttachtmentToOneSiteUsingSite(t *testing.T) {
+func testSiteRoleToOneSiteUsingSite(t *testing.T) {
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
 
-	var local Attachtment
+	var local SiteRole
 	var foreign Site
 
 	seed := randomize.NewSeed()
-	if err := randomize.Struct(seed, &local, attachtmentDBTypes, false, attachtmentColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Attachtment struct: %s", err)
+	if err := randomize.Struct(seed, &local, siteRoleDBTypes, false, siteRoleColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize SiteRole struct: %s", err)
 	}
 	if err := randomize.Struct(seed, &foreign, siteDBTypes, false, siteColumnsWithDefault...); err != nil {
 		t.Errorf("Unable to randomize Site struct: %s", err)
@@ -595,8 +595,8 @@ func testAttachtmentToOneSiteUsingSite(t *testing.T) {
 		return nil
 	})
 
-	slice := AttachtmentSlice{&local}
-	if err = local.L.LoadSite(ctx, tx, false, (*[]*Attachtment)(&slice), nil); err != nil {
+	slice := SiteRoleSlice{&local}
+	if err = local.L.LoadSite(ctx, tx, false, (*[]*SiteRole)(&slice), nil); err != nil {
 		t.Fatal(err)
 	}
 	if local.R.Site == nil {
@@ -616,24 +616,24 @@ func testAttachtmentToOneSiteUsingSite(t *testing.T) {
 	}
 }
 
-func testAttachtmentToOneSetOpPostUsingRelated(t *testing.T) {
+func testSiteRoleToOneSetOpAccountUsingAccount(t *testing.T) {
 	var err error
 
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
 
-	var a Attachtment
-	var b, c Post
+	var a SiteRole
+	var b, c Account
 
 	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, attachtmentDBTypes, false, strmangle.SetComplement(attachtmentPrimaryKeyColumns, attachtmentColumnsWithoutDefault)...); err != nil {
+	if err = randomize.Struct(seed, &a, siteRoleDBTypes, false, strmangle.SetComplement(siteRolePrimaryKeyColumns, siteRoleColumnsWithoutDefault)...); err != nil {
 		t.Fatal(err)
 	}
-	if err = randomize.Struct(seed, &b, postDBTypes, false, strmangle.SetComplement(postPrimaryKeyColumns, postColumnsWithoutDefault)...); err != nil {
+	if err = randomize.Struct(seed, &b, accountDBTypes, false, strmangle.SetComplement(accountPrimaryKeyColumns, accountColumnsWithoutDefault)...); err != nil {
 		t.Fatal(err)
 	}
-	if err = randomize.Struct(seed, &c, postDBTypes, false, strmangle.SetComplement(postPrimaryKeyColumns, postColumnsWithoutDefault)...); err != nil {
+	if err = randomize.Struct(seed, &c, accountDBTypes, false, strmangle.SetComplement(accountPrimaryKeyColumns, accountColumnsWithoutDefault)...); err != nil {
 		t.Fatal(err)
 	}
 
@@ -644,47 +644,43 @@ func testAttachtmentToOneSetOpPostUsingRelated(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	for i, x := range []*Post{&b, &c} {
-		err = a.SetRelated(ctx, tx, i != 0, x)
+	for i, x := range []*Account{&b, &c} {
+		err = a.SetAccount(ctx, tx, i != 0, x)
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		if a.R.Related != x {
+		if a.R.Account != x {
 			t.Error("relationship struct not set to correct value")
 		}
 
-		if x.R.RelatedAttachtments[0] != &a {
+		if x.R.SiteRoles[0] != &a {
 			t.Error("failed to append to foreign relationship struct")
 		}
-		if a.RelatedID != x.ID {
-			t.Error("foreign key was wrong value", a.RelatedID)
+		if a.AccountID != x.ID {
+			t.Error("foreign key was wrong value", a.AccountID)
 		}
 
-		zero := reflect.Zero(reflect.TypeOf(a.RelatedID))
-		reflect.Indirect(reflect.ValueOf(&a.RelatedID)).Set(zero)
-
-		if err = a.Reload(ctx, tx); err != nil {
-			t.Fatal("failed to reload", err)
+		if exists, err := SiteRoleExists(ctx, tx, a.AccountID, a.SiteID); err != nil {
+			t.Fatal(err)
+		} else if !exists {
+			t.Error("want 'a' to exist")
 		}
 
-		if a.RelatedID != x.ID {
-			t.Error("foreign key was wrong value", a.RelatedID, x.ID)
-		}
 	}
 }
-func testAttachtmentToOneSetOpSiteUsingSite(t *testing.T) {
+func testSiteRoleToOneSetOpSiteUsingSite(t *testing.T) {
 	var err error
 
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
 
-	var a Attachtment
+	var a SiteRole
 	var b, c Site
 
 	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, attachtmentDBTypes, false, strmangle.SetComplement(attachtmentPrimaryKeyColumns, attachtmentColumnsWithoutDefault)...); err != nil {
+	if err = randomize.Struct(seed, &a, siteRoleDBTypes, false, strmangle.SetComplement(siteRolePrimaryKeyColumns, siteRoleColumnsWithoutDefault)...); err != nil {
 		t.Fatal(err)
 	}
 	if err = randomize.Struct(seed, &b, siteDBTypes, false, strmangle.SetComplement(sitePrimaryKeyColumns, siteColumnsWithoutDefault)...); err != nil {
@@ -711,34 +707,30 @@ func testAttachtmentToOneSetOpSiteUsingSite(t *testing.T) {
 			t.Error("relationship struct not set to correct value")
 		}
 
-		if x.R.Attachtments[0] != &a {
+		if x.R.SiteRoles[0] != &a {
 			t.Error("failed to append to foreign relationship struct")
 		}
 		if a.SiteID != x.ID {
 			t.Error("foreign key was wrong value", a.SiteID)
 		}
 
-		zero := reflect.Zero(reflect.TypeOf(a.SiteID))
-		reflect.Indirect(reflect.ValueOf(&a.SiteID)).Set(zero)
-
-		if err = a.Reload(ctx, tx); err != nil {
-			t.Fatal("failed to reload", err)
+		if exists, err := SiteRoleExists(ctx, tx, a.AccountID, a.SiteID); err != nil {
+			t.Fatal(err)
+		} else if !exists {
+			t.Error("want 'a' to exist")
 		}
 
-		if a.SiteID != x.ID {
-			t.Error("foreign key was wrong value", a.SiteID, x.ID)
-		}
 	}
 }
 
-func testAttachtmentsReload(t *testing.T) {
+func testSiteRolesReload(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Attachtment{}
-	if err = randomize.Struct(seed, o, attachtmentDBTypes, true, attachtmentColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Attachtment struct: %s", err)
+	o := &SiteRole{}
+	if err = randomize.Struct(seed, o, siteRoleDBTypes, true, siteRoleColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize SiteRole struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -753,14 +745,14 @@ func testAttachtmentsReload(t *testing.T) {
 	}
 }
 
-func testAttachtmentsReloadAll(t *testing.T) {
+func testSiteRolesReloadAll(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Attachtment{}
-	if err = randomize.Struct(seed, o, attachtmentDBTypes, true, attachtmentColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Attachtment struct: %s", err)
+	o := &SiteRole{}
+	if err = randomize.Struct(seed, o, siteRoleDBTypes, true, siteRoleColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize SiteRole struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -770,21 +762,21 @@ func testAttachtmentsReloadAll(t *testing.T) {
 		t.Error(err)
 	}
 
-	slice := AttachtmentSlice{o}
+	slice := SiteRoleSlice{o}
 
 	if err = slice.ReloadAll(ctx, tx); err != nil {
 		t.Error(err)
 	}
 }
 
-func testAttachtmentsSelect(t *testing.T) {
+func testSiteRolesSelect(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Attachtment{}
-	if err = randomize.Struct(seed, o, attachtmentDBTypes, true, attachtmentColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Attachtment struct: %s", err)
+	o := &SiteRole{}
+	if err = randomize.Struct(seed, o, siteRoleDBTypes, true, siteRoleColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize SiteRole struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -794,7 +786,7 @@ func testAttachtmentsSelect(t *testing.T) {
 		t.Error(err)
 	}
 
-	slice, err := Attachtments().All(ctx, tx)
+	slice, err := SiteRoles().All(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -805,25 +797,25 @@ func testAttachtmentsSelect(t *testing.T) {
 }
 
 var (
-	attachtmentDBTypes = map[string]string{`ID`: `integer`, `CreatedDate`: `timestamp with time zone`, `UpdatedDate`: `timestamp with time zone`, `SiteID`: `integer`, `RelatedID`: `integer`, `URL`: `text`}
-	_                  = bytes.MinRead
+	siteRoleDBTypes = map[string]string{`AccountID`: `integer`, `SiteID`: `integer`, `Role`: `character varying`}
+	_               = bytes.MinRead
 )
 
-func testAttachtmentsUpdate(t *testing.T) {
+func testSiteRolesUpdate(t *testing.T) {
 	t.Parallel()
 
-	if 0 == len(attachtmentPrimaryKeyColumns) {
+	if 0 == len(siteRolePrimaryKeyColumns) {
 		t.Skip("Skipping table with no primary key columns")
 	}
-	if len(attachtmentAllColumns) == len(attachtmentPrimaryKeyColumns) {
+	if len(siteRoleAllColumns) == len(siteRolePrimaryKeyColumns) {
 		t.Skip("Skipping table with only primary key columns")
 	}
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Attachtment{}
-	if err = randomize.Struct(seed, o, attachtmentDBTypes, true, attachtmentColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Attachtment struct: %s", err)
+	o := &SiteRole{}
+	if err = randomize.Struct(seed, o, siteRoleDBTypes, true, siteRoleColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize SiteRole struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -833,7 +825,7 @@ func testAttachtmentsUpdate(t *testing.T) {
 		t.Error(err)
 	}
 
-	count, err := Attachtments().Count(ctx, tx)
+	count, err := SiteRoles().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -842,8 +834,8 @@ func testAttachtmentsUpdate(t *testing.T) {
 		t.Error("want one record, got:", count)
 	}
 
-	if err = randomize.Struct(seed, o, attachtmentDBTypes, true, attachtmentPrimaryKeyColumns...); err != nil {
-		t.Errorf("Unable to randomize Attachtment struct: %s", err)
+	if err = randomize.Struct(seed, o, siteRoleDBTypes, true, siteRolePrimaryKeyColumns...); err != nil {
+		t.Errorf("Unable to randomize SiteRole struct: %s", err)
 	}
 
 	if rowsAff, err := o.Update(ctx, tx, boil.Infer()); err != nil {
@@ -853,18 +845,18 @@ func testAttachtmentsUpdate(t *testing.T) {
 	}
 }
 
-func testAttachtmentsSliceUpdateAll(t *testing.T) {
+func testSiteRolesSliceUpdateAll(t *testing.T) {
 	t.Parallel()
 
-	if len(attachtmentAllColumns) == len(attachtmentPrimaryKeyColumns) {
+	if len(siteRoleAllColumns) == len(siteRolePrimaryKeyColumns) {
 		t.Skip("Skipping table with only primary key columns")
 	}
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Attachtment{}
-	if err = randomize.Struct(seed, o, attachtmentDBTypes, true, attachtmentColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Attachtment struct: %s", err)
+	o := &SiteRole{}
+	if err = randomize.Struct(seed, o, siteRoleDBTypes, true, siteRoleColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize SiteRole struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -874,7 +866,7 @@ func testAttachtmentsSliceUpdateAll(t *testing.T) {
 		t.Error(err)
 	}
 
-	count, err := Attachtments().Count(ctx, tx)
+	count, err := SiteRoles().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -883,18 +875,18 @@ func testAttachtmentsSliceUpdateAll(t *testing.T) {
 		t.Error("want one record, got:", count)
 	}
 
-	if err = randomize.Struct(seed, o, attachtmentDBTypes, true, attachtmentPrimaryKeyColumns...); err != nil {
-		t.Errorf("Unable to randomize Attachtment struct: %s", err)
+	if err = randomize.Struct(seed, o, siteRoleDBTypes, true, siteRolePrimaryKeyColumns...); err != nil {
+		t.Errorf("Unable to randomize SiteRole struct: %s", err)
 	}
 
 	// Remove Primary keys and unique columns from what we plan to update
 	var fields []string
-	if strmangle.StringSliceMatch(attachtmentAllColumns, attachtmentPrimaryKeyColumns) {
-		fields = attachtmentAllColumns
+	if strmangle.StringSliceMatch(siteRoleAllColumns, siteRolePrimaryKeyColumns) {
+		fields = siteRoleAllColumns
 	} else {
 		fields = strmangle.SetComplement(
-			attachtmentAllColumns,
-			attachtmentPrimaryKeyColumns,
+			siteRoleAllColumns,
+			siteRolePrimaryKeyColumns,
 		)
 	}
 
@@ -912,7 +904,7 @@ func testAttachtmentsSliceUpdateAll(t *testing.T) {
 		}
 	}
 
-	slice := AttachtmentSlice{o}
+	slice := SiteRoleSlice{o}
 	if rowsAff, err := slice.UpdateAll(ctx, tx, updateMap); err != nil {
 		t.Error(err)
 	} else if rowsAff != 1 {
@@ -920,29 +912,29 @@ func testAttachtmentsSliceUpdateAll(t *testing.T) {
 	}
 }
 
-func testAttachtmentsUpsert(t *testing.T) {
+func testSiteRolesUpsert(t *testing.T) {
 	t.Parallel()
 
-	if len(attachtmentAllColumns) == len(attachtmentPrimaryKeyColumns) {
+	if len(siteRoleAllColumns) == len(siteRolePrimaryKeyColumns) {
 		t.Skip("Skipping table with only primary key columns")
 	}
 
 	seed := randomize.NewSeed()
 	var err error
 	// Attempt the INSERT side of an UPSERT
-	o := Attachtment{}
-	if err = randomize.Struct(seed, &o, attachtmentDBTypes, true); err != nil {
-		t.Errorf("Unable to randomize Attachtment struct: %s", err)
+	o := SiteRole{}
+	if err = randomize.Struct(seed, &o, siteRoleDBTypes, true); err != nil {
+		t.Errorf("Unable to randomize SiteRole struct: %s", err)
 	}
 
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
 	if err = o.Upsert(ctx, tx, false, nil, boil.Infer(), boil.Infer()); err != nil {
-		t.Errorf("Unable to upsert Attachtment: %s", err)
+		t.Errorf("Unable to upsert SiteRole: %s", err)
 	}
 
-	count, err := Attachtments().Count(ctx, tx)
+	count, err := SiteRoles().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -951,15 +943,15 @@ func testAttachtmentsUpsert(t *testing.T) {
 	}
 
 	// Attempt the UPDATE side of an UPSERT
-	if err = randomize.Struct(seed, &o, attachtmentDBTypes, false, attachtmentPrimaryKeyColumns...); err != nil {
-		t.Errorf("Unable to randomize Attachtment struct: %s", err)
+	if err = randomize.Struct(seed, &o, siteRoleDBTypes, false, siteRolePrimaryKeyColumns...); err != nil {
+		t.Errorf("Unable to randomize SiteRole struct: %s", err)
 	}
 
 	if err = o.Upsert(ctx, tx, true, nil, boil.Infer(), boil.Infer()); err != nil {
-		t.Errorf("Unable to upsert Attachtment: %s", err)
+		t.Errorf("Unable to upsert SiteRole: %s", err)
 	}
 
-	count, err = Attachtments().Count(ctx, tx)
+	count, err = SiteRoles().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
