@@ -687,7 +687,7 @@ func testCommentsSelect(t *testing.T) {
 }
 
 var (
-	commentDBTypes = map[string]string{`ID`: `integer`, `CreatedDate`: `timestamp with time zone`, `PostID`: `integer`, `Email`: `character varying`, `Name`: `character varying`, `Content`: `text`}
+	commentDBTypes = map[string]string{`ID`: `integer`, `CreatedAt`: `timestamp with time zone`, `PostID`: `integer`, `Email`: `character varying`, `Name`: `character varying`, `Content`: `text`}
 	_              = bytes.MinRead
 )
 

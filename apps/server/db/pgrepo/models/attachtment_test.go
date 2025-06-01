@@ -805,7 +805,7 @@ func testAttachtmentsSelect(t *testing.T) {
 }
 
 var (
-	attachtmentDBTypes = map[string]string{`ID`: `integer`, `CreatedDate`: `timestamp with time zone`, `UpdatedDate`: `timestamp with time zone`, `SiteID`: `integer`, `RelatedID`: `integer`, `URL`: `text`}
+	attachtmentDBTypes = map[string]string{`ID`: `integer`, `CreatedAt`: `timestamp with time zone`, `UpdatedAt`: `timestamp with time zone`, `SiteID`: `integer`, `RelatedID`: `integer`, `URL`: `text`}
 	_                  = bytes.MinRead
 )
 

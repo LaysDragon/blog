@@ -23,72 +23,72 @@ import (
 
 // Account is an object representing the database table.
 type Account struct {
-	ID          int       `boil:"id" json:"id" toml:"id" yaml:"id"`
-	CreatedDate time.Time `boil:"created_date" json:"created_date" toml:"created_date" yaml:"created_date"`
-	UpdatedDate time.Time `boil:"updated_date" json:"updated_date" toml:"updated_date" yaml:"updated_date"`
-	Username    string    `boil:"username" json:"username" toml:"username" yaml:"username"`
-	Role        string    `boil:"role" json:"role" toml:"role" yaml:"role"`
-	Email       string    `boil:"email" json:"email" toml:"email" yaml:"email"`
-	PassHash    string    `boil:"pass_hash" json:"pass_hash" toml:"pass_hash" yaml:"pass_hash"`
+	ID         int       `boil:"id" json:"id" toml:"id" yaml:"id"`
+	CreatedAt  time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	UpdatedAt  time.Time `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
+	Username   string    `boil:"username" json:"username" toml:"username" yaml:"username"`
+	Role       string    `boil:"role" json:"role" toml:"role" yaml:"role"`
+	Email      string    `boil:"email" json:"email" toml:"email" yaml:"email"`
+	PasswdHash string    `boil:"passwd_hash" json:"passwd_hash" toml:"passwd_hash" yaml:"passwd_hash"`
 
 	R *accountR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L accountL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 var AccountColumns = struct {
-	ID          string
-	CreatedDate string
-	UpdatedDate string
-	Username    string
-	Role        string
-	Email       string
-	PassHash    string
+	ID         string
+	CreatedAt  string
+	UpdatedAt  string
+	Username   string
+	Role       string
+	Email      string
+	PasswdHash string
 }{
-	ID:          "id",
-	CreatedDate: "created_date",
-	UpdatedDate: "updated_date",
-	Username:    "username",
-	Role:        "role",
-	Email:       "email",
-	PassHash:    "pass_hash",
+	ID:         "id",
+	CreatedAt:  "created_at",
+	UpdatedAt:  "updated_at",
+	Username:   "username",
+	Role:       "role",
+	Email:      "email",
+	PasswdHash: "passwd_hash",
 }
 
 var AccountTableColumns = struct {
-	ID          string
-	CreatedDate string
-	UpdatedDate string
-	Username    string
-	Role        string
-	Email       string
-	PassHash    string
+	ID         string
+	CreatedAt  string
+	UpdatedAt  string
+	Username   string
+	Role       string
+	Email      string
+	PasswdHash string
 }{
-	ID:          "account.id",
-	CreatedDate: "account.created_date",
-	UpdatedDate: "account.updated_date",
-	Username:    "account.username",
-	Role:        "account.role",
-	Email:       "account.email",
-	PassHash:    "account.pass_hash",
+	ID:         "account.id",
+	CreatedAt:  "account.created_at",
+	UpdatedAt:  "account.updated_at",
+	Username:   "account.username",
+	Role:       "account.role",
+	Email:      "account.email",
+	PasswdHash: "account.passwd_hash",
 }
 
 // Generated where
 
 var AccountWhere = struct {
-	ID          whereHelperint
-	CreatedDate whereHelpertime_Time
-	UpdatedDate whereHelpertime_Time
-	Username    whereHelperstring
-	Role        whereHelperstring
-	Email       whereHelperstring
-	PassHash    whereHelperstring
+	ID         whereHelperint
+	CreatedAt  whereHelpertime_Time
+	UpdatedAt  whereHelpertime_Time
+	Username   whereHelperstring
+	Role       whereHelperstring
+	Email      whereHelperstring
+	PasswdHash whereHelperstring
 }{
-	ID:          whereHelperint{field: "\"account\".\"id\""},
-	CreatedDate: whereHelpertime_Time{field: "\"account\".\"created_date\""},
-	UpdatedDate: whereHelpertime_Time{field: "\"account\".\"updated_date\""},
-	Username:    whereHelperstring{field: "\"account\".\"username\""},
-	Role:        whereHelperstring{field: "\"account\".\"role\""},
-	Email:       whereHelperstring{field: "\"account\".\"email\""},
-	PassHash:    whereHelperstring{field: "\"account\".\"pass_hash\""},
+	ID:         whereHelperint{field: "\"account\".\"id\""},
+	CreatedAt:  whereHelpertime_Time{field: "\"account\".\"created_at\""},
+	UpdatedAt:  whereHelpertime_Time{field: "\"account\".\"updated_at\""},
+	Username:   whereHelperstring{field: "\"account\".\"username\""},
+	Role:       whereHelperstring{field: "\"account\".\"role\""},
+	Email:      whereHelperstring{field: "\"account\".\"email\""},
+	PasswdHash: whereHelperstring{field: "\"account\".\"passwd_hash\""},
 }
 
 // AccountRels is where relationship names are stored.
@@ -147,9 +147,9 @@ func (r *accountR) GetSiteRoles() SiteRoleSlice {
 type accountL struct{}
 
 var (
-	accountAllColumns            = []string{"id", "created_date", "updated_date", "username", "role", "email", "pass_hash"}
-	accountColumnsWithoutDefault = []string{"username", "role", "email", "pass_hash"}
-	accountColumnsWithDefault    = []string{"id", "created_date", "updated_date"}
+	accountAllColumns            = []string{"id", "created_at", "updated_at", "username", "role", "email", "passwd_hash"}
+	accountColumnsWithoutDefault = []string{"username", "role", "email", "passwd_hash"}
+	accountColumnsWithDefault    = []string{"id", "created_at", "updated_at"}
 	accountPrimaryKeyColumns     = []string{"id"}
 	accountGeneratedColumns      = []string{}
 )
@@ -942,6 +942,16 @@ func (o *Account) Insert(ctx context.Context, exec boil.ContextExecutor, columns
 	}
 
 	var err error
+	if !boil.TimestampsAreSkipped(ctx) {
+		currTime := time.Now().In(boil.GetLocation())
+
+		if o.CreatedAt.IsZero() {
+			o.CreatedAt = currTime
+		}
+		if o.UpdatedAt.IsZero() {
+			o.UpdatedAt = currTime
+		}
+	}
 
 	if err := o.doBeforeInsertHooks(ctx, exec); err != nil {
 		return err
@@ -1017,6 +1027,12 @@ func (o *Account) Insert(ctx context.Context, exec boil.ContextExecutor, columns
 // See boil.Columns.UpdateColumnSet documentation to understand column list inference for updates.
 // Update does not automatically update the record in case of default values. Use .Reload() to refresh the records.
 func (o *Account) Update(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) (int64, error) {
+	if !boil.TimestampsAreSkipped(ctx) {
+		currTime := time.Now().In(boil.GetLocation())
+
+		o.UpdatedAt = currTime
+	}
+
 	var err error
 	if err = o.doBeforeUpdateHooks(ctx, exec); err != nil {
 		return 0, err
@@ -1146,6 +1162,14 @@ func (o AccountSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, 
 func (o *Account) Upsert(ctx context.Context, exec boil.ContextExecutor, updateOnConflict bool, conflictColumns []string, updateColumns, insertColumns boil.Columns, opts ...UpsertOptionFunc) error {
 	if o == nil {
 		return errors.New("models: no account provided for upsert")
+	}
+	if !boil.TimestampsAreSkipped(ctx) {
+		currTime := time.Now().In(boil.GetLocation())
+
+		if o.CreatedAt.IsZero() {
+			o.CreatedAt = currTime
+		}
+		o.UpdatedAt = currTime
 	}
 
 	if err := o.doBeforeUpsertHooks(ctx, exec); err != nil {

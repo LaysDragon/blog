@@ -24,47 +24,47 @@ import (
 
 // Attachtment is an object representing the database table.
 type Attachtment struct {
-	ID          int       `boil:"id" json:"id" toml:"id" yaml:"id"`
-	CreatedDate null.Time `boil:"created_date" json:"created_date,omitempty" toml:"created_date" yaml:"created_date,omitempty"`
-	UpdatedDate null.Time `boil:"updated_date" json:"updated_date,omitempty" toml:"updated_date" yaml:"updated_date,omitempty"`
-	SiteID      int       `boil:"site_id" json:"site_id" toml:"site_id" yaml:"site_id"`
-	RelatedID   int       `boil:"related_id" json:"related_id" toml:"related_id" yaml:"related_id"`
-	URL         string    `boil:"url" json:"url" toml:"url" yaml:"url"`
+	ID        int       `boil:"id" json:"id" toml:"id" yaml:"id"`
+	CreatedAt null.Time `boil:"created_at" json:"created_at,omitempty" toml:"created_at" yaml:"created_at,omitempty"`
+	UpdatedAt null.Time `boil:"updated_at" json:"updated_at,omitempty" toml:"updated_at" yaml:"updated_at,omitempty"`
+	SiteID    int       `boil:"site_id" json:"site_id" toml:"site_id" yaml:"site_id"`
+	RelatedID int       `boil:"related_id" json:"related_id" toml:"related_id" yaml:"related_id"`
+	URL       string    `boil:"url" json:"url" toml:"url" yaml:"url"`
 
 	R *attachtmentR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L attachtmentL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 var AttachtmentColumns = struct {
-	ID          string
-	CreatedDate string
-	UpdatedDate string
-	SiteID      string
-	RelatedID   string
-	URL         string
+	ID        string
+	CreatedAt string
+	UpdatedAt string
+	SiteID    string
+	RelatedID string
+	URL       string
 }{
-	ID:          "id",
-	CreatedDate: "created_date",
-	UpdatedDate: "updated_date",
-	SiteID:      "site_id",
-	RelatedID:   "related_id",
-	URL:         "url",
+	ID:        "id",
+	CreatedAt: "created_at",
+	UpdatedAt: "updated_at",
+	SiteID:    "site_id",
+	RelatedID: "related_id",
+	URL:       "url",
 }
 
 var AttachtmentTableColumns = struct {
-	ID          string
-	CreatedDate string
-	UpdatedDate string
-	SiteID      string
-	RelatedID   string
-	URL         string
+	ID        string
+	CreatedAt string
+	UpdatedAt string
+	SiteID    string
+	RelatedID string
+	URL       string
 }{
-	ID:          "attachtment.id",
-	CreatedDate: "attachtment.created_date",
-	UpdatedDate: "attachtment.updated_date",
-	SiteID:      "attachtment.site_id",
-	RelatedID:   "attachtment.related_id",
-	URL:         "attachtment.url",
+	ID:        "attachtment.id",
+	CreatedAt: "attachtment.created_at",
+	UpdatedAt: "attachtment.updated_at",
+	SiteID:    "attachtment.site_id",
+	RelatedID: "attachtment.related_id",
+	URL:       "attachtment.url",
 }
 
 // Generated where
@@ -94,19 +94,19 @@ func (w whereHelpernull_Time) IsNull() qm.QueryMod    { return qmhelper.WhereIsN
 func (w whereHelpernull_Time) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
 
 var AttachtmentWhere = struct {
-	ID          whereHelperint
-	CreatedDate whereHelpernull_Time
-	UpdatedDate whereHelpernull_Time
-	SiteID      whereHelperint
-	RelatedID   whereHelperint
-	URL         whereHelperstring
+	ID        whereHelperint
+	CreatedAt whereHelpernull_Time
+	UpdatedAt whereHelpernull_Time
+	SiteID    whereHelperint
+	RelatedID whereHelperint
+	URL       whereHelperstring
 }{
-	ID:          whereHelperint{field: "\"attachtment\".\"id\""},
-	CreatedDate: whereHelpernull_Time{field: "\"attachtment\".\"created_date\""},
-	UpdatedDate: whereHelpernull_Time{field: "\"attachtment\".\"updated_date\""},
-	SiteID:      whereHelperint{field: "\"attachtment\".\"site_id\""},
-	RelatedID:   whereHelperint{field: "\"attachtment\".\"related_id\""},
-	URL:         whereHelperstring{field: "\"attachtment\".\"url\""},
+	ID:        whereHelperint{field: "\"attachtment\".\"id\""},
+	CreatedAt: whereHelpernull_Time{field: "\"attachtment\".\"created_at\""},
+	UpdatedAt: whereHelpernull_Time{field: "\"attachtment\".\"updated_at\""},
+	SiteID:    whereHelperint{field: "\"attachtment\".\"site_id\""},
+	RelatedID: whereHelperint{field: "\"attachtment\".\"related_id\""},
+	URL:       whereHelperstring{field: "\"attachtment\".\"url\""},
 }
 
 // AttachtmentRels is where relationship names are stored.
@@ -165,9 +165,9 @@ func (r *attachtmentR) GetSite() *Site {
 type attachtmentL struct{}
 
 var (
-	attachtmentAllColumns            = []string{"id", "created_date", "updated_date", "site_id", "related_id", "url"}
+	attachtmentAllColumns            = []string{"id", "created_at", "updated_at", "site_id", "related_id", "url"}
 	attachtmentColumnsWithoutDefault = []string{"site_id", "related_id", "url"}
-	attachtmentColumnsWithDefault    = []string{"id", "created_date", "updated_date"}
+	attachtmentColumnsWithDefault    = []string{"id", "created_at", "updated_at"}
 	attachtmentPrimaryKeyColumns     = []string{"id"}
 	attachtmentGeneratedColumns      = []string{}
 )
@@ -882,6 +882,16 @@ func (o *Attachtment) Insert(ctx context.Context, exec boil.ContextExecutor, col
 	}
 
 	var err error
+	if !boil.TimestampsAreSkipped(ctx) {
+		currTime := time.Now().In(boil.GetLocation())
+
+		if queries.MustTime(o.CreatedAt).IsZero() {
+			queries.SetScanner(&o.CreatedAt, currTime)
+		}
+		if queries.MustTime(o.UpdatedAt).IsZero() {
+			queries.SetScanner(&o.UpdatedAt, currTime)
+		}
+	}
 
 	if err := o.doBeforeInsertHooks(ctx, exec); err != nil {
 		return err
@@ -957,6 +967,12 @@ func (o *Attachtment) Insert(ctx context.Context, exec boil.ContextExecutor, col
 // See boil.Columns.UpdateColumnSet documentation to understand column list inference for updates.
 // Update does not automatically update the record in case of default values. Use .Reload() to refresh the records.
 func (o *Attachtment) Update(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) (int64, error) {
+	if !boil.TimestampsAreSkipped(ctx) {
+		currTime := time.Now().In(boil.GetLocation())
+
+		queries.SetScanner(&o.UpdatedAt, currTime)
+	}
+
 	var err error
 	if err = o.doBeforeUpdateHooks(ctx, exec); err != nil {
 		return 0, err
@@ -1086,6 +1102,14 @@ func (o AttachtmentSlice) UpdateAll(ctx context.Context, exec boil.ContextExecut
 func (o *Attachtment) Upsert(ctx context.Context, exec boil.ContextExecutor, updateOnConflict bool, conflictColumns []string, updateColumns, insertColumns boil.Columns, opts ...UpsertOptionFunc) error {
 	if o == nil {
 		return errors.New("models: no attachtment provided for upsert")
+	}
+	if !boil.TimestampsAreSkipped(ctx) {
+		currTime := time.Now().In(boil.GetLocation())
+
+		if queries.MustTime(o.CreatedAt).IsZero() {
+			queries.SetScanner(&o.CreatedAt, currTime)
+		}
+		queries.SetScanner(&o.UpdatedAt, currTime)
 	}
 
 	if err := o.doBeforeUpsertHooks(ctx, exec); err != nil {

@@ -23,58 +23,58 @@ import (
 
 // Post is an object representing the database table.
 type Post struct {
-	ID          int       `boil:"id" json:"id" toml:"id" yaml:"id"`
-	CreatedDate time.Time `boil:"created_date" json:"created_date" toml:"created_date" yaml:"created_date"`
-	UpdatedDate time.Time `boil:"updated_date" json:"updated_date" toml:"updated_date" yaml:"updated_date"`
-	SiteID      int       `boil:"site_id" json:"site_id" toml:"site_id" yaml:"site_id"`
-	Content     string    `boil:"content" json:"content" toml:"content" yaml:"content"`
+	ID        int       `boil:"id" json:"id" toml:"id" yaml:"id"`
+	CreatedAt time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	UpdatedAt time.Time `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
+	SiteID    int       `boil:"site_id" json:"site_id" toml:"site_id" yaml:"site_id"`
+	Content   string    `boil:"content" json:"content" toml:"content" yaml:"content"`
 
 	R *postR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L postL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 var PostColumns = struct {
-	ID          string
-	CreatedDate string
-	UpdatedDate string
-	SiteID      string
-	Content     string
+	ID        string
+	CreatedAt string
+	UpdatedAt string
+	SiteID    string
+	Content   string
 }{
-	ID:          "id",
-	CreatedDate: "created_date",
-	UpdatedDate: "updated_date",
-	SiteID:      "site_id",
-	Content:     "content",
+	ID:        "id",
+	CreatedAt: "created_at",
+	UpdatedAt: "updated_at",
+	SiteID:    "site_id",
+	Content:   "content",
 }
 
 var PostTableColumns = struct {
-	ID          string
-	CreatedDate string
-	UpdatedDate string
-	SiteID      string
-	Content     string
+	ID        string
+	CreatedAt string
+	UpdatedAt string
+	SiteID    string
+	Content   string
 }{
-	ID:          "post.id",
-	CreatedDate: "post.created_date",
-	UpdatedDate: "post.updated_date",
-	SiteID:      "post.site_id",
-	Content:     "post.content",
+	ID:        "post.id",
+	CreatedAt: "post.created_at",
+	UpdatedAt: "post.updated_at",
+	SiteID:    "post.site_id",
+	Content:   "post.content",
 }
 
 // Generated where
 
 var PostWhere = struct {
-	ID          whereHelperint
-	CreatedDate whereHelpertime_Time
-	UpdatedDate whereHelpertime_Time
-	SiteID      whereHelperint
-	Content     whereHelperstring
+	ID        whereHelperint
+	CreatedAt whereHelpertime_Time
+	UpdatedAt whereHelpertime_Time
+	SiteID    whereHelperint
+	Content   whereHelperstring
 }{
-	ID:          whereHelperint{field: "\"post\".\"id\""},
-	CreatedDate: whereHelpertime_Time{field: "\"post\".\"created_date\""},
-	UpdatedDate: whereHelpertime_Time{field: "\"post\".\"updated_date\""},
-	SiteID:      whereHelperint{field: "\"post\".\"site_id\""},
-	Content:     whereHelperstring{field: "\"post\".\"content\""},
+	ID:        whereHelperint{field: "\"post\".\"id\""},
+	CreatedAt: whereHelpertime_Time{field: "\"post\".\"created_at\""},
+	UpdatedAt: whereHelpertime_Time{field: "\"post\".\"updated_at\""},
+	SiteID:    whereHelperint{field: "\"post\".\"site_id\""},
+	Content:   whereHelperstring{field: "\"post\".\"content\""},
 }
 
 // PostRels is where relationship names are stored.
@@ -152,9 +152,9 @@ func (r *postR) GetComments() CommentSlice {
 type postL struct{}
 
 var (
-	postAllColumns            = []string{"id", "created_date", "updated_date", "site_id", "content"}
+	postAllColumns            = []string{"id", "created_at", "updated_at", "site_id", "content"}
 	postColumnsWithoutDefault = []string{"site_id", "content"}
-	postColumnsWithDefault    = []string{"id", "created_date", "updated_date"}
+	postColumnsWithDefault    = []string{"id", "created_at", "updated_at"}
 	postPrimaryKeyColumns     = []string{"id"}
 	postGeneratedColumns      = []string{}
 )
@@ -1051,6 +1051,16 @@ func (o *Post) Insert(ctx context.Context, exec boil.ContextExecutor, columns bo
 	}
 
 	var err error
+	if !boil.TimestampsAreSkipped(ctx) {
+		currTime := time.Now().In(boil.GetLocation())
+
+		if o.CreatedAt.IsZero() {
+			o.CreatedAt = currTime
+		}
+		if o.UpdatedAt.IsZero() {
+			o.UpdatedAt = currTime
+		}
+	}
 
 	if err := o.doBeforeInsertHooks(ctx, exec); err != nil {
 		return err
@@ -1126,6 +1136,12 @@ func (o *Post) Insert(ctx context.Context, exec boil.ContextExecutor, columns bo
 // See boil.Columns.UpdateColumnSet documentation to understand column list inference for updates.
 // Update does not automatically update the record in case of default values. Use .Reload() to refresh the records.
 func (o *Post) Update(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) (int64, error) {
+	if !boil.TimestampsAreSkipped(ctx) {
+		currTime := time.Now().In(boil.GetLocation())
+
+		o.UpdatedAt = currTime
+	}
+
 	var err error
 	if err = o.doBeforeUpdateHooks(ctx, exec); err != nil {
 		return 0, err
@@ -1255,6 +1271,14 @@ func (o PostSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, col
 func (o *Post) Upsert(ctx context.Context, exec boil.ContextExecutor, updateOnConflict bool, conflictColumns []string, updateColumns, insertColumns boil.Columns, opts ...UpsertOptionFunc) error {
 	if o == nil {
 		return errors.New("models: no post provided for upsert")
+	}
+	if !boil.TimestampsAreSkipped(ctx) {
+		currTime := time.Now().In(boil.GetLocation())
+
+		if o.CreatedAt.IsZero() {
+			o.CreatedAt = currTime
+		}
+		o.UpdatedAt = currTime
 	}
 
 	if err := o.doBeforeUpsertHooks(ctx, exec); err != nil {

@@ -1028,7 +1028,7 @@ func testSitesSelect(t *testing.T) {
 }
 
 var (
-	siteDBTypes = map[string]string{`ID`: `integer`, `Name`: `character varying`, `CreatedDate`: `timestamp with time zone`, `UpdatedDate`: `timestamp with time zone`}
+	siteDBTypes = map[string]string{`ID`: `integer`, `CreatedAt`: `timestamp with time zone`, `UpdatedAt`: `timestamp with time zone`, `Name`: `character varying`}
 	_           = bytes.MinRead
 )
 

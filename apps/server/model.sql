@@ -1,20 +1,20 @@
 CREATE TABLE
     IF NOT EXISTS account (
         id serial PRIMARY KEY,
-        created_date timestamptz NOT NULL default current_timestamp,
-        updated_date timestamptz NOT NULL default current_timestamp,
+        created_at  timestamptz NOT NULL default current_timestamp,
+        updated_at timestamptz NOT NULL default current_timestamp,
         username varchar(20) NOT NULL,
         role varchar(10) NOT NULL,
         email varchar(50) NOT NULL,
-        pass_hash varchar(50) NOT NULL
+        passwd_hash varchar(50) NOT NULL
     );
 
 CREATE TABLE
     IF NOT EXISTS site (
         id serial PRIMARY KEY,
-        name varchar(50),
-        created_date timestamptz NOT NULL DEFAULT current_timestamp,
-        updated_date timestamptz NOT NULL DEFAULT current_timestamp
+        created_at  timestamptz NOT NULL DEFAULT current_timestamp,
+        updated_at timestamptz NOT NULL DEFAULT current_timestamp,
+        name varchar(50)
     );
 
 CREATE TABLE
@@ -28,8 +28,8 @@ CREATE TABLE
 CREATE TABLE
     IF NOT EXISTS post (
         id serial PRIMARY KEY,
-        created_date timestamptz NOT NULL default current_timestamp,
-        updated_date timestamptz NOT NULL default current_timestamp,
+        created_at  timestamptz NOT NULL default current_timestamp,
+        updated_at timestamptz NOT NULL default current_timestamp,
         site_id int NOT NULL REFERENCES site (id),
         content text NOT NULL
     );
@@ -37,17 +37,18 @@ CREATE TABLE
 CREATE TABLE
     IF NOT EXISTS attachtment (
         id serial PRIMARY KEY,
-        created_date timestamptz default current_timestamp,
-        updated_date timestamptz default current_timestamp,
+        created_at  timestamptz default current_timestamp,
+        updated_at timestamptz default current_timestamp,
         site_id int NOT NULL REFERENCES site (id),
-        related_id int NOT NULL REFERENCES post (id),
+        --//TODO: 關聯的文章id，設計有些問題，這可能要從另一個關聯表進行管理，需要程序能在文章儲存時自動檢測引用哪些文件
+        related_id int NOT NULL REFERENCES post (id),  
         url text NOT NULL
     );
 
 CREATE TABLE
     IF NOT EXISTS comment (
         id serial PRIMARY KEY,
-        created_date timestamptz NOT NULL default current_timestamp,
+        created_at  timestamptz NOT NULL default current_timestamp,
         post_id int NOT NULL REFERENCES post (id),
         email varchar(50) NOT NULL,
         name varchar(20) NOT NULL,

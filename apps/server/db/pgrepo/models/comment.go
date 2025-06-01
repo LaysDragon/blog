@@ -23,65 +23,65 @@ import (
 
 // Comment is an object representing the database table.
 type Comment struct {
-	ID          int       `boil:"id" json:"id" toml:"id" yaml:"id"`
-	CreatedDate time.Time `boil:"created_date" json:"created_date" toml:"created_date" yaml:"created_date"`
-	PostID      int       `boil:"post_id" json:"post_id" toml:"post_id" yaml:"post_id"`
-	Email       string    `boil:"email" json:"email" toml:"email" yaml:"email"`
-	Name        string    `boil:"name" json:"name" toml:"name" yaml:"name"`
-	Content     string    `boil:"content" json:"content" toml:"content" yaml:"content"`
+	ID        int       `boil:"id" json:"id" toml:"id" yaml:"id"`
+	CreatedAt time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	PostID    int       `boil:"post_id" json:"post_id" toml:"post_id" yaml:"post_id"`
+	Email     string    `boil:"email" json:"email" toml:"email" yaml:"email"`
+	Name      string    `boil:"name" json:"name" toml:"name" yaml:"name"`
+	Content   string    `boil:"content" json:"content" toml:"content" yaml:"content"`
 
 	R *commentR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L commentL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 var CommentColumns = struct {
-	ID          string
-	CreatedDate string
-	PostID      string
-	Email       string
-	Name        string
-	Content     string
+	ID        string
+	CreatedAt string
+	PostID    string
+	Email     string
+	Name      string
+	Content   string
 }{
-	ID:          "id",
-	CreatedDate: "created_date",
-	PostID:      "post_id",
-	Email:       "email",
-	Name:        "name",
-	Content:     "content",
+	ID:        "id",
+	CreatedAt: "created_at",
+	PostID:    "post_id",
+	Email:     "email",
+	Name:      "name",
+	Content:   "content",
 }
 
 var CommentTableColumns = struct {
-	ID          string
-	CreatedDate string
-	PostID      string
-	Email       string
-	Name        string
-	Content     string
+	ID        string
+	CreatedAt string
+	PostID    string
+	Email     string
+	Name      string
+	Content   string
 }{
-	ID:          "comment.id",
-	CreatedDate: "comment.created_date",
-	PostID:      "comment.post_id",
-	Email:       "comment.email",
-	Name:        "comment.name",
-	Content:     "comment.content",
+	ID:        "comment.id",
+	CreatedAt: "comment.created_at",
+	PostID:    "comment.post_id",
+	Email:     "comment.email",
+	Name:      "comment.name",
+	Content:   "comment.content",
 }
 
 // Generated where
 
 var CommentWhere = struct {
-	ID          whereHelperint
-	CreatedDate whereHelpertime_Time
-	PostID      whereHelperint
-	Email       whereHelperstring
-	Name        whereHelperstring
-	Content     whereHelperstring
+	ID        whereHelperint
+	CreatedAt whereHelpertime_Time
+	PostID    whereHelperint
+	Email     whereHelperstring
+	Name      whereHelperstring
+	Content   whereHelperstring
 }{
-	ID:          whereHelperint{field: "\"comment\".\"id\""},
-	CreatedDate: whereHelpertime_Time{field: "\"comment\".\"created_date\""},
-	PostID:      whereHelperint{field: "\"comment\".\"post_id\""},
-	Email:       whereHelperstring{field: "\"comment\".\"email\""},
-	Name:        whereHelperstring{field: "\"comment\".\"name\""},
-	Content:     whereHelperstring{field: "\"comment\".\"content\""},
+	ID:        whereHelperint{field: "\"comment\".\"id\""},
+	CreatedAt: whereHelpertime_Time{field: "\"comment\".\"created_at\""},
+	PostID:    whereHelperint{field: "\"comment\".\"post_id\""},
+	Email:     whereHelperstring{field: "\"comment\".\"email\""},
+	Name:      whereHelperstring{field: "\"comment\".\"name\""},
+	Content:   whereHelperstring{field: "\"comment\".\"content\""},
 }
 
 // CommentRels is where relationship names are stored.
@@ -121,9 +121,9 @@ func (r *commentR) GetPost() *Post {
 type commentL struct{}
 
 var (
-	commentAllColumns            = []string{"id", "created_date", "post_id", "email", "name", "content"}
+	commentAllColumns            = []string{"id", "created_at", "post_id", "email", "name", "content"}
 	commentColumnsWithoutDefault = []string{"post_id", "email", "name", "content"}
-	commentColumnsWithDefault    = []string{"id", "created_date"}
+	commentColumnsWithDefault    = []string{"id", "created_at"}
 	commentPrimaryKeyColumns     = []string{"id"}
 	commentGeneratedColumns      = []string{}
 )
@@ -660,6 +660,13 @@ func (o *Comment) Insert(ctx context.Context, exec boil.ContextExecutor, columns
 	}
 
 	var err error
+	if !boil.TimestampsAreSkipped(ctx) {
+		currTime := time.Now().In(boil.GetLocation())
+
+		if o.CreatedAt.IsZero() {
+			o.CreatedAt = currTime
+		}
+	}
 
 	if err := o.doBeforeInsertHooks(ctx, exec); err != nil {
 		return err
@@ -864,6 +871,13 @@ func (o CommentSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, 
 func (o *Comment) Upsert(ctx context.Context, exec boil.ContextExecutor, updateOnConflict bool, conflictColumns []string, updateColumns, insertColumns boil.Columns, opts ...UpsertOptionFunc) error {
 	if o == nil {
 		return errors.New("models: no comment provided for upsert")
+	}
+	if !boil.TimestampsAreSkipped(ctx) {
+		currTime := time.Now().In(boil.GetLocation())
+
+		if o.CreatedAt.IsZero() {
+			o.CreatedAt = currTime
+		}
 	}
 
 	if err := o.doBeforeUpsertHooks(ctx, exec); err != nil {

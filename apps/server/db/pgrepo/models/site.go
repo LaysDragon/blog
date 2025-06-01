@@ -24,37 +24,37 @@ import (
 
 // Site is an object representing the database table.
 type Site struct {
-	ID          int         `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Name        null.String `boil:"name" json:"name,omitempty" toml:"name" yaml:"name,omitempty"`
-	CreatedDate time.Time   `boil:"created_date" json:"created_date" toml:"created_date" yaml:"created_date"`
-	UpdatedDate time.Time   `boil:"updated_date" json:"updated_date" toml:"updated_date" yaml:"updated_date"`
+	ID        int         `boil:"id" json:"id" toml:"id" yaml:"id"`
+	CreatedAt time.Time   `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	UpdatedAt time.Time   `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
+	Name      null.String `boil:"name" json:"name,omitempty" toml:"name" yaml:"name,omitempty"`
 
 	R *siteR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L siteL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 var SiteColumns = struct {
-	ID          string
-	Name        string
-	CreatedDate string
-	UpdatedDate string
+	ID        string
+	CreatedAt string
+	UpdatedAt string
+	Name      string
 }{
-	ID:          "id",
-	Name:        "name",
-	CreatedDate: "created_date",
-	UpdatedDate: "updated_date",
+	ID:        "id",
+	CreatedAt: "created_at",
+	UpdatedAt: "updated_at",
+	Name:      "name",
 }
 
 var SiteTableColumns = struct {
-	ID          string
-	Name        string
-	CreatedDate string
-	UpdatedDate string
+	ID        string
+	CreatedAt string
+	UpdatedAt string
+	Name      string
 }{
-	ID:          "site.id",
-	Name:        "site.name",
-	CreatedDate: "site.created_date",
-	UpdatedDate: "site.updated_date",
+	ID:        "site.id",
+	CreatedAt: "site.created_at",
+	UpdatedAt: "site.updated_at",
+	Name:      "site.name",
 }
 
 // Generated where
@@ -116,15 +116,15 @@ func (w whereHelpernull_String) IsNull() qm.QueryMod    { return qmhelper.WhereI
 func (w whereHelpernull_String) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
 
 var SiteWhere = struct {
-	ID          whereHelperint
-	Name        whereHelpernull_String
-	CreatedDate whereHelpertime_Time
-	UpdatedDate whereHelpertime_Time
+	ID        whereHelperint
+	CreatedAt whereHelpertime_Time
+	UpdatedAt whereHelpertime_Time
+	Name      whereHelpernull_String
 }{
-	ID:          whereHelperint{field: "\"site\".\"id\""},
-	Name:        whereHelpernull_String{field: "\"site\".\"name\""},
-	CreatedDate: whereHelpertime_Time{field: "\"site\".\"created_date\""},
-	UpdatedDate: whereHelpertime_Time{field: "\"site\".\"updated_date\""},
+	ID:        whereHelperint{field: "\"site\".\"id\""},
+	CreatedAt: whereHelpertime_Time{field: "\"site\".\"created_at\""},
+	UpdatedAt: whereHelpertime_Time{field: "\"site\".\"updated_at\""},
+	Name:      whereHelpernull_String{field: "\"site\".\"name\""},
 }
 
 // SiteRels is where relationship names are stored.
@@ -202,9 +202,9 @@ func (r *siteR) GetSiteRoles() SiteRoleSlice {
 type siteL struct{}
 
 var (
-	siteAllColumns            = []string{"id", "name", "created_date", "updated_date"}
+	siteAllColumns            = []string{"id", "created_at", "updated_at", "name"}
 	siteColumnsWithoutDefault = []string{}
-	siteColumnsWithDefault    = []string{"id", "name", "created_date", "updated_date"}
+	siteColumnsWithDefault    = []string{"id", "created_at", "updated_at", "name"}
 	sitePrimaryKeyColumns     = []string{"id"}
 	siteGeneratedColumns      = []string{}
 )
@@ -1103,6 +1103,16 @@ func (o *Site) Insert(ctx context.Context, exec boil.ContextExecutor, columns bo
 	}
 
 	var err error
+	if !boil.TimestampsAreSkipped(ctx) {
+		currTime := time.Now().In(boil.GetLocation())
+
+		if o.CreatedAt.IsZero() {
+			o.CreatedAt = currTime
+		}
+		if o.UpdatedAt.IsZero() {
+			o.UpdatedAt = currTime
+		}
+	}
 
 	if err := o.doBeforeInsertHooks(ctx, exec); err != nil {
 		return err
@@ -1178,6 +1188,12 @@ func (o *Site) Insert(ctx context.Context, exec boil.ContextExecutor, columns bo
 // See boil.Columns.UpdateColumnSet documentation to understand column list inference for updates.
 // Update does not automatically update the record in case of default values. Use .Reload() to refresh the records.
 func (o *Site) Update(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) (int64, error) {
+	if !boil.TimestampsAreSkipped(ctx) {
+		currTime := time.Now().In(boil.GetLocation())
+
+		o.UpdatedAt = currTime
+	}
+
 	var err error
 	if err = o.doBeforeUpdateHooks(ctx, exec); err != nil {
 		return 0, err
@@ -1307,6 +1323,14 @@ func (o SiteSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, col
 func (o *Site) Upsert(ctx context.Context, exec boil.ContextExecutor, updateOnConflict bool, conflictColumns []string, updateColumns, insertColumns boil.Columns, opts ...UpsertOptionFunc) error {
 	if o == nil {
 		return errors.New("models: no site provided for upsert")
+	}
+	if !boil.TimestampsAreSkipped(ctx) {
+		currTime := time.Now().In(boil.GetLocation())
+
+		if o.CreatedAt.IsZero() {
+			o.CreatedAt = currTime
+		}
+		o.UpdatedAt = currTime
 	}
 
 	if err := o.doBeforeUpsertHooks(ctx, exec); err != nil {

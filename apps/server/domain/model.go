@@ -4,8 +4,8 @@ import "time"
 
 type Account struct {
 	Id          int
-	CreatedDate time.Time
-	UpdatedDate time.Time
+	CreatedAt time.Time
+	UpdatedAt time.Time
 	Username    string
 	Role        string
 	Email       string
@@ -14,23 +14,23 @@ type Account struct {
 
 type Site struct {
 	Id          int
-	CreatedDate time.Time
-	UpdatedDate time.Time
+	CreatedAt time.Time
+	UpdatedAt time.Time
 	Name        string
 }
 
 type Post struct {
 	Id          int
-	CreatedDate time.Time
-	UpdatedDate time.Time
+	CreatedAt time.Time
+	UpdatedAt time.Time
 	SiteId      int
 	Content     string
 }
 
 type Attachtment struct {
 	Id          int
-	CreatedDate time.Time
-	UpdatedDate time.Time
+	CreatedAt time.Time
+	UpdatedAt time.Time
 	SiteId      int
 	RelatedId   int
 	Url         string
@@ -38,7 +38,7 @@ type Attachtment struct {
 
 type Comment struct {
 	Id          int
-	CreatedDate time.Time
+	CreatedAt time.Time
 	PostId      time.Time
 	Email       string
 	Name        string
