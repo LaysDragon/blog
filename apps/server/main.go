@@ -9,7 +9,6 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/LaysDragon/blog/apps/server/db/pgrepo"
-	"github.com/LaysDragon/blog/apps/server/service"
 	"github.com/LaysDragon/blog/apps/server/usecase"
 	"github.com/LaysDragon/blog/apps/server/web"
 	"github.com/gin-gonic/gin"
@@ -44,9 +43,9 @@ func main() {
 		log.Fatalf("unable to connect to database, %v", err)
 	}
 
-	postRepo := pgrepo.NewPostRepo(db)
-	postService := service.NewPostService()
-	postUseCase := usecase.NewPostUseCase(postRepo, postService)
+	postRepo := pgrepo.NewPost(db)
+	// postService := service.NewPostService()
+	postUseCase := usecase.NewPost(postRepo)
 	postController := web.NewPostController(postUseCase)
 
 	router := gin.Default()

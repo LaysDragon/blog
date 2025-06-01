@@ -9,15 +9,15 @@ import (
 )
 
 type PostController struct {
-	usecase *usecase.PostUseCase
+	usecase *usecase.Post
 }
 
-func NewPostController(usecase *usecase.PostUseCase) *PostController {
+func NewPostController(usecase *usecase.Post) *PostController {
 	return &PostController{usecase}
 }
 
 func (c *PostController) HandleGetPost(ctx *gin.Context) {
-	post, err := c.usecase.ById(0)
+	post, err := c.usecase.ById(ctx, 1)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			ctx.Status(404)
