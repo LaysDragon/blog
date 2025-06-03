@@ -41,9 +41,5 @@ func (c *AccountController) HandlePost(ctx *gin.Context) {
 		c.log.Error("created account failed", zap.Error(err))
 		return
 	}
-	ctx.JSON(200, Account{
-		ID:       acc.ID,
-		Username: acc.Username,
-		Email:    acc.Email,
-	})
+	ctx.JSON(200, c.ToDto(acc))
 }
