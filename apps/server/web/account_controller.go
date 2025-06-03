@@ -15,9 +15,10 @@ type Account struct {
 
 type AccountController struct {
 	usecase *usecase.Account
+	jwt     *JwtHandler
 	log     *zap.Logger
 }
 
-func NewAccountController(usecase *usecase.Account, log *zap.Logger) *AccountController {
-	return &AccountController{usecase, log}
+func NewAccountController(usecase *usecase.Account, log *zap.Logger, jwt *JwtHandler) *AccountController {
+	return &AccountController{usecase, jwt, log}
 }

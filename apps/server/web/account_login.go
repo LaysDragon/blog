@@ -25,14 +25,21 @@ func (c *AccountController) HandleLogin(ctx *gin.Context) {
 		return
 	}
 
-	result, err := c.usecase.Verify(ctx, request.Username, request.Password)
+	result, account, err := c.usecase.Verify(ctx, request.Username, request.Password)
 	if err != nil {
 		c.log.Error("account verify failed", zap.Error(err))
 		return
 	}
 	if result {
+		token, err := c.jwt.Signed(account.ID, string(account.Role))
+		if err != nil {
+			c.log.Error("jwt signing failed", zap.Error(err))
+			ctx.Status(500)
+			return
+		}
+
 		ctx.JSON(http.StatusOK, LoginResult{
-			Token: "",
+			Token: token,
 		})
 	} else {
 		ctx.Status(http.StatusUnauthorized)

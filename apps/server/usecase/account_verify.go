@@ -1,16 +1,20 @@
 package usecase
 
-import "context"
-import "github.com/matthewhartstonge/argon2"
+import (
+	"context"
 
-func (a *Account) Verify(ctx context.Context, username string, password string) (bool, error) {
+	"github.com/LaysDragon/blog/apps/server/domain"
+	"github.com/matthewhartstonge/argon2"
+)
+
+func (a *Account) Verify(ctx context.Context, username string, password string) (bool, *domain.Account, error) {
 	account, err := a.ByUsername(ctx, username)
 	if err != nil {
-		return false, err
+		return false, nil, err
 	}
 	ok, err := argon2.VerifyEncoded([]byte(password), []byte(account.PasswdHash))
 	if err != nil {
-		return false, err
+		return false, nil, err
 	}
-	return ok, nil
+	return ok, account, nil
 }

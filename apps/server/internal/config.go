@@ -10,6 +10,8 @@ import (
 type Config struct {
 	DBType         string
 	DataSourceName string
+	//TODO: first run auto produce with crypto/rand and overwrite config
+	JwtSecret string
 }
 
 func LoadConfig() Config {
