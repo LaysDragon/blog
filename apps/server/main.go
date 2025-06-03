@@ -88,8 +88,8 @@ func main() {
 			func(config internal.Config) (boil.ContextExecutor, error) {
 				return errorWrap(sql.Open(config.DBType, config.DataSourceName))("unable to connect to database, %w")
 			},
-			func(config internal.Config) *web.JwtHandler {
-				return web.NewJwtHandler(config.JwtSecret)
+			func(config internal.Config, log *zap.Logger) *web.JwtHandler {
+				return web.NewJwtHandler(config.JwtSecret, log)
 			},
 			web.GetValidator,
 			pgrepo.NewPost,

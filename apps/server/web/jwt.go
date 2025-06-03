@@ -1,10 +1,16 @@
 package web
 
 import (
+	"context"
+	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
+	"github.com/LaysDragon/blog/apps/server/domain"
+	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"go.uber.org/zap"
 )
 
 type AuthClaims struct {
@@ -12,12 +18,13 @@ type AuthClaims struct {
 	Role string
 }
 
-func NewJwtHandler(secret string) *JwtHandler {
-	return &JwtHandler{secret: []byte(secret)}
-}
-
 type JwtHandler struct {
 	secret []byte
+	log    *zap.Logger
+}
+
+func NewJwtHandler(secret string, log *zap.Logger) *JwtHandler {
+	return &JwtHandler{secret: []byte(secret), log: log}
 }
 
 func (j *JwtHandler) Parse(tokenStr string) (*jwt.Token, *AuthClaims, error) {
@@ -50,4 +57,65 @@ func (j *JwtHandler) Signed(uid int, role string) (string, error) {
 		return "", err
 	}
 	return tokenStr, nil
+}
+
+type AuthToken struct {
+	Token  *jwt.Token
+	Claims *AuthClaims
+}
+
+func (j *JwtHandler) ParseMiddleware() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		bearer := ctx.GetHeader("Authorization")
+		if bearer == "" {
+			return
+		}
+		spltBearer := strings.Split(bearer, " ")
+		if len(spltBearer) != 2 {
+			return
+		}
+
+		tokenStr := spltBearer[1]
+
+		token, claims, err := j.Parse(tokenStr)
+		if err != nil {
+			j.log.Error("failed to parse jwt token", zap.Error(err))
+			ctx.AbortWithStatus(http.StatusInternalServerError)
+		}
+
+		ctx.Set("token", &AuthToken{
+			token,
+			claims,
+		})
+	}
+}
+
+func RequiredAuthMiddware() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		token := GetToken(ctx)
+		if token == nil || !token.Token.Valid {
+			ctx.AbortWithStatus(http.StatusUnauthorized)
+			return
+		}
+	}
+}
+
+func GetToken(ctx context.Context) *AuthToken {
+	if token, ok := ctx.Value("token").(*AuthToken); ok {
+		return token
+	}
+	return nil
+
+}
+
+func GetRole(ctx context.Context) domain.AccountRole {
+	token := GetToken(ctx)
+	if token == nil {
+		return ""
+	}
+	if !token.Token.Valid {
+		return ""
+	}
+
+	return (domain.AccountRole)(token.Claims.Role)
 }
