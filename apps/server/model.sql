@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS account (
     updated_at timestamptz NOT NULL default current_timestamp,
     deleted_at timestamptz,
     username varchar(20) UNIQUE NOT NULL,
-    role varchar(10) NOT NULL,
+    role varchar(50) NOT NULL,
     email varchar(50) NOT NULL,
     passwd_hash text NOT NULL
 );
