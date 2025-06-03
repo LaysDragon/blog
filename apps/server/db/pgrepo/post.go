@@ -62,7 +62,7 @@ func (r *PostDb) Upsert(ctx context.Context, post *domain.Post) (*domain.Post, e
 	dbPost := r.ToDb(post)
 	err := dbPost.Upsert(ctx, r.db, true, []string{"id"}, boil.Infer(), boil.Infer())
 	if err != nil {
-		return nil, err
+		return nil, ErrorTranslate(err)
 	}
 	return r.ToDomain(dbPost), nil
 }
