@@ -28,10 +28,10 @@ func (r *PostDb) ToDb(post *domain.Post) *models.Post {
 		return nil
 	}
 	return &models.Post{
-		ID:        post.Id,
+		ID:        post.ID,
 		CreatedAt: post.CreatedAt,
 		UpdatedAt: post.UpdatedAt,
-		SiteID:    post.SiteId,
+		SiteID:    post.SiteID,
 		Content:   post.Content,
 	}
 }
@@ -41,10 +41,10 @@ func (r *PostDb) ToDomain(post *models.Post) *domain.Post {
 		return nil
 	}
 	return &domain.Post{
-		Id:        post.ID,
+		ID:        post.ID,
 		CreatedAt: post.CreatedAt,
 		UpdatedAt: post.UpdatedAt,
-		SiteId:    post.SiteID,
+		SiteID:    post.SiteID,
 		Content:   post.Content,
 	}
 }

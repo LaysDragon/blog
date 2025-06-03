@@ -2,20 +2,22 @@ package web
 
 import (
 	"database/sql"
+
 	"github.com/LaysDragon/blog/apps/server/usecase"
 	"github.com/gin-gonic/gin"
-	"log"
+	"go.uber.org/zap"
 )
 
 type PostController struct {
 	usecase *usecase.Post
+	log     *zap.SugaredLogger
 }
 
-func NewPostController(usecase *usecase.Post) *PostController {
-	return &PostController{usecase}
+func NewPostController(usecase *usecase.Post, log *zap.SugaredLogger) *PostController {
+	return &PostController{usecase, log}
 }
 
-func (c *PostController) HandleGetPost(ctx *gin.Context) {
+func (c *PostController) HandleGet(ctx *gin.Context) {
 	post, err := c.usecase.ById(ctx, 1)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -23,7 +25,7 @@ func (c *PostController) HandleGetPost(ctx *gin.Context) {
 		} else {
 			ctx.String(500, err.Error())
 		}
-		log.Println(err)
+		c.log.Error(err)
 		return
 	}
 	ctx.JSON(200, post)

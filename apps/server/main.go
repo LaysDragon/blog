@@ -33,8 +33,8 @@ func errorWrap[T any](val T, err error) func(string) (T, error) {
 	}
 }
 
-func SetupServer(lc fx.Lifecycle, log *zap.Logger, postController *web.PostController) *gin.Engine {
-	log = log.With(zap.String("module", "Gin"))
+func NewServer(log *zap.Logger) *gin.Engine {
+	log = log.Named("gin")
 	gin.DebugPrintFunc = func(format string, values ...interface{}) {
 		msg := strings.TrimSpace(fmt.Sprintf(format, values...))
 		if len(strings.Split(msg, "\n")) > 1 {
@@ -43,11 +43,15 @@ func SetupServer(lc fx.Lifecycle, log *zap.Logger, postController *web.PostContr
 			log.Debug(msg)
 		}
 	}
-
 	router := gin.New()
 	router.Use(ginzap.Ginzap(log, time.RFC3339, true))
+	//TODO: use prettyconsole.FormattedString on panic recover stack trace
 	router.Use(ginzap.RecoveryWithZap(log, true))
-	router.GET("/post", postController.HandleGetPost)
+	return router
+}
+
+func StartServer(lc fx.Lifecycle, router *gin.Engine, log *zap.Logger) {
+	log = log.Named("gin")
 
 	httpSrv := &http.Server{Addr: ":8080", Handler: router}
 	log.Info("Server setup complete")
@@ -69,8 +73,6 @@ func SetupServer(lc fx.Lifecycle, log *zap.Logger, postController *web.PostContr
 
 		},
 	})
-
-	return router
 }
 
 func main() {
@@ -80,23 +82,33 @@ func main() {
 			func() *zap.Logger {
 				return prettyconsole.NewLogger(zap.DebugLevel)
 			},
+			func(log *zap.Logger) *zap.SugaredLogger {
+				return log.Sugar()
+			},
 			func(config internal.Config) (boil.ContextExecutor, error) {
 				return errorWrap(sql.Open(config.DBType, config.DataSourceName))("unable to connect to database, %w")
 			},
+			web.GetValidator,
 			pgrepo.NewPost,
+			pgrepo.NewAccount,
 			usecase.NewPost,
+			usecase.NewAccount,
 			web.NewPostController,
-			SetupServer,
+			web.NewAccountController,
+			NewServer,
 		),
 		//TODO: remove moduletrace and stacktrace field by custom encoder wrapper
 		// https://stackoverflow.com/questions/73469128/hide-sensitive-fields-in-uber-zap-go
 		fx.WithLogger(func(log *zap.Logger) fxevent.Logger {
-			log = log.WithOptions()
-			fxlogger := &fxevent.ZapLogger{Logger: log}
+			fxlogger := &fxevent.ZapLogger{Logger: log.Named("fx")}
 			fxlogger.UseLogLevel(zap.InfoLevel)
 			return fxlogger
 		}),
-		fx.Invoke(func(router *gin.Engine) {}),
+		fx.Invoke(
+			web.SetupValidation,
+			web.SetupRouter,
+			StartServer,
+		),
 	)
 
 	app.Run()

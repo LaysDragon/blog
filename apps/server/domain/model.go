@@ -1,16 +1,27 @@
 package domain
 
-import "time"
+import (
+	"slices"
+	"time"
+)
+
+type Enum interface {
+	IsValid() bool
+}
 
 type AccountRole string
 
 const (
-	Admin AccountRole = "ROLE::ADMIN"
-	User  AccountRole = "ROLE::USER"
+	AdminRole AccountRole = "ROLE::ADMIN"
+	UserRole  AccountRole = "ROLE::USER"
 )
 
+func (r AccountRole) IsValid() bool {
+	return slices.Contains([]AccountRole{AdminRole, UserRole}, r)
+}
+
 type Account struct {
-	Id         int
+	ID         int
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
 	Username   string
@@ -20,41 +31,41 @@ type Account struct {
 }
 
 type Site struct {
-	Id        int
+	ID        int
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	Name      string
 }
 
 type Post struct {
-	Id        int
+	ID        int
 	CreatedAt time.Time
 	UpdatedAt time.Time
-	SiteId    int
+	SiteID    int
 	Content   string
 }
 
 type Attachtment struct {
-	Id        int
+	ID        int
 	CreatedAt time.Time
 	UpdatedAt time.Time
-	SiteId    int
-	RelatedId int
+	SiteID    int
+	RelatedID int
 	Url       string
 }
 
 type Comment struct {
-	Id        int
+	ID        int
 	CreatedAt time.Time
-	PostId    time.Time
+	PostID    time.Time
 	Email     string
 	Name      string
 	Content   string
 }
 
 type AccessLog struct {
-	Id        int
+	ID        int
 	CreatedAt time.Time
-	UserId    int
+	UserID    int
 	Method    string
 }

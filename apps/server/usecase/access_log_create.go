@@ -8,7 +8,7 @@ import (
 
 func (s *AccessLog) Create(ctx context.Context, uid int, method string) (*domain.AccessLog, error) {
 	return s.repo.Upsert(ctx, &domain.AccessLog{
-		UserId: uid,
+		UserID: uid,
 		Method: method,
 	})
 }
