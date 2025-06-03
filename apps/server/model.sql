@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS account (
     username varchar(20) UNIQUE NOT NULL,
     role varchar(10) NOT NULL,
     email varchar(50) NOT NULL,
-    passwd_hash varchar(50) NOT NULL
+    passwd_hash text NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS site (
