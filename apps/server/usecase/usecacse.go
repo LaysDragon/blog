@@ -12,13 +12,13 @@ type CommonRepo[T any] interface {
 }
 
 type ItemNotExistedError struct {
-	err error
+	Err error
 }
 
 func (e ItemNotExistedError) Error() string {
-	return fmt.Sprintf("Item Not Existed : err %v", e.err)
+	return fmt.Sprintf("Item Not Existed : err %v", e.Err)
 }
 
 func (e ItemNotExistedError) Unwrap() error {
-	return e.err
+	return e.Err
 }
