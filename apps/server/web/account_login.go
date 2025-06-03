@@ -7,10 +7,6 @@ import (
 	"go.uber.org/zap"
 )
 
-func (c *AccountController) HandleGet(ctx *gin.Context) {
-	ctx.Status(200)
-}
-
 type AccountLoginRequest struct {
 	Username string `json:"username" binding:"required"`
 	Password string `json:"password" binding:"required"`
