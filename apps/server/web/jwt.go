@@ -2,6 +2,7 @@ package web
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strconv"
 	"strings"
@@ -60,8 +61,9 @@ func (j *JwtHandler) Signed(uid int, role string) (string, error) {
 }
 
 type AuthToken struct {
-	Token  *jwt.Token
-	Claims *AuthClaims
+	Token   *jwt.Token
+	Claims  *AuthClaims
+	Expired bool
 }
 
 func (j *JwtHandler) ParseMiddleware() gin.HandlerFunc {
@@ -77,15 +79,21 @@ func (j *JwtHandler) ParseMiddleware() gin.HandlerFunc {
 
 		tokenStr := spltBearer[1]
 
+		expired := false
 		token, claims, err := j.Parse(tokenStr)
 		if err != nil {
-			j.log.Error("failed to parse jwt token", zap.Error(err))
-			ctx.AbortWithStatus(http.StatusInternalServerError)
+			if errors.Is(err, jwt.ErrTokenExpired) {
+				expired = true
+			} else {
+				j.log.Error("failed to parse jwt token", zap.Error(err))
+				ctx.AbortWithStatus(http.StatusInternalServerError)
+			}
 		}
 
 		ctx.Set("token", &AuthToken{
 			token,
 			claims,
+			expired,
 		})
 	}
 }
@@ -93,7 +101,7 @@ func (j *JwtHandler) ParseMiddleware() gin.HandlerFunc {
 func RequiredAuthMiddware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		token := GetToken(ctx)
-		if token == nil || !token.Token.Valid {
+		if token == nil || token.Expired || !token.Token.Valid {
 			ctx.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
