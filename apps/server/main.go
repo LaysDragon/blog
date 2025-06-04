@@ -18,6 +18,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/LaysDragon/blog/apps/server/db/pgrepo"
+	"github.com/LaysDragon/blog/apps/server/db/pgrepo/perm"
 	"github.com/LaysDragon/blog/apps/server/internal"
 	"github.com/LaysDragon/blog/apps/server/usecase"
 	"github.com/LaysDragon/blog/apps/server/web"
@@ -76,6 +77,7 @@ func StartServer(lc fx.Lifecycle, router *gin.Engine, log *zap.Logger) {
 }
 
 func main() {
+	//TODO: refactor with fx module
 	app := fx.New(
 		fx.Provide(
 			internal.LoadConfig,
@@ -85,11 +87,19 @@ func main() {
 			func(log *zap.Logger) *zap.SugaredLogger {
 				return log.Sugar()
 			},
-			func(config internal.Config) (boil.ContextExecutor, error) {
+			func(config internal.Config) (*sql.DB, error) {
 				return errorWrap(sql.Open(config.DBType, config.DataSourceName))("unable to connect to database, %w")
 			},
+
+			func(db *sql.DB) boil.ContextExecutor {
+				return db
+			},
+
 			func(config internal.Config, log *zap.Logger) *web.JwtHandler {
 				return web.NewJwtHandler(config.JwtSecret, log)
+			},
+			func(config internal.Config, db *sql.DB, log *zap.Logger) (*perm.Perm, error) {
+				return errorWrap(perm.New(db, config.DBType, log))("failed to init Permission service, %w")
 			},
 			web.GetValidator,
 			pgrepo.NewPost,
@@ -108,6 +118,7 @@ func main() {
 			return fxlogger
 		}),
 		fx.Invoke(
+			perm.InitPerm,
 			web.SetupValidation,
 			web.SetupRouter,
 			StartServer,
