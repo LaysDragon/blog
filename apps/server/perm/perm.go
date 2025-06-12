@@ -11,6 +11,7 @@ import (
 	sqladapter "github.com/Blank-Xu/sql-adapter"
 	"github.com/casbin/casbin/v2"
 	"github.com/casbin/casbin/v2/model"
+	"github.com/casbin/casbin/v2/util"
 	"go.uber.org/zap"
 )
 
@@ -71,6 +72,9 @@ func New(db *sql.DB, dbType string, log *zap.Logger) (*Perm, error) {
 	if err != nil {
 		return nil, err
 	}
+	e.AddNamedMatchingFunc("g", "KeyMatch2", util.KeyMatch)
+	e.AddNamedMatchingFunc("g2", "KeyMatch2", util.KeyMatch)
+
 	if err = e.LoadPolicy(); err != nil {
 		return nil, err
 	}
@@ -119,8 +123,21 @@ func InitPerm(perm *Perm, db *sql.DB) error {
 	return nil
 }
 
+func (p *Perm) CheckRaw(sub string, res string, act string) (bool, []string, error) {
+	result, reason, err := p.enforcer.EnforceEx(sub, act, res)
+	p.log.Debug("Check Permission", zap.String("sub", sub), zap.String("act", act), zap.String("res", res), zap.Bool("result", result), zap.Strings("reason", reason), zap.Error(err))
+
+	return result, reason, err
+}
+
 func (p *Perm) Check(sub ResId, res ResId, act ActStr) (bool, error) {
-	return p.enforcer.Enforce(sub.Str(), res.Type().Act(act), res.Str())
+	actStr := string(act)
+	if !act.IsOverride() {
+		actStr = res.Type().Act(act)
+	}
+	result, _, err := p.CheckRaw(sub.Str(), actStr, res.Str())
+
+	return result, err
 }
 
 func (p *Perm) AddResRelation(parent ResId, child ResId) {

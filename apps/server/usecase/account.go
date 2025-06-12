@@ -3,8 +3,8 @@ package usecase
 import (
 	"context"
 
-	"github.com/LaysDragon/blog/apps/server/db/pgrepo/perm"
 	"github.com/LaysDragon/blog/apps/server/domain"
+	"github.com/LaysDragon/blog/apps/server/perm"
 	"github.com/matthewhartstonge/argon2"
 )
 

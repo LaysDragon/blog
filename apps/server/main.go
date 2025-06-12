@@ -9,20 +9,19 @@ import (
 	"strings"
 	"time"
 
+	"github.com/LaysDragon/blog/apps/server/db/pgrepo"
+	"github.com/LaysDragon/blog/apps/server/internal"
+	"github.com/LaysDragon/blog/apps/server/perm"
+	"github.com/LaysDragon/blog/apps/server/usecase"
+	"github.com/LaysDragon/blog/apps/server/web"
 	ginzap "github.com/gin-contrib/zap"
+	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
 	prettyconsole "github.com/thessem/zap-prettyconsole"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"go.uber.org/fx"
 	"go.uber.org/fx/fxevent"
 	"go.uber.org/zap"
-
-	"github.com/LaysDragon/blog/apps/server/db/pgrepo"
-	"github.com/LaysDragon/blog/apps/server/db/pgrepo/perm"
-	"github.com/LaysDragon/blog/apps/server/internal"
-	"github.com/LaysDragon/blog/apps/server/usecase"
-	"github.com/LaysDragon/blog/apps/server/web"
-	"github.com/gin-gonic/gin"
 )
 
 func errorWrap[T any](val T, err error) func(string) (T, error) {
@@ -45,7 +44,7 @@ func NewServer(log *zap.Logger) *gin.Engine {
 		}
 	}
 	router := gin.New()
-	router.Use(ginzap.Ginzap(log, time.RFC3339, true))
+	router.Use(ginzap.Ginzap(log, time.RFC3339, true), web.CtxLoggerMidleware(log))
 	//TODO: use prettyconsole.FormattedString on panic recover stack trace
 	router.Use(ginzap.RecoveryWithZap(log, true))
 	return router

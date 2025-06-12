@@ -2,6 +2,7 @@ package web
 
 import (
 	"github.com/LaysDragon/blog/apps/server/domain"
+	"github.com/LaysDragon/blog/apps/server/perm"
 	"github.com/LaysDragon/blog/apps/server/usecase"
 	"go.uber.org/zap"
 )
@@ -18,10 +19,11 @@ type AccountController struct {
 	usecase *usecase.Account
 	jwt     *JwtHandler
 	log     *zap.Logger
+	perm    *perm.Perm
 }
 
-func NewAccountController(usecase *usecase.Account, log *zap.Logger, jwt *JwtHandler) *AccountController {
-	return &AccountController{usecase, jwt, log}
+func NewAccountController(usecase *usecase.Account, log *zap.Logger, perm *perm.Perm, jwt *JwtHandler) *AccountController {
+	return &AccountController{usecase, jwt, log, perm}
 }
 
 func (c *AccountController) ToDto(acc *domain.Account) *Account {

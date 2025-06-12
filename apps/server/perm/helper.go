@@ -33,6 +33,11 @@ const (
 	ACT_READ   ActStr = "READ"
 	ACT_DELETE ActStr = "DELETE"
 
+	ACT_WRITE_USER_ADMIN ActStr = "ACT::USER_ADMIN/WRITE"
+
+	//system implied top level scope
+	RES_SYSTEM ResStr = "system"
+
 	RES_USER    ResStr = "user"
 	RES_POST    ResStr = "post"
 	RES_SITE    ResStr = "site"
@@ -41,6 +46,11 @@ const (
 	ROLE_OWNER RoleStr = "OWNER"
 )
 
+func (a ActStr) IsOverride() bool {
+	return strings.HasPrefix(string(a), "ACT::")
+}
+
+// {res_type}.{id}
 func (r ResStr) ID(id int) ResId {
 	return ResId{
 		ID:   strconv.Itoa(id),
@@ -48,10 +58,20 @@ func (r ResStr) ID(id int) ResId {
 	}
 }
 
+// // {res_type}.new
+// func (r ResStr) New() ResId {
+// 	return ResId{
+// 		ID:   "new",
+// 		Name: r,
+// 	}
+// }
+
+// ACT::{res_type}/{act}
 func (r ResStr) Act(act ActStr) string {
-	return fmt.Sprintf("%v.%v", r, act)
+	return fmt.Sprintf("ACT::%v/%v", r, act)
 }
 
+// ROLE::{res_type}/{act}
 func (r ResStr) Role(act RoleStr) string {
 	return fmt.Sprintf("ROLE::%v/%v", strings.ToUpper(string(r)), act)
 }
@@ -61,7 +81,11 @@ type ResId struct {
 	Name ResStr
 }
 
+// {res_type}.{id}
 func (r ResId) Str() string {
+	if r.ID == "" {
+		return string(r.Name)
+	}
 	return fmt.Sprintf("%v.%v", r.Name, r.ID)
 }
 
@@ -80,13 +104,21 @@ func User(id int) ResId {
 	return RES_USER.ID(id)
 }
 
+// user.anon
 func UserAnon() ResId {
 	return ResId{
 		Name: RES_USER,
 		ID:   "anon",
 	}
-
 }
+
+// // user.new_admin
+// func UserNewAdmin() ResId {
+// 	return ResId{
+// 		Name: RES_USER,
+// 		ID:   "new_admin",
+// 	}
+// }
 
 func Site(id int) ResId {
 	return RES_SITE.ID(id)
@@ -96,4 +128,11 @@ func Post(id int) ResId {
 }
 func Comment(id int) ResId {
 	return RES_COMMENT.ID(id)
+}
+
+func System() ResId {
+	return ResId{
+		Name: RES_SYSTEM,
+		ID:   "",
+	}
 }

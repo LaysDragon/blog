@@ -127,3 +127,19 @@ func GetRole(ctx context.Context) domain.AccountRole {
 
 	return (domain.AccountRole)(token.Claims.Role)
 }
+
+func GetUID(ctx context.Context) int {
+	token := GetToken(ctx)
+	if token == nil {
+		return -1
+	}
+	if !token.Token.Valid {
+		return -1
+	}
+	uid, err := strconv.Atoi(token.Claims.Subject)
+	if err != nil {
+		GetLogger(ctx).Error("failed to parse jwt token uid subject", zap.Error(err))
+		return -1
+	}
+	return uid
+}

@@ -1,7 +1,10 @@
 package web
 
 import (
+	"net/http"
+
 	"github.com/LaysDragon/blog/apps/server/domain"
+	"github.com/LaysDragon/blog/apps/server/perm"
 	"github.com/LaysDragon/blog/apps/server/usecase"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -24,7 +27,14 @@ func (c *AccountController) HandlePost(ctx *gin.Context) {
 	}
 
 	if request.Role == domain.AdminRole {
-		//TODO: verify the permission of create admin account
+		allow, err := c.perm.Check(perm.User(GetUID(ctx)), perm.System(), perm.ACT_WRITE_USER_ADMIN)
+		if err != nil {
+			c.log.Error("check permission failed", zap.Error(err))
+		}
+		if !allow {
+			ctx.Status(http.StatusForbidden)
+			return
+		}
 	}
 
 	acc, err := c.usecase.Create(ctx, &domain.Account{
