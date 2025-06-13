@@ -131,11 +131,11 @@ func (p *Perm) CheckRaw(sub string, act string, res string) (bool, []string, err
 }
 
 func (p *Perm) Check(sub ResId, act ActStr, res ResId) (bool, error) {
-	actStr := string(act)
-	if !act.IsOverride() {
-		actStr = res.Type().Act(act)
-	}
-	result, _, err := p.CheckRaw(sub.Str(), actStr, res.Str())
+	// actStr := string(act)
+	// if !act.IsOverride() {
+	// 	actStr = res.Type().Act(act)
+	// }
+	result, _, err := p.CheckRaw(sub.Str(), res.Type().Act(act), res.Str())
 
 	return result, err
 }
@@ -147,13 +147,13 @@ func (p *Perm) CheckE(sub ResId, act ActStr, res ResId) error {
 		return err
 	}
 	if !result {
-		actStr := string(act)
-		if !act.IsOverride() {
-			actStr = res.Type().Act(act)
-		}
+		// actStr := string(act)
+		// if !act.IsOverride() {
+		// 	actStr = res.Type().Act(act)
+		// }
 		return PermissionError{
 			sub: sub.Str(),
-			act: actStr,
+			act: res.Type().Act(act),
 			res: res.Str(),
 		}
 	}

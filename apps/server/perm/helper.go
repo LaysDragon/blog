@@ -44,7 +44,15 @@ const (
 	RES_COMMENT ResStr = "comment"
 
 	ROLE_OWNER RoleStr = "OWNER"
-)
+
+
+// func (r RoleStr) Str() string {
+// 	return fmt.Sprintf("ROLE::%v", r)
+// }
+
+func (a RoleStr) IsOverride() bool {
+	return strings.HasPrefix(string(a), "ROLE::")
+}
 
 func (a ActStr) IsOverride() bool {
 	return strings.HasPrefix(string(a), "ACT::")
@@ -68,12 +76,18 @@ func (r ResStr) ID(id int) ResId {
 
 // ACT::{res_type}/{act}
 func (r ResStr) Act(act ActStr) string {
+	if act.IsOverride() {
+		return string(act)
+	}
 	return fmt.Sprintf("ACT::%v/%v", r, act)
 }
 
-// ROLE::{res_type}/{act}
-func (r ResStr) Role(act RoleStr) string {
-	return fmt.Sprintf("ROLE::%v/%v", strings.ToUpper(string(r)), act)
+// ROLE::{res_type}/{role}
+func (r ResStr) Role(role RoleStr) string {
+	if role.IsOverride() {
+		return string(role)
+	}
+	return fmt.Sprintf("ROLE::%v/%v", strings.ToUpper(string(r)), role)
 }
 
 type ResId struct {
