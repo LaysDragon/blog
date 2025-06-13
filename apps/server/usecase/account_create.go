@@ -20,5 +20,14 @@ func (a *Account) Create(ctx context.Context, op perm.ResId, account *domain.Acc
 		return nil, err
 	}
 	account.PasswdHash = string(encoded)
-	return a.repo.Upsert(ctx, account)
+	acc, err := a.repo.Upsert(ctx, account)
+	if err != nil {
+		return nil, err
+	}
+
+	err = a.perm.Logic.AddAccount(acc)
+	if err != nil {
+		return nil, err
+	}
+	return acc, nil
 }
