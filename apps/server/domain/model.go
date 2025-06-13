@@ -57,7 +57,7 @@ type Attachtment struct {
 type Comment struct {
 	ID        int
 	CreatedAt time.Time
-	PostID    time.Time
+	PostID    int
 	Email     string
 	Name      string
 	Content   string
