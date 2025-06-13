@@ -56,6 +56,7 @@ func readPredefiendPolicy() (p [][]string, g [][]string, g2 [][]string) {
 type Perm struct {
 	enforcer *casbin.Enforcer
 	log      *zap.Logger
+	Logic    *PolicyLogic
 }
 
 func New(db *sql.DB, dbType string, log *zap.Logger) (*Perm, error) {
@@ -78,7 +79,13 @@ func New(db *sql.DB, dbType string, log *zap.Logger) (*Perm, error) {
 	if err = e.LoadPolicy(); err != nil {
 		return nil, err
 	}
-	return &Perm{enforcer: e, log: log}, nil
+	p := &Perm{enforcer: e, log: log, Logic: &PolicyLogic{
+		enforcer: e,
+		log:      log,
+	}}
+	p.Logic.perm = p
+
+	return p, nil
 }
 
 func InitPerm(perm *Perm, db *sql.DB) error {
@@ -174,8 +181,8 @@ func (p *Perm) DeleteResRelation(res ResId) (bool, error) {
 	return result || result2, err
 }
 
-func (p *Perm) AddPerm(sub ResId, role RoleStr, res ResId) {
-	p.enforcer.AddPolicy(res.Str(), res.Type().Role(role), res.Str())
+func (p *Perm) AddPerm(sub ResId, role RoleStr, res ResId) (bool, error) {
+	return p.enforcer.AddPolicy(sub.Str(), res.Type().Role(role), res.Str())
 }
 func (p *Perm) RemovePerm(sub ResId) {
 	p.enforcer.RemoveFilteredPolicy(0, sub.Str())

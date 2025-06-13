@@ -45,6 +45,9 @@ const (
 
 	ROLE_OWNER RoleStr = "OWNER"
 
+	ROLE_ADMIN RoleStr = "ROLE::ADMIN"
+	ROLE_USER  RoleStr = "ROLE::USER"
+)
 
 // func (r RoleStr) Str() string {
 // 	return fmt.Sprintf("ROLE::%v", r)
