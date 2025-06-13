@@ -205,3 +205,8 @@ type PermissionError struct {
 func (e PermissionError) Error() string {
 	return fmt.Sprintf("Permission insufficient (%v,%v,%v)", e.sub, e.act, e.res)
 }
+
+func (e PermissionError) Is(err error) bool {
+	_, ok := err.(PermissionError)
+	return ok
+}
