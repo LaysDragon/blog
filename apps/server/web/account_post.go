@@ -22,7 +22,7 @@ type AccountCreateRequest struct {
 func (c *AccountController) HandlePost(ctx *gin.Context) {
 	var request AccountCreateRequest = AccountCreateRequest{Role: domain.UserRole}
 	if err := ctx.ShouldBindJSON(&request); err != nil {
-		ctx.Status(400)
+		ctx.Status(http.StatusBadRequest)
 		c.log.Error("bind failed", zap.Error(err))
 		return
 	}
@@ -50,5 +50,6 @@ func (c *AccountController) HandlePost(ctx *gin.Context) {
 		c.log.Error("created account failed", zap.Error(err))
 		return
 	}
+
 	ctx.JSON(200, c.ToDto(acc))
 }
