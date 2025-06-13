@@ -23,7 +23,7 @@ var predefinedPolicy string
 
 func readPredefiendPolicy() (p [][]string, g [][]string, g2 [][]string) {
 	lines := strings.Split(predefinedPolicy, "\n")
-	slices.DeleteFunc(lines, func(line string) bool {
+	lines = slices.DeleteFunc(lines, func(line string) bool {
 		return strings.TrimSpace(line) == ""
 	})
 	var policies [][]string
