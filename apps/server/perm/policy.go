@@ -13,21 +13,19 @@ type PolicyLogic struct {
 }
 
 func (p *PolicyLogic) AddAccount(user *domain.Account) error {
+	ps := &Polices{}
+
 	if user.Role == domain.AdminRole {
 		//p,user.admin,ROLE::ADMIN,*
-		_, err := p.perm.AddPerm(User(user.ID), ROLE_ADMIN, ResWild())
-		if err != nil {
-			return err
-		}
+		ps.AddPerm(User(user.ID), ROLE_ADMIN, ResWild())
 	} else {
 		//p,user.1,ROLE::USER,*
-		_, err := p.perm.AddPerm(User(user.ID), ROLE_USER, ResWild())
-		if err != nil {
-			return err
-		}
+		ps.AddPerm(User(user.ID), ROLE_USER, ResWild())
 	}
 	//p,user.1,ROLE::USER/OWNER,user.2
-	_, err := p.perm.AddPerm(User(user.ID), ROLE_OWNER, User(user.ID))
+	ps.AddPerm(User(user.ID), ROLE_OWNER, User(user.ID))
+
+	_, err := p.perm.AddPolicies(ps)
 	if err != nil {
 		return err
 	}

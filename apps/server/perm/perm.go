@@ -178,12 +178,23 @@ func (p *Perm) DeleteResRelation(res ResId) (bool, error) {
 		return result, err
 	}
 	result2, err := p.enforcer.RemoveFilteredNamedGroupingPolicy("g2", 1, res.Str())
-	return result || result2, err
+	return result && result2, err
 }
 
 func (p *Perm) AddPerm(sub ResId, role RoleStr, res ResId) (bool, error) {
 	return p.enforcer.AddPolicy(sub.Str(), res.Type().Role(role), res.Str())
 }
+
+// TODO: possiable to handle any kind of transaction and failed rollback???
+func (p *Perm) AddPolicies(ps *Polices) (bool, error) {
+	result, err := p.enforcer.AddPolicies(ps.items)
+	if err != nil {
+		return result, err
+	}
+	result2, err := p.enforcer.AddNamedGroupingPolicies("g2", ps.relations)
+	return result && result2, err
+}
+
 func (p *Perm) RemovePerm(sub ResId) {
 	p.enforcer.RemoveFilteredPolicy(0, sub.Str())
 }
@@ -194,6 +205,19 @@ func (p *Perm) Load() error {
 
 func (p *Perm) Save() error {
 	return p.enforcer.SavePolicy()
+}
+
+type Polices struct {
+	items     [][]string
+	relations [][]string
+}
+
+func (p *Polices) AddPerm(sub ResId, role RoleStr, res ResId) {
+	p.items = append(p.items, []string{sub.Str(), res.Type().Role(role), res.Str()})
+}
+
+func (p *Polices) AddRelation(parent ResId, child ResId) {
+	p.relations = append(p.relations, []string{child.Str(), parent.Str()})
 }
 
 type PermissionError struct {
