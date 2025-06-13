@@ -3,6 +3,7 @@ package web
 import (
 	"context"
 
+	"github.com/LaysDragon/blog/apps/server/perm"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
@@ -32,4 +33,8 @@ func CtxLoggerMidleware(log *zap.Logger) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		RegisterGinLogger(ctx, log)
 	}
+}
+
+func GetUserOp(ctx context.Context) perm.ResId {
+	return perm.User(GetUID(ctx))
 }

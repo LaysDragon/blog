@@ -23,6 +23,11 @@ func (e ItemNotExistedError) Unwrap() error {
 	return e.Err
 }
 
+func (e ItemNotExistedError) Is(err error) bool {
+	_, ok := err.(ItemNotExistedError)
+	return ok
+}
+
 type ItemConflictError struct {
 	Err   error
 	Field string
@@ -34,4 +39,9 @@ func (e ItemConflictError) Error() string {
 
 func (e ItemConflictError) Unwrap() error {
 	return e.Err
+}
+
+func (e ItemConflictError) Is(err error) bool {
+	_, ok := err.(ItemConflictError)
+	return ok
 }

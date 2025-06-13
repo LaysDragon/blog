@@ -1,6 +1,7 @@
 package web
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/LaysDragon/blog/apps/server/domain"
@@ -26,27 +27,25 @@ func (c *AccountController) HandlePost(ctx *gin.Context) {
 		return
 	}
 
-	if request.Role == domain.AdminRole {
-		allow, err := c.perm.Check(perm.User(GetUID(ctx)), perm.System(), perm.ACT_WRITE_USER_ADMIN)
-		if err != nil {
-			c.log.Error("check permission failed", zap.Error(err))
-		}
-		if !allow {
-			ctx.Status(http.StatusForbidden)
-			return
-		}
-	}
-
-	acc, err := c.usecase.Create(ctx, &domain.Account{
+	acc, err := c.usecase.Create(ctx, GetUserOp(ctx), &domain.Account{
 		Username: request.Username,
 		Role:     request.Role,
 		Email:    request.Email,
 	}, request.Password)
+
 	if err != nil {
-		if err, ok := err.(usecase.ItemConflictError); ok && err.Field == "username" {
-			ctx.Status(409)
-		} else {
-			ctx.Status(500)
+		switch {
+		case errors.Is(err, usecase.ItemConflictError{}):
+			var e usecase.ItemConflictError
+			if ok := errors.As(err, &e); ok && e.Field == "username" {
+				ctx.Status(http.StatusConflict)
+			} else {
+				ctx.Status(http.StatusInternalServerError)
+			}
+		case errors.Is(err, perm.PermissionError{}):
+			ctx.Status(http.StatusForbidden)
+		default:
+			ctx.Status(http.StatusInternalServerError)
 		}
 		c.log.Error("created account failed", zap.Error(err))
 		return

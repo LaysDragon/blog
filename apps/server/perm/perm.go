@@ -123,14 +123,14 @@ func InitPerm(perm *Perm, db *sql.DB) error {
 	return nil
 }
 
-func (p *Perm) CheckRaw(sub string, res string, act string) (bool, []string, error) {
+func (p *Perm) CheckRaw(sub string, act string, res string) (bool, []string, error) {
 	result, reason, err := p.enforcer.EnforceEx(sub, act, res)
 	p.log.Debug("Check Permission", zap.String("sub", sub), zap.String("act", act), zap.String("res", res), zap.Bool("result", result), zap.Strings("reason", reason), zap.Error(err))
 
 	return result, reason, err
 }
 
-func (p *Perm) Check(sub ResId, res ResId, act ActStr) (bool, error) {
+func (p *Perm) Check(sub ResId, act ActStr, res ResId) (bool, error) {
 	actStr := string(act)
 	if !act.IsOverride() {
 		actStr = res.Type().Act(act)
@@ -138,6 +138,27 @@ func (p *Perm) Check(sub ResId, res ResId, act ActStr) (bool, error) {
 	result, _, err := p.CheckRaw(sub.Str(), actStr, res.Str())
 
 	return result, err
+}
+
+func (p *Perm) CheckE(sub ResId, act ActStr, res ResId) error {
+
+	result, err := p.Check(sub, act, res)
+	if err != nil {
+		return err
+	}
+	if !result {
+		actStr := string(act)
+		if !act.IsOverride() {
+			actStr = res.Type().Act(act)
+		}
+		return PermissionError{
+			sub: sub.Str(),
+			act: actStr,
+			res: res.Str(),
+		}
+	}
+	return nil
+
 }
 
 func (p *Perm) AddResRelation(parent ResId, child ResId) {
@@ -166,4 +187,14 @@ func (p *Perm) Load() error {
 
 func (p *Perm) Save() error {
 	return p.enforcer.SavePolicy()
+}
+
+type PermissionError struct {
+	sub string
+	act string
+	res string
+}
+
+func (e PermissionError) Error() string {
+	return fmt.Sprintf("Permission insufficient (%v,%v,%v)", e.sub, e.act, e.res)
 }

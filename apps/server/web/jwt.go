@@ -121,6 +121,10 @@ func GetRole(ctx context.Context) domain.AccountRole {
 	if token == nil {
 		return ""
 	}
+	if token.Expired {
+		return ""
+	}
+
 	if !token.Token.Valid {
 		return ""
 	}
@@ -133,6 +137,11 @@ func GetUID(ctx context.Context) int {
 	if token == nil {
 		return -1
 	}
+
+	if token.Expired {
+		return -1
+	}
+
 	if !token.Token.Valid {
 		return -1
 	}
