@@ -1,27 +1,141 @@
 package perm
 
 import (
+	_ "embed"
 	"fmt"
 	"log"
 	"testing"
 
 	"github.com/casbin/casbin/v2"
+	"github.com/casbin/casbin/v2/model"
+	stringadapter "github.com/casbin/casbin/v2/persist/string-adapter"
 	"github.com/casbin/casbin/v2/util"
+	// scas "github.com/qiangmzsx/string-adapter"
 )
 
-func TestRule(t *testing.T) {
-	// Initialize a Xorm adapter with MySQL database.
-	// a, err := xormadapter.NewAdapter("mysql", "mysql_username:mysql_password@tcp(127.0.0.1:3306)/")
-	// if err != nil {
-	// 	log.Fatalf("error: adapter: %s", err)
-	// }
+// //go:embed model.conf
+// var authModel string
 
-	e, err := casbin.NewEnforcer("model.conf", "test_policy.csv")
+// //go:embed predefined_policy.csv
+// var predefinedPolicy string
+
+//go:embed test_policy.csv
+var testPolicy string
+
+func initCasbin() *casbin.Enforcer {
+	m, err := model.NewModelFromString(authModel)
+	if err != nil {
+		log.Fatalf("error: enforcer: %s", err)
+
+	}
+	sa := stringadapter.NewAdapter(predefinedPolicy + "\n" + testPolicy)
+	e, err := casbin.NewEnforcer(m, sa)
 	if err != nil {
 		log.Fatalf("error: enforcer: %s", err)
 	}
 	e.AddNamedMatchingFunc("g", "KeyMatch2", util.KeyMatch)
 	e.AddNamedMatchingFunc("g2", "KeyMatch2", util.KeyMatch)
+	return e
+}
+
+func TestRule(t *testing.T) {
+	e := initCasbin()
+
+	tests := []struct {
+		sub  string
+		act  string
+		res  string
+		want bool
+	}{
+		{
+			sub:  "user.1",
+			act:  "ACT::POST/WRITE",
+			res:  "post.1",
+			want: true,
+		},
+		{
+			sub:  "user.1",
+			act:  "ACT::POST/WRITE",
+			res:  "post.2",
+			want: true,
+		},
+		{
+			sub:  "user.2",
+			act:  "ACT::POST/WRITE",
+			res:  "post.3",
+			want: true,
+		},
+		{
+			sub:  "user.2",
+			act:  "ACT::POST/WRITE",
+			res:  "post.1",
+			want: false,
+		},
+		{
+			sub:  "user.2",
+			act:  "ACT::POST/READ",
+			res:  "post.1",
+			want: true,
+		},
+		{
+			sub:  "user.admin",
+			act:  "ACT::POST/WRITE",
+			res:  "post.1",
+			want: true,
+		},
+		{
+			sub:  "user.anon",
+			act:  "ACT::POST/READ",
+			res:  "post.1",
+			want: true,
+		},
+		{
+			sub:  "user.anon",
+			act:  "ACT::POST/WRITE",
+			res:  "post.1",
+			want: false,
+		},
+		{
+			sub:  "user.anon",
+			act:  "ACT::COMMENT/WRITE",
+			res:  "post.1",
+			want: true,
+		},
+		{
+			sub:  "user.anon",
+			act:  "ACT::COMMENT/READ",
+			res:  "comment.1",
+			want: true,
+		},
+		{
+			sub:  "user.admin",
+			act:  "ACT::USER_ADMIN/WRITE",
+			res:  "system",
+			want: true,
+		},
+		{
+			sub:  "user.admin",
+			act:  "ACT::POST/WRITE",
+			res:  "post.1",
+			want: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(fmt.Sprintf("%-11v want to do %-25v on %-10v", tt.sub, tt.act, tt.res), func(t *testing.T) {
+			result, _, err := e.EnforceEx(tt.sub, tt.act, tt.res)
+			if err != nil {
+				t.Error(err)
+			}
+			if result != tt.want {
+				t.Errorf("EnforceEx() = %v, want %v", result, tt.want)
+			}
+		})
+	}
+}
+
+func testRuleRaw(t *testing.T) {
+	e := initCasbin()
 
 	testRule := [][]string{
 		{"user.1", "ACT::POST/WRITE", "post.1"},
@@ -43,23 +157,9 @@ func TestRule(t *testing.T) {
 		result, reason, err := e.EnforceEx(sub, act, res)
 		fmt.Printf("[%-5v] %-11v,%-25v,%-10v = %v ,err=%v\n", result, sub, act, res, reason, err)
 	}
-
-	// fmt.Println(e.EnforceEx("user.1", "ACT::POST/WRITE", "post.1"))
-	// fmt.Println(e.EnforceEx("user.1", "ACT::POST/WRITE", "post.2"))
-	// fmt.Println(e.EnforceEx("user.2", "ACT::POST/WRITE", "post.3"))
-	// fmt.Println(e.EnforceEx("user.2", "ACT::POST/WRITE", "post.1"))
-	// fmt.Println(e.EnforceEx("user.2", "ACT::POST/READ", "post.1"))
-	// fmt.Println(e.EnforceEx("user.admin", "ACT::POST/WRITE", "post.1"))
-	// fmt.Println(e.EnforceEx("user.anon", "ACT::POST/READ", "post.1"))
-	// fmt.Println(e.EnforceEx("user.anon", "ACT::POST/WRITE", "post.1"))
-	// fmt.Println(e.EnforceEx("user.anon", "ACT::COMMENT/WRITE", "post.1"))
-	// fmt.Println(e.EnforceEx("user.anon", "ACT::COMMENT/READ", "comment.1"))
-	// fmt.Println(e.EnforceEx("user.admin", "ACT::USER_ADMIN/WRITE", "post.1"))
-	// fmt.Println(e.EnforceEx("user.admin", "ACT::POST/WRITE", "post.1"))
-
 }
 
-func TestPattern(t *testing.T) {
+func testPattern(t *testing.T) {
 	fmt.Println(util.KeyMatch("*", "post.1"))
 	fmt.Println(util.KeyMatch("post.1", "*"))
 	fmt.Println(util.GlobMatch("*", "post.1"))
