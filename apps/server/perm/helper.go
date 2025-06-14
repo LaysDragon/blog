@@ -82,7 +82,7 @@ func (r ResStr) Act(act ActStr) string {
 	if act.IsOverride() {
 		return string(act)
 	}
-	return fmt.Sprintf("ACT::%v/%v", r, act)
+	return fmt.Sprintf("ACT::%v/%v", strings.ToUpper(string(r)), act)
 }
 
 // ROLE::{res_type}/{role}
