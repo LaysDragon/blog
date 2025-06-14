@@ -10,6 +10,7 @@ import (
 
 type AccountRepo interface {
 	CommonRepo[AccountRepo]
+	List(ctx context.Context, offset int, limit int) ([]*domain.Account, error)
 	ById(ctx context.Context, id int) (*domain.Account, error)
 	ByUsername(ctx context.Context, username string) (*domain.Account, error)
 	Upsert(ctx context.Context, post *domain.Account) (*domain.Account, error)

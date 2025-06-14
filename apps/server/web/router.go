@@ -14,5 +14,6 @@ func SetupRouter(router *gin.Engine,
 
 	authGroup := router.Group("", RequiredAuthMiddware())
 	authGroup.GET("/account/:id", account.HandleGet)
+	authGroup.GET("/accounts", account.HandleList)
 
 }

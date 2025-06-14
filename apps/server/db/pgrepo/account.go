@@ -7,7 +7,7 @@ import (
 	"github.com/LaysDragon/blog/apps/server/domain"
 	usecase "github.com/LaysDragon/blog/apps/server/usecase"
 	"github.com/volatiletech/sqlboiler/v4/boil"
-	// . "github.com/volatiletech/sqlboiler/v4/queries/qm"
+	. "github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
 type AccountDb struct {
@@ -85,4 +85,17 @@ func (r *AccountDb) Upsert(ctx context.Context, account *domain.Account) (*domai
 func (r *AccountDb) Delete(ctx context.Context, id int) error {
 	_, err := models.Accounts(models.AccountWhere.ID.EQ(id)).DeleteAll(ctx, r.db, false)
 	return ErrorTranslate(err)
+}
+
+func (r *AccountDb) List(ctx context.Context, offset int, limit int) ([]*domain.Account, error) {
+	accs, err := models.Accounts(Offset(offset), Limit(limit), OrderBy(models.AccountColumns.ID)).All(ctx, r.db)
+	if err != nil {
+		return nil, ErrorTranslate(err)
+	}
+	var result []*domain.Account
+	for _, a := range accs {
+		result = append(result, r.ToDomain(a))
+	}
+	return result, nil
+
 }

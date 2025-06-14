@@ -11,26 +11,9 @@ type ResStr string
 type RoleStr string
 
 const (
-	// ACT_USER_WRITE  ActStr = "ACT::USER/WRITE"
-	// ACT_USER_READ   ActStr = "ACT::USER/READ"
-	// ACT_USER_DELETE ActStr = "ACT::USER/DELETE"
-
-	// ACT_POST_WRITE  ActStr = "ACT::POST/WRITE"
-	// ACT_POST_READ   ActStr = "ACT::POST/READ"
-	// ACT_POST_DELETE ActStr = "ACT::POST/DELETE"
-
-	// ACT_SITE_WRITE ActStr = "ACT::SITE/WRITE"
-	// ACT_SITE_READ  ActStr = "ACT::SITE/READ"
-
-	// ACT_COMMENT__WRITE  ActStr = "ACT::COMMENT/WRITE"
-	// ACT_COMMENT__READ   ActStr = "ACT::COMMENT/READ"
-	// ACT_COMMENT__DELETE ActStr = "ACT::COMMENT/DELETE"
-
-	// ROLE_USER_OWNER RoleStr = "ROLE::USER/OWNER"
-	// ROLE_SITE_OWNER RoleStr = "ROLE::SITE/OWNER"
-	// ROLE_POST_OWNER RoleStr = "ROLE::POST/OWNER"
 	ACT_WRITE  ActStr = "WRITE"
 	ACT_READ   ActStr = "READ"
+	ACT_LIST   ActStr = "LIST"
 	ACT_DELETE ActStr = "DELETE"
 
 	ACT_WRITE_USER_ADMIN ActStr = "ACT::USER_ADMIN/WRITE"
@@ -48,10 +31,6 @@ const (
 	ROLE_ADMIN RoleStr = "ROLE::ADMIN"
 	ROLE_USER  RoleStr = "ROLE::USER"
 )
-
-// func (r RoleStr) Str() string {
-// 	return fmt.Sprintf("ROLE::%v", r)
-// }
 
 func (a RoleStr) IsOverride() bool {
 	return strings.HasPrefix(string(a), "ROLE::")
