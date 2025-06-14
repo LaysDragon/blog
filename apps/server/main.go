@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/LaysDragon/blog/apps/server/db"
 	"github.com/LaysDragon/blog/apps/server/db/pgrepo"
 	"github.com/LaysDragon/blog/apps/server/internal"
 	"github.com/LaysDragon/blog/apps/server/perm"
@@ -87,7 +88,15 @@ func main() {
 				return log.Sugar()
 			},
 			func(config internal.Config) (*sql.DB, error) {
-				return errorWrap(sql.Open(config.DBType, config.DataSourceName))("unable to connect to database, %w")
+				db, err := sql.Open(config.DBType, config.DataSourceName)
+				if err != nil {
+					return nil, fmt.Errorf("unable to connect to database, %w", err)
+				}
+				err = db.PingContext(context.Background())
+				if err != nil {
+					return nil, fmt.Errorf("unable to connect to database, %w", err)
+				}
+				return db, nil
 			},
 
 			func(db *sql.DB) boil.ContextExecutor {
@@ -117,7 +126,9 @@ func main() {
 			return fxlogger
 		}),
 		fx.Invoke(
+			db.InitDb,
 			perm.InitPerm,
+			db.InitDbData,
 			web.SetupValidation,
 			web.SetupRouter,
 			StartServer,
