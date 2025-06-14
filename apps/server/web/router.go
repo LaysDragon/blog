@@ -8,12 +8,12 @@ func SetupRouter(router *gin.Engine,
 	post *PostController) {
 	router.Use(jwt.ParseMiddleware())
 
-	router.POST("/account", account.HandlePost)
-	router.POST("/account/login", account.HandleLogin)
-	router.GET("/post", post.HandleGet)
+	router.POST("/accounts", account.HandlePost)
+	router.POST("/accounts/login", account.HandleLogin)
+	router.GET("/posts", post.HandleGet)
 
 	authGroup := router.Group("", RequiredAuthMiddware())
-	authGroup.GET("/account/:id", account.HandleGet)
+	authGroup.GET("/accounts/:id", account.HandleGet)
 	authGroup.GET("/accounts", account.HandleList)
 
 }
