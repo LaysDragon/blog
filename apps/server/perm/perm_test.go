@@ -38,6 +38,111 @@ func initCasbin() *casbin.Enforcer {
 	return e
 }
 
+func TestActStr(t *testing.T) {
+	actTests := []struct {
+		res  ActStr
+		want string
+		name string
+	}{
+		{
+			res:  ACT_DELETE,
+			want: "ACT::DELETE",
+		},
+		{
+			res:  ACT_DELETE.Res(RES_USER),
+			want: "ACT::USER/DELETE",
+		},
+		{
+			res:  ACT_LIST.Res(RES_USER),
+			want: "ACT::USER/LIST",
+		},
+		{
+			res:  ACT_WRITE.Res(User(1).Type()),
+			want: "ACT::USER/WRITE",
+			name: "test res id type user.1",
+		},
+		{
+			res:  ACT_READ.Res(Site(25).Type()),
+			want: "ACT::SITE/READ",
+			name: "test res id type site.25",
+		},
+		{
+			res:  ACT_LIST.Res(Post(7).Type()),
+			want: "ACT::POST/LIST",
+			name: "test res id type post.7",
+		},
+		{
+			res:  ACT_LIST.Res(RES_COMMENT).Res(RES_USER),
+			want: "ACT::COMMENT/LIST",
+			name: "test res override ignored",
+		},
+	}
+
+	for _, tt := range actTests {
+		name := tt.name
+		if name == "" {
+			name = fmt.Sprintf("test %v", tt.want)
+		}
+		t.Run(name, func(t *testing.T) {
+			result := tt.res.Str()
+			if result != tt.want {
+				t.Errorf("Str() = %v, want %v", result, tt.want)
+			}
+		})
+	}
+}
+
+func TestResId(t *testing.T) {
+	resTests := []struct {
+		res  ResId
+		want string
+		name string
+	}{
+		{
+			res:  User(1),
+			want: "user.1",
+		},
+		{
+			res:  Site(2),
+			want: "site.2",
+		},
+		{
+			res:  Post(3),
+			want: "post.3",
+		},
+		{
+			res:  Comment(4),
+			want: "comment.4",
+		},
+		{
+			res:  ResWild(),
+			want: "*",
+		},
+		{
+			res:  UserAnon(),
+			want: "user.anon",
+		},
+		{
+			res:  System(),
+			want: "system",
+		},
+	}
+
+	for _, tt := range resTests {
+		name := tt.name
+		if name == "" {
+			name = fmt.Sprintf("test %v", tt.want)
+		}
+		t.Run(name, func(t *testing.T) {
+			result := tt.res.Str()
+			if result != tt.want {
+				t.Errorf("Str() = %v, want %v", result, tt.want)
+			}
+		})
+	}
+
+}
+
 func TestRule(t *testing.T) {
 	e := initCasbin()
 

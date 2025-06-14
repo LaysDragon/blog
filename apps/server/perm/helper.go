@@ -58,9 +58,13 @@ func (a ActStr) Res(res ResStr) ActStr {
 }
 
 func (a ActStr) Str() string {
-	return string(a)
+	if a.IsOverride() {
+		return string(a)
+	}
+	return fmt.Sprintf("ACT::%v", strings.ToUpper(string(a)))
 }
 
+// TODO: test ResStr
 // ROLE::{res_type}/{role}
 func (r ResStr) Role(role RoleStr) string {
 	if role.IsOverride() {
@@ -84,13 +88,6 @@ func (r ResId) Str() string {
 
 func (r ResId) Type() ResStr {
 	return r.Name
-}
-
-func ResWild() ResId {
-	return ResId{
-		Name: "*",
-		ID:   "*",
-	}
 }
 
 func User(id int) ResId {
@@ -126,6 +123,13 @@ func Comment(id int) ResId {
 func System() ResId {
 	return ResId{
 		Name: RES_SYSTEM,
+		ID:   "",
+	}
+}
+
+func ResWild() ResId {
+	return ResId{
+		Name: "*",
 		ID:   "",
 	}
 }
