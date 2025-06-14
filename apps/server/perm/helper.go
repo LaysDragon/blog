@@ -69,20 +69,17 @@ func (r ResStr) ID(id int) ResId {
 	}
 }
 
-// // {res_type}.new
-// func (r ResStr) New() ResId {
-// 	return ResId{
-// 		ID:   "new",
-// 		Name: r,
-// 	}
-// }
-
 // ACT::{res_type}/{act}
-func (r ResStr) Act(act ActStr) string {
-	if act.IsOverride() {
-		return string(act)
+
+func (a ActStr) Res(res ResStr) ActStr {
+	if a.IsOverride() {
+		return a
 	}
-	return fmt.Sprintf("ACT::%v/%v", strings.ToUpper(string(r)), act)
+	return ActStr(fmt.Sprintf("ACT::%v/%v", strings.ToUpper(string(res)), a))
+}
+
+func (a ActStr) Str() string {
+	return string(a)
 }
 
 // ROLE::{res_type}/{role}
