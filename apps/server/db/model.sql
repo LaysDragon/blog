@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS site_role (
     PRIMARY KEY (account_id, site_id),
     account_id int NOT NULL REFERENCES account (id),
     site_id int NOT NULL REFERENCES site (id),
-    role varchar(10) NOT NULL
+    role varchar(50) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS post (
