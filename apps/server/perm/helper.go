@@ -76,6 +76,8 @@ func (r ResStr) Role(role RoleStr) string {
 type ResId struct {
 	ID   string
 	Name ResStr
+	// for user.system, record the source of the system op,for some internal op that will need to temp bypass perm check
+	Source *ResId
 }
 
 // {res_type}.{id}
@@ -84,6 +86,14 @@ func (r ResId) Str() string {
 		return string(r.Name)
 	}
 	return fmt.Sprintf("%v.%v", r.Name, r.ID)
+}
+
+func (r ResId) String() string {
+	if r.Source == nil {
+		return r.Str()
+	}
+	return fmt.Sprintf("%v(%v)", r.Str(), r.Source.String())
+
 }
 
 func (r ResId) Type() ResStr {
@@ -99,6 +109,18 @@ func UserAnon() ResId {
 	return ResId{
 		Name: RES_USER,
 		ID:   "anon",
+	}
+}
+
+// user.system, for special internal logic that bypass all operation
+func UserSystem(op ResId) ResId {
+	if op.Name == RES_USER && op.ID == "system" {
+		return op
+	}
+	return ResId{
+		Name:   RES_USER,
+		ID:     "system",
+		Source: &op,
 	}
 }
 

@@ -1,3 +1,4 @@
+p,user.system,*,*
 p,user.anon,ROLE::ANON,site.*
 
 g,ACT::SITE/READ,ROLE::ANON
