@@ -1151,7 +1151,7 @@ func testAccountsSelect(t *testing.T) {
 }
 
 var (
-	accountDBTypes = map[string]string{`ID`: `integer`, `CreatedAt`: `timestamp with time zone`, `UpdatedAt`: `timestamp with time zone`, `DeletedAt`: `timestamp with time zone`, `Username`: `character varying`, `Role`: `character varying`, `Email`: `character varying`, `PasswdHash`: `character varying`}
+	accountDBTypes = map[string]string{`ID`: `integer`, `CreatedAt`: `timestamp with time zone`, `UpdatedAt`: `timestamp with time zone`, `DeletedAt`: `timestamp with time zone`, `Username`: `character varying`, `Role`: `character varying`, `Email`: `character varying`, `PasswdHash`: `text`}
 	_              = bytes.MinRead
 )
 

@@ -24,11 +24,11 @@ import (
 
 // Site is an object representing the database table.
 type Site struct {
-	ID        int         `boil:"id" json:"id" toml:"id" yaml:"id"`
-	CreatedAt time.Time   `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
-	UpdatedAt time.Time   `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
-	DeletedAt null.Time   `boil:"deleted_at" json:"deleted_at,omitempty" toml:"deleted_at" yaml:"deleted_at,omitempty"`
-	Name      null.String `boil:"name" json:"name,omitempty" toml:"name" yaml:"name,omitempty"`
+	ID        int       `boil:"id" json:"id" toml:"id" yaml:"id"`
+	CreatedAt time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	UpdatedAt time.Time `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
+	DeletedAt null.Time `boil:"deleted_at" json:"deleted_at,omitempty" toml:"deleted_at" yaml:"deleted_at,omitempty"`
+	Name      string    `boil:"name" json:"name" toml:"name" yaml:"name"`
 
 	R *siteR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L siteL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -64,74 +64,18 @@ var SiteTableColumns = struct {
 
 // Generated where
 
-type whereHelpernull_String struct{ field string }
-
-func (w whereHelpernull_String) EQ(x null.String) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, false, x)
-}
-func (w whereHelpernull_String) NEQ(x null.String) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, true, x)
-}
-func (w whereHelpernull_String) LT(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelpernull_String) LTE(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelpernull_String) GT(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelpernull_String) GTE(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
-}
-func (w whereHelpernull_String) LIKE(x null.String) qm.QueryMod {
-	return qm.Where(w.field+" LIKE ?", x)
-}
-func (w whereHelpernull_String) NLIKE(x null.String) qm.QueryMod {
-	return qm.Where(w.field+" NOT LIKE ?", x)
-}
-func (w whereHelpernull_String) ILIKE(x null.String) qm.QueryMod {
-	return qm.Where(w.field+" ILIKE ?", x)
-}
-func (w whereHelpernull_String) NILIKE(x null.String) qm.QueryMod {
-	return qm.Where(w.field+" NOT ILIKE ?", x)
-}
-func (w whereHelpernull_String) SIMILAR(x null.String) qm.QueryMod {
-	return qm.Where(w.field+" SIMILAR TO ?", x)
-}
-func (w whereHelpernull_String) NSIMILAR(x null.String) qm.QueryMod {
-	return qm.Where(w.field+" NOT SIMILAR TO ?", x)
-}
-func (w whereHelpernull_String) IN(slice []string) qm.QueryMod {
-	values := make([]interface{}, 0, len(slice))
-	for _, value := range slice {
-		values = append(values, value)
-	}
-	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
-}
-func (w whereHelpernull_String) NIN(slice []string) qm.QueryMod {
-	values := make([]interface{}, 0, len(slice))
-	for _, value := range slice {
-		values = append(values, value)
-	}
-	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
-}
-
-func (w whereHelpernull_String) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
-func (w whereHelpernull_String) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
-
 var SiteWhere = struct {
 	ID        whereHelperint
 	CreatedAt whereHelpertime_Time
 	UpdatedAt whereHelpertime_Time
 	DeletedAt whereHelpernull_Time
-	Name      whereHelpernull_String
+	Name      whereHelperstring
 }{
 	ID:        whereHelperint{field: "\"site\".\"id\""},
 	CreatedAt: whereHelpertime_Time{field: "\"site\".\"created_at\""},
 	UpdatedAt: whereHelpertime_Time{field: "\"site\".\"updated_at\""},
 	DeletedAt: whereHelpernull_Time{field: "\"site\".\"deleted_at\""},
-	Name:      whereHelpernull_String{field: "\"site\".\"name\""},
+	Name:      whereHelperstring{field: "\"site\".\"name\""},
 }
 
 // SiteRels is where relationship names are stored.
@@ -210,8 +154,8 @@ type siteL struct{}
 
 var (
 	siteAllColumns            = []string{"id", "created_at", "updated_at", "deleted_at", "name"}
-	siteColumnsWithoutDefault = []string{}
-	siteColumnsWithDefault    = []string{"id", "created_at", "updated_at", "deleted_at", "name"}
+	siteColumnsWithoutDefault = []string{"name"}
+	siteColumnsWithDefault    = []string{"id", "created_at", "updated_at", "deleted_at"}
 	sitePrimaryKeyColumns     = []string{"id"}
 	siteGeneratedColumns      = []string{}
 )

@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS site (
     created_at timestamptz NOT NULL DEFAULT current_timestamp,
     updated_at timestamptz NOT NULL DEFAULT current_timestamp,
     deleted_at timestamptz,
-    name varchar(50)
+    name varchar(50) UNIQUE NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS site_role (
