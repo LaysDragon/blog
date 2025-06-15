@@ -12,5 +12,5 @@ func (a *Account) List(ctx context.Context, op perm.ResId, page int, pageSize in
 	if err != nil {
 		return nil, err
 	}
-	return a.repo.List(ctx, pageSize*page, pageSize)
+	return a.accRepo.List(ctx, pageSize*page, pageSize)
 }

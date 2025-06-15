@@ -20,7 +20,7 @@ func (a *Account) Create(ctx context.Context, op perm.ResId, account *domain.Acc
 		return nil, err
 	}
 	account.PasswdHash = string(encoded)
-	acc, err := a.repo.Upsert(ctx, account)
+	acc, err := a.accRepo.Upsert(ctx, account)
 	if err != nil {
 		return nil, err
 	}

@@ -12,5 +12,5 @@ func (a *Account) ById(ctx context.Context, op perm.ResId, id int) (*domain.Acco
 	if err != nil {
 		return nil, err
 	}
-	return a.repo.ById(ctx, id)
+	return a.accRepo.ById(ctx, id)
 }

@@ -7,5 +7,5 @@ import (
 )
 
 func (s *Account) ByUsername(ctx context.Context, username string) (*domain.Account, error) {
-	return s.repo.ByUsername(ctx, username)
+	return s.accRepo.ByUsername(ctx, username)
 }

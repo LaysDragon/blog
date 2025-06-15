@@ -112,6 +112,7 @@ func main() {
 			web.GetValidator,
 			pgrepo.NewPost,
 			pgrepo.NewAccount,
+			pgrepo.NewSite,
 			usecase.NewPost,
 			usecase.NewAccount,
 			web.NewPostController,

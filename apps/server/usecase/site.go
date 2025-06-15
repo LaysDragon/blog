@@ -8,6 +8,7 @@ import (
 
 type SiteRepo interface {
 	CommonRepo[SiteRepo]
+	List(ctx context.Context, offset int, limit int) ([]*domain.Site, error)
 	ById(ctx context.Context, id int) (*domain.Site, error)
 	Upsert(ctx context.Context, post *domain.Site) (*domain.Site, error)
 	Delete(ctx context.Context, id int) error

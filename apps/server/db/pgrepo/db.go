@@ -76,3 +76,5 @@ func ErrorTranslate(err error) error {
 	}
 	return err
 }
+
+type ErrorWrapped interface{ Unwrap() error }

@@ -71,8 +71,6 @@ func (r *AccountDb) ByUsername(ctx context.Context, username string) (*domain.Ac
 	return r.ToDomain(Account), nil
 }
 
-type ErrorWrapped interface{ Unwrap() error }
-
 func (r *AccountDb) Upsert(ctx context.Context, account *domain.Account) (*domain.Account, error) {
 	dbAccount := r.ToDb(account)
 	err := dbAccount.Upsert(ctx, r.db, true, []string{"id"}, boil.Infer(), boil.Infer())

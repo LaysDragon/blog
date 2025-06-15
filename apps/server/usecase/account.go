@@ -18,12 +18,13 @@ type AccountRepo interface {
 }
 
 type Account struct {
-	repo   AccountRepo
-	argon2 argon2.Config
-	perm   *perm.Perm
+	accRepo  AccountRepo
+	siteRepo SiteRepo
+	argon2   argon2.Config
+	perm     *perm.Perm
 }
 
-func NewAccount(repo AccountRepo, perm *perm.Perm) *Account {
+func NewAccount(accRepo AccountRepo, siteRepo SiteRepo, perm *perm.Perm) *Account {
 	argon := argon2.Config{
 		HashLength:  32,
 		SaltLength:  16,
@@ -33,5 +34,5 @@ func NewAccount(repo AccountRepo, perm *perm.Perm) *Account {
 		Mode:        argon2.ModeArgon2id,
 		Version:     argon2.Version13,
 	}
-	return &Account{repo, argon, perm}
+	return &Account{accRepo, siteRepo, argon, perm}
 }
