@@ -95,7 +95,9 @@ func (p *Perm) CheckRaw(sub string, act string, res string) (bool, []string, err
 }
 
 func (p *Perm) Check(sub ResId, act ActStr, res ResId) (bool, error) {
-	result, _, err := p.CheckRaw(sub.Str(), act.Res(res.Type()).Str(), res.Str())
+	subs, acts, ress := sub.Str(), act.Res(res.Type()).Str(), res.Str()
+	result, reason, err := p.enforcer.EnforceEx(subs, acts, ress)
+	p.log.Debug("Check Permission", zap.String("sub", sub.String()), zap.String("act", act.Res(res.Type()).Str()), zap.String("res", res.String()), zap.Bool("result", result), zap.Strings("reason", reason), zap.Error(err))
 
 	return result, err
 }
