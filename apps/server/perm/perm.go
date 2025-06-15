@@ -119,8 +119,8 @@ func (p *Perm) CheckE(sub ResId, act ActStr, res ResId) error {
 
 }
 
-func (p *Perm) AddResRelation(parent ResId, child ResId) {
-	p.enforcer.AddNamedGroupingPolicy("g2", child.Str(), parent.Str())
+func (p *Perm) AddResRelation(parent ResId, child ResId) (bool, error) {
+	return p.enforcer.AddNamedGroupingPolicy("g2", child.Str(), parent.Str())
 }
 
 func (p *Perm) DeleteResRelation(res ResId) (bool, error) {

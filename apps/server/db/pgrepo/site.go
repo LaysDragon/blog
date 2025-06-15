@@ -48,12 +48,12 @@ func (r *SiteDb) ToDomain(site *models.Site) *domain.Site {
 }
 
 func (r *SiteDb) ById(ctx context.Context, id int) (*domain.Site, error) {
-	Site, err := models.FindSite(ctx, r.db, id)
+	site, err := models.FindSite(ctx, r.db, id)
 
 	if err != nil {
 		return nil, ErrorTranslate(err)
 	}
-	return r.ToDomain(Site), nil
+	return r.ToDomain(site), nil
 }
 
 func (r *SiteDb) Upsert(ctx context.Context, site *domain.Site) (*domain.Site, error) {

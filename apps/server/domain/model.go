@@ -16,6 +16,12 @@ const (
 	UserRole  AccountRole = "ROLE::USER"
 )
 
+type SiteRoleType string
+
+const (
+	SiteOwnerRole SiteRoleType = "ROLE::OWNER"
+)
+
 func (r AccountRole) IsValid() bool {
 	return slices.Contains([]AccountRole{AdminRole, UserRole}, r)
 }
@@ -35,6 +41,14 @@ type Site struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	Name      string
+}
+
+type SiteRole struct {
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	AccountId int
+	SiteId    int
+	Role      SiteRoleType
 }
 
 type Post struct {

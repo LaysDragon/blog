@@ -1,6 +1,8 @@
 package perm
 
 import (
+	"fmt"
+
 	"github.com/LaysDragon/blog/apps/server/domain"
 	"github.com/casbin/casbin/v2"
 	"go.uber.org/zap"
@@ -27,14 +29,18 @@ func (p *PolicyLogic) AddAccount(user *domain.Account) error {
 
 	_, err := p.perm.AddPolicies(ps)
 	if err != nil {
-		return err
+		return fmt.Errorf("add account perm rule failed:%w", err)
 	}
 	return nil
 }
 
-// func (p *PolicyLogic) AddSite(post *domain.Post) {
-// 	p.perm.AddResRelation(Site(post.SiteID), Post(post.ID))
-// }
+func (p *PolicyLogic) AddSite(site *domain.Site, user *domain.Account) error {
+	_, err := p.perm.AddResRelation(User(user.ID), Site(site.ID))
+	if err != nil {
+		return fmt.Errorf("add site perm rule failed:%w", err)
+	}
+	return nil
+}
 
 func (p *PolicyLogic) AddPost(post *domain.Post) {
 	p.perm.AddResRelation(Site(post.SiteID), Post(post.ID))

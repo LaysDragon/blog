@@ -17,6 +17,7 @@ const (
 	ACT_DELETE ActStr = "DELETE"
 
 	ACT_WRITE_USER_ADMIN ActStr = "ACT::USER_ADMIN/WRITE"
+	ACT_WRITE_SITE_OWNER ActStr = "ACT::SITE_OWNER/WRITE"
 
 	//system implied top level scope
 	RES_SYSTEM ResStr = "system"

@@ -239,7 +239,7 @@ func TestRule(t *testing.T) {
 	}
 }
 
-func testRuleRaw(t *testing.T) {
+func TestRuleRaw(t *testing.T) {
 	e := initCasbin()
 
 	testRule := [][]string{
@@ -255,6 +255,7 @@ func testRuleRaw(t *testing.T) {
 		{"user.anon", "ACT::COMMENT/READ", "comment.1"},
 		{"user.admin", "ACT::USER_ADMIN/WRITE", "system"},
 		{"user.admin", "ACT::POST/WRITE", "post.1"},
+		{"user.system", "ACT::SITE/WRITE", "system"},
 	}
 
 	for _, v := range testRule {

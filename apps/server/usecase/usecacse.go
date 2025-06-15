@@ -45,3 +45,12 @@ func (e ItemConflictError) Is(err error) bool {
 	_, ok := err.(ItemConflictError)
 	return ok
 }
+
+func errorWrap[T any](val T, err error) func(string) (T, error) {
+	return func(msg string) (T, error) {
+		if err != nil {
+			return val, fmt.Errorf(msg, err)
+		}
+		return val, err
+	}
+}
