@@ -21,28 +21,36 @@ func (a *Account) Create(ctx context.Context, op perm.ResId, account *domain.Acc
 		return nil, fmt.Errorf("create account failed:%w", err)
 	}
 	account.PasswdHash = string(encoded)
-	account, err = a.accRepo.Upsert(ctx, account)
-	if err != nil {
-		return nil, fmt.Errorf("create account data failed:%w", err)
-	}
 
-	site, err := a.siteUse.Create(ctx, perm.UserSystem(op), &domain.Site{
-		Name: fmt.Sprintf("User%v's site", account.ID),
+	err = a.transactor.WithinTransaction(ctx, func(ctx context.Context) error {
+		account, err = a.accRepo.Upsert(ctx, account)
+		if err != nil {
+			return fmt.Errorf("create account data failed:%w", err)
+		}
+
+		site, err := a.siteUse.Create(ctx, perm.UserSystem(op), &domain.Site{
+			Name: fmt.Sprintf("User%v's site", account.ID),
+		})
+		if err != nil {
+			return err
+		}
+
+		_, err = a.siteUse.CreateRole(ctx, perm.UserSystem(op), site.ID, account.ID, domain.SiteOwnerRole)
+		if err != nil {
+			return err
+		}
+
+		err = a.perm.Logic.AddAccount(account)
+		if err != nil {
+			return err
+		}
+		err = a.perm.Logic.AddSite(site, account)
+		if err != nil {
+			return err
+		}
+		return nil
 	})
-	if err != nil {
-		return nil, err
-	}
 
-	_, err = a.siteUse.CreateRole(ctx, perm.UserSystem(op), site.ID, account.ID, domain.SiteOwnerRole)
-	if err != nil {
-		return nil, err
-	}
-
-	err = a.perm.Logic.AddAccount(account)
-	if err != nil {
-		return nil, err
-	}
-	err = a.perm.Logic.AddSite(site, account)
 	if err != nil {
 		return nil, err
 	}

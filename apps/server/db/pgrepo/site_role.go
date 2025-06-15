@@ -6,6 +6,7 @@ import (
 	"github.com/LaysDragon/blog/apps/server/db/pgrepo/models"
 	"github.com/LaysDragon/blog/apps/server/domain"
 	usecase "github.com/LaysDragon/blog/apps/server/usecase"
+	stdlibTransactor "github.com/Thiht/transactor/stdlib"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	. "github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
@@ -14,7 +15,7 @@ type SiteRoleDb struct {
 	CommonDb[usecase.SiteRoleRepo]
 }
 
-func NewSiteRole(db boil.ContextExecutor) usecase.SiteRoleRepo {
+func NewSiteRole(db stdlibTransactor.DBGetter) usecase.SiteRoleRepo {
 	return &SiteRoleDb{
 		CommonDb: CommonDb[usecase.SiteRoleRepo]{
 			db:      db,
@@ -50,7 +51,7 @@ func (r *SiteRoleDb) ToDomain(role *models.SiteRole) *domain.SiteRole {
 }
 
 func (r *SiteRoleDb) ById(ctx context.Context, sid int, uid int) (*domain.SiteRole, error) {
-	SiteRole, err := models.FindSiteRole(ctx, r.db, uid, sid)
+	SiteRole, err := models.FindSiteRole(ctx, r.db(ctx), uid, sid)
 
 	if err != nil {
 		return nil, ErrorTranslate(err)
@@ -59,7 +60,7 @@ func (r *SiteRoleDb) ById(ctx context.Context, sid int, uid int) (*domain.SiteRo
 }
 
 func (r *SiteRoleDb) ByUid(ctx context.Context, id int) ([]*domain.SiteRole, error) {
-	roles, err := models.SiteRoles(models.SiteRoleWhere.AccountID.EQ(id)).All(ctx, r.db)
+	roles, err := models.SiteRoles(models.SiteRoleWhere.AccountID.EQ(id)).All(ctx, r.db(ctx))
 
 	if err != nil {
 		return nil, ErrorTranslate(err)
@@ -68,7 +69,7 @@ func (r *SiteRoleDb) ByUid(ctx context.Context, id int) ([]*domain.SiteRole, err
 }
 
 func (r *SiteRoleDb) BySid(ctx context.Context, id int) ([]*domain.SiteRole, error) {
-	roles, err := models.SiteRoles(models.SiteRoleWhere.SiteID.EQ(id)).All(ctx, r.db)
+	roles, err := models.SiteRoles(models.SiteRoleWhere.SiteID.EQ(id)).All(ctx, r.db(ctx))
 
 	if err != nil {
 		return nil, ErrorTranslate(err)
@@ -78,7 +79,7 @@ func (r *SiteRoleDb) BySid(ctx context.Context, id int) ([]*domain.SiteRole, err
 
 func (r *SiteRoleDb) Upsert(ctx context.Context, role *domain.SiteRole) (*domain.SiteRole, error) {
 	dbSiteRole := r.ToDb(role)
-	err := dbSiteRole.Upsert(ctx, r.db, true, []string{"site_id", "account_id"}, boil.Infer(), boil.Infer())
+	err := dbSiteRole.Upsert(ctx, r.db(ctx), true, []string{"site_id", "account_id"}, boil.Infer(), boil.Infer())
 	if err != nil {
 		return nil, ErrorTranslate(err)
 	}
@@ -86,13 +87,13 @@ func (r *SiteRoleDb) Upsert(ctx context.Context, role *domain.SiteRole) (*domain
 }
 
 func (r *SiteRoleDb) Delete(ctx context.Context, sid int, uid int) error {
-	_, err := models.SiteRoles(models.SiteRoleWhere.SiteID.EQ(sid), models.SiteRoleWhere.AccountID.EQ(uid)).DeleteAll(ctx, r.db)
+	_, err := models.SiteRoles(models.SiteRoleWhere.SiteID.EQ(sid), models.SiteRoleWhere.AccountID.EQ(uid)).DeleteAll(ctx, r.db(ctx))
 	return ErrorTranslate(err)
 }
 
 // TODO seems useless without filter option
 func (r *SiteRoleDb) List(ctx context.Context, offset int, limit int) ([]*domain.SiteRole, error) {
-	accs, err := models.SiteRoles(Offset(offset), Limit(limit), OrderBy(models.SiteRoleColumns.SiteID)).All(ctx, r.db)
+	accs, err := models.SiteRoles(Offset(offset), Limit(limit), OrderBy(models.SiteRoleColumns.SiteID)).All(ctx, r.db(ctx))
 	if err != nil {
 		return nil, ErrorTranslate(err)
 	}

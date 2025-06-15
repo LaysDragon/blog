@@ -1,14 +1,13 @@
 package usecase
 
 import (
-	"context"
 	"fmt"
 )
 
 type CommonRepo[T any] interface {
-	BeginTx(ctx context.Context) (T, error)
-	Commit() error
-	Rollback() error
+	// BeginTx(ctx context.Context) (T, error)
+	// Commit() error
+	// Rollback() error
 }
 
 type ItemNotExistedError struct {

@@ -6,6 +6,7 @@ import (
 	"github.com/LaysDragon/blog/apps/server/db/pgrepo/models"
 	"github.com/LaysDragon/blog/apps/server/domain"
 	usecase "github.com/LaysDragon/blog/apps/server/usecase"
+	stdlibTransactor "github.com/Thiht/transactor/stdlib"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	. "github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
@@ -14,7 +15,7 @@ type AccountDb struct {
 	CommonDb[usecase.AccountRepo]
 }
 
-func NewAccount(db boil.ContextExecutor) usecase.AccountRepo {
+func NewAccount(db stdlibTransactor.DBGetter) usecase.AccountRepo {
 	return &AccountDb{
 		CommonDb: CommonDb[usecase.AccountRepo]{
 			db:      db,
@@ -54,7 +55,7 @@ func (r *AccountDb) ToDomain(account *models.Account) *domain.Account {
 }
 
 func (r *AccountDb) ById(ctx context.Context, id int) (*domain.Account, error) {
-	Account, err := models.FindAccount(ctx, r.db, id)
+	Account, err := models.FindAccount(ctx, r.db(ctx), id)
 
 	if err != nil {
 		return nil, ErrorTranslate(err)
@@ -63,7 +64,7 @@ func (r *AccountDb) ById(ctx context.Context, id int) (*domain.Account, error) {
 }
 
 func (r *AccountDb) ByUsername(ctx context.Context, username string) (*domain.Account, error) {
-	Account, err := models.Accounts(models.AccountWhere.Username.EQ(username)).One(ctx, r.db)
+	Account, err := models.Accounts(models.AccountWhere.Username.EQ(username)).One(ctx, r.db(ctx))
 
 	if err != nil {
 		return nil, ErrorTranslate(err)
@@ -73,7 +74,7 @@ func (r *AccountDb) ByUsername(ctx context.Context, username string) (*domain.Ac
 
 func (r *AccountDb) Upsert(ctx context.Context, account *domain.Account) (*domain.Account, error) {
 	dbAccount := r.ToDb(account)
-	err := dbAccount.Upsert(ctx, r.db, true, []string{"id"}, boil.Infer(), boil.Infer())
+	err := dbAccount.Upsert(ctx, r.db(ctx), true, []string{"id"}, boil.Infer(), boil.Infer())
 	if err != nil {
 		return nil, ErrorTranslate(err)
 	}
@@ -81,12 +82,12 @@ func (r *AccountDb) Upsert(ctx context.Context, account *domain.Account) (*domai
 }
 
 func (r *AccountDb) Delete(ctx context.Context, id int) error {
-	_, err := models.Accounts(models.AccountWhere.ID.EQ(id)).DeleteAll(ctx, r.db, false)
+	_, err := models.Accounts(models.AccountWhere.ID.EQ(id)).DeleteAll(ctx, r.db(ctx), false)
 	return ErrorTranslate(err)
 }
 
 func (r *AccountDb) List(ctx context.Context, offset int, limit int) ([]*domain.Account, error) {
-	accs, err := models.Accounts(Offset(offset), Limit(limit), OrderBy(models.AccountColumns.ID)).All(ctx, r.db)
+	accs, err := models.Accounts(Offset(offset), Limit(limit), OrderBy(models.AccountColumns.ID)).All(ctx, r.db(ctx))
 	if err != nil {
 		return nil, ErrorTranslate(err)
 	}

@@ -15,6 +15,8 @@ import (
 	"github.com/LaysDragon/blog/apps/server/perm"
 	"github.com/LaysDragon/blog/apps/server/usecase"
 	"github.com/LaysDragon/blog/apps/server/web"
+	"github.com/Thiht/transactor"
+	stdlibTransactor "github.com/Thiht/transactor/stdlib"
 	ginzap "github.com/gin-contrib/zap"
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
@@ -101,6 +103,12 @@ func main() {
 
 			func(db *sql.DB) boil.ContextExecutor {
 				return db
+			},
+			func(db *sql.DB) (transactor.Transactor, stdlibTransactor.DBGetter) {
+				return stdlibTransactor.NewTransactor(
+					db,
+					stdlibTransactor.NestedTransactionsSavepoints,
+				)
 			},
 
 			func(config internal.Config, log *zap.Logger) *web.JwtHandler {

@@ -6,6 +6,7 @@ import (
 	"github.com/LaysDragon/blog/apps/server/db/pgrepo/models"
 	"github.com/LaysDragon/blog/apps/server/domain"
 	usecase "github.com/LaysDragon/blog/apps/server/usecase"
+	stdlibTransactor "github.com/Thiht/transactor/stdlib"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	. "github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
@@ -14,7 +15,7 @@ type SiteDb struct {
 	CommonDb[usecase.SiteRepo]
 }
 
-func NewSite(db boil.ContextExecutor) usecase.SiteRepo {
+func NewSite(db stdlibTransactor.DBGetter) usecase.SiteRepo {
 	return &SiteDb{
 		CommonDb: CommonDb[usecase.SiteRepo]{
 			db:      db,
@@ -48,7 +49,7 @@ func (r *SiteDb) ToDomain(site *models.Site) *domain.Site {
 }
 
 func (r *SiteDb) ById(ctx context.Context, id int) (*domain.Site, error) {
-	site, err := models.FindSite(ctx, r.db, id)
+	site, err := models.FindSite(ctx, r.db(ctx), id)
 
 	if err != nil {
 		return nil, ErrorTranslate(err)
@@ -58,7 +59,7 @@ func (r *SiteDb) ById(ctx context.Context, id int) (*domain.Site, error) {
 
 func (r *SiteDb) Upsert(ctx context.Context, site *domain.Site) (*domain.Site, error) {
 	dbSite := r.ToDb(site)
-	err := dbSite.Upsert(ctx, r.db, true, []string{"id"}, boil.Infer(), boil.Infer())
+	err := dbSite.Upsert(ctx, r.db(ctx), true, []string{"id"}, boil.Infer(), boil.Infer())
 	if err != nil {
 		return nil, ErrorTranslate(err)
 	}
@@ -66,12 +67,12 @@ func (r *SiteDb) Upsert(ctx context.Context, site *domain.Site) (*domain.Site, e
 }
 
 func (r *SiteDb) Delete(ctx context.Context, id int) error {
-	_, err := models.Sites(models.SiteWhere.ID.EQ(id)).DeleteAll(ctx, r.db, false)
+	_, err := models.Sites(models.SiteWhere.ID.EQ(id)).DeleteAll(ctx, r.db(ctx), false)
 	return ErrorTranslate(err)
 }
 
 func (r *SiteDb) List(ctx context.Context, offset int, limit int) ([]*domain.Site, error) {
-	accs, err := models.Sites(Offset(offset), Limit(limit), OrderBy(models.SiteColumns.ID)).All(ctx, r.db)
+	accs, err := models.Sites(Offset(offset), Limit(limit), OrderBy(models.SiteColumns.ID)).All(ctx, r.db(ctx))
 	if err != nil {
 		return nil, ErrorTranslate(err)
 	}
