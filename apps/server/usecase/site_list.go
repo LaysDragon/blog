@@ -6,6 +6,7 @@ import (
 
 	"github.com/LaysDragon/blog/apps/server/domain"
 	"github.com/LaysDragon/blog/apps/server/perm"
+	"github.com/LaysDragon/blog/apps/server/utils"
 )
 
 func (s *Site) List(ctx context.Context, op perm.ResId, offset int, limit int, uid int) ([]*domain.Site, error) {
@@ -19,5 +20,5 @@ func (s *Site) List(ctx context.Context, op perm.ResId, offset int, limit int, u
 		return nil, fmt.Errorf("query site data failed:%w", err)
 	}
 
-	return errorWrap(s.repo.List(ctx, offset, limit, uid))("create site data failed:%w")
+	return utils.ErrorWrap(s.repo.List(ctx, offset, limit, uid))("create site data failed:%w")
 }

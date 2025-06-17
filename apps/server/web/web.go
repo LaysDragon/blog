@@ -8,10 +8,6 @@ import (
 	"go.uber.org/zap"
 )
 
-func logObj(log *zap.Logger, obj any) {
-	log.Debug("check obj content", zap.Any("obj", obj))
-}
-
 const LOGGER_KEY = "APP_WIDE_LOGGER"
 
 func RegisterLogger(ctx context.Context, log *zap.Logger) context.Context {
@@ -37,14 +33,4 @@ func CtxLoggerMidleware(log *zap.Logger) gin.HandlerFunc {
 
 func GetUserOp(ctx context.Context) perm.ResId {
 	return perm.User(GetUID(ctx))
-}
-
-// TODO: move to utils
-func mappingFunc[S any, T any](source []S, mapper func(S) T) []T {
-	result := make([]T, 0) //prevent nil slice turn into null json
-	for _, s := range source {
-		result = append(result, mapper(s))
-	}
-	return result
-
 }

@@ -14,6 +14,7 @@ import (
 	"github.com/LaysDragon/blog/apps/server/internal"
 	"github.com/LaysDragon/blog/apps/server/perm"
 	"github.com/LaysDragon/blog/apps/server/usecase"
+	"github.com/LaysDragon/blog/apps/server/utils"
 	"github.com/LaysDragon/blog/apps/server/web"
 	"github.com/Thiht/transactor"
 	stdlibTransactor "github.com/Thiht/transactor/stdlib"
@@ -26,15 +27,6 @@ import (
 	"go.uber.org/fx/fxevent"
 	"go.uber.org/zap"
 )
-
-func errorWrap[T any](val T, err error) func(string) (T, error) {
-	return func(msg string) (T, error) {
-		if err != nil {
-			return val, fmt.Errorf(msg, err)
-		}
-		return val, err
-	}
-}
 
 func NewServer(log *zap.Logger) *gin.Engine {
 	log = log.Named("gin")
@@ -115,7 +107,7 @@ func main() {
 				return web.NewJwtHandler(config.JwtSecret, log)
 			},
 			func(config internal.Config, db *sql.DB, log *zap.Logger) (*perm.Perm, error) {
-				return errorWrap(perm.New(db, config.DBType, log))("failed to init Permission service, %w")
+				return utils.ErrorWrap(perm.New(db, config.DBType, log))("failed to init Permission service, %w")
 			},
 			web.GetValidator,
 			pgrepo.NewPost,

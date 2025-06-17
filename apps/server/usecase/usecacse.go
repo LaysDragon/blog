@@ -5,9 +5,6 @@ import (
 )
 
 type CommonRepo[T any] interface {
-	// BeginTx(ctx context.Context) (T, error)
-	// Commit() error
-	// Rollback() error
 }
 
 type ItemNotExistedError struct {
@@ -43,13 +40,4 @@ func (e ItemConflictError) Unwrap() error {
 func (e ItemConflictError) Is(err error) bool {
 	_, ok := err.(ItemConflictError)
 	return ok
-}
-
-func errorWrap[T any](val T, err error) func(string) (T, error) {
-	return func(msg string) (T, error) {
-		if err != nil {
-			return val, fmt.Errorf(msg, err)
-		}
-		return val, err
-	}
 }

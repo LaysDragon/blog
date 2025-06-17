@@ -7,6 +7,7 @@ import (
 
 	"github.com/LaysDragon/blog/apps/server/perm"
 	"github.com/LaysDragon/blog/apps/server/usecase"
+	"github.com/LaysDragon/blog/apps/server/utils"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
@@ -43,7 +44,7 @@ func (c *SiteController) HandleList(ctx *gin.Context) {
 		return
 	}
 
-	result := mappingFunc(sites, c.ToDto)
+	result := utils.MappingFunc(sites, c.ToDto)
 	// var result []Site
 	// for _, a := range sites {
 	// 	result = append(result, *c.ToDto(a))

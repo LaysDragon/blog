@@ -6,6 +6,7 @@ import (
 
 	"github.com/LaysDragon/blog/apps/server/domain"
 	"github.com/LaysDragon/blog/apps/server/perm"
+	"github.com/LaysDragon/blog/apps/server/utils"
 )
 
 func (s *Site) Create(ctx context.Context, op perm.ResId, Site *domain.Site) (*domain.Site, error) {
@@ -14,5 +15,5 @@ func (s *Site) Create(ctx context.Context, op perm.ResId, Site *domain.Site) (*d
 		return nil, fmt.Errorf("create site data failed:%w", err)
 	}
 
-	return errorWrap(s.repo.Upsert(ctx, Site))("create site data failed:%w")
+	return utils.ErrorWrap(s.repo.Upsert(ctx, Site))("create site data failed:%w")
 }

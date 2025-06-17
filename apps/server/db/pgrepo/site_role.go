@@ -6,6 +6,7 @@ import (
 	"github.com/LaysDragon/blog/apps/server/db/pgrepo/models"
 	"github.com/LaysDragon/blog/apps/server/domain"
 	usecase "github.com/LaysDragon/blog/apps/server/usecase"
+	"github.com/LaysDragon/blog/apps/server/utils"
 	stdlibTransactor "github.com/Thiht/transactor/stdlib"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	. "github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -65,7 +66,7 @@ func (r *SiteRoleDb) ByUid(ctx context.Context, id int) ([]*domain.SiteRole, err
 	if err != nil {
 		return nil, ErrorTranslate(err)
 	}
-	return mappingFunc(roles, r.ToDomain), nil
+	return utils.MappingFunc(roles, r.ToDomain), nil
 }
 
 func (r *SiteRoleDb) BySid(ctx context.Context, id int) ([]*domain.SiteRole, error) {
@@ -74,7 +75,7 @@ func (r *SiteRoleDb) BySid(ctx context.Context, id int) ([]*domain.SiteRole, err
 	if err != nil {
 		return nil, ErrorTranslate(err)
 	}
-	return mappingFunc(roles, r.ToDomain), nil
+	return utils.MappingFunc(roles, r.ToDomain), nil
 }
 
 func (r *SiteRoleDb) Upsert(ctx context.Context, role *domain.SiteRole) (*domain.SiteRole, error) {
@@ -97,6 +98,6 @@ func (r *SiteRoleDb) List(ctx context.Context, offset int, limit int) ([]*domain
 	if err != nil {
 		return nil, ErrorTranslate(err)
 	}
-	return mappingFunc(accs, r.ToDomain), nil
+	return utils.MappingFunc(accs, r.ToDomain), nil
 
 }

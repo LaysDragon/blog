@@ -6,6 +6,7 @@ import (
 	"github.com/LaysDragon/blog/apps/server/db/pgrepo/models"
 	"github.com/LaysDragon/blog/apps/server/domain"
 	usecase "github.com/LaysDragon/blog/apps/server/usecase"
+	"github.com/LaysDragon/blog/apps/server/utils"
 	stdlibTransactor "github.com/Thiht/transactor/stdlib"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	. "github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -77,7 +78,7 @@ func (r *SiteDb) List(ctx context.Context, offset int, limit int, uid int) ([]*d
 		if err != nil {
 			return nil, ErrorTranslate(err)
 		}
-		return mappingFunc(sitesRoles, func(site *models.SiteRole) *domain.Site {
+		return utils.MappingFunc(sitesRoles, func(site *models.SiteRole) *domain.Site {
 			return r.ToDomain(site.R.Site)
 		}), nil
 	} else {
@@ -86,7 +87,7 @@ func (r *SiteDb) List(ctx context.Context, offset int, limit int, uid int) ([]*d
 			return nil, ErrorTranslate(err)
 		}
 
-		return mappingFunc(sites, r.ToDomain), nil
+		return utils.MappingFunc(sites, r.ToDomain), nil
 	}
 
 }
