@@ -5,7 +5,7 @@ type: application
 tasks:
   run:
     # command: "go run main.go"
-    command: "air"
+    command: air --build.stop_on_error true
     local: true
     options:
       persistent: true
