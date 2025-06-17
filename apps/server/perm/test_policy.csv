@@ -7,8 +7,12 @@ p,user.2,ROLE::USER,*
 
 p,user.admin,ROLE::ADMIN,*
 
+
+g2,site.1,user.1
 g2,post.1,site.1
 g2,post.2,site.1
+
+g2,site.2,user.2
 g2,post.3,site.2
 g2,post.4,site.2
 

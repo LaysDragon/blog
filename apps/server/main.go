@@ -127,6 +127,7 @@ func main() {
 			usecase.NewAccount,
 			web.NewPostController,
 			web.NewAccountController,
+			web.NewSiteController,
 			NewServer,
 		),
 		//TODO: remove moduletrace and stacktrace field by custom encoder wrapper

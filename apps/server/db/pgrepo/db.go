@@ -76,10 +76,12 @@ func ErrorTranslate(err error) error {
 	return err
 }
 
+// TODO: move to utils
 type ErrorWrapped interface{ Unwrap() error }
 
+// TODO: move to utils
 func mappingFunc[S any, T any](source []S, mapper func(S) T) []T {
-	var result []T
+	result := make([]T, 0)
 	for _, s := range source {
 		result = append(result, mapper(s))
 	}

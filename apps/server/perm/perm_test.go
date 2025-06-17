@@ -224,6 +224,24 @@ func TestRule(t *testing.T) {
 			res:  "post.1",
 			want: true,
 		},
+		{
+			sub:  "user.admin",
+			act:  "ACT::SITE/LIST",
+			res:  "system",
+			want: true,
+		},
+		{
+			sub:  "user.1",
+			act:  "ACT::SITE/LIST",
+			res:  "system",
+			want: false,
+		},
+		{
+			sub:  "user.1",
+			act:  "ACT::SITE/LIST",
+			res:  "user.1",
+			want: true,
+		},
 	}
 
 	for _, tt := range tests {
@@ -256,6 +274,8 @@ func TestRuleRaw(t *testing.T) {
 		{"user.admin", "ACT::USER_ADMIN/WRITE", "system"},
 		{"user.admin", "ACT::POST/WRITE", "post.1"},
 		{"user.system", "ACT::SITE/WRITE", "system"},
+		{"user.1", "ACT::SITE/LIST", "system"},
+		{"user.1", "ACT::SITE/LIST", "user.1"},
 	}
 
 	for _, v := range testRule {
