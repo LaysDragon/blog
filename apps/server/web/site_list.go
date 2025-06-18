@@ -45,10 +45,5 @@ func (c *SiteController) HandleList(ctx *gin.Context) {
 	}
 
 	result := utils.MappingFunc(sites, c.ToDto)
-	// var result []Site
-	// for _, a := range sites {
-	// 	result = append(result, *c.ToDto(a))
-	// }
-
 	ctx.JSON(http.StatusOK, result)
 }
