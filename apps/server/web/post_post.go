@@ -13,7 +13,7 @@ import (
 
 type PostCreateRequest struct {
 	Content string `json:"content" binding:"required"`
-	SiteId  int    `json:"site_id" binding:"required"`
+	SiteId  int    `json:"siteId" binding:"required"`
 }
 
 func (c *PostController) HandlePost(ctx *gin.Context) {
