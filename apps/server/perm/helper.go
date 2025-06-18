@@ -136,6 +136,14 @@ func UserSystem(op ResId) ResId {
 func Site(id int) ResId {
 	return RES_SITE.ID(id)
 }
+
+func SiteWild() ResId {
+	return ResId{
+		Name: RES_SITE,
+		ID:   "*",
+	}
+}
+
 func Post(id int) ResId {
 	return RES_POST.ID(id)
 }
