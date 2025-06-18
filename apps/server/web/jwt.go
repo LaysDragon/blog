@@ -85,7 +85,9 @@ func (j *JwtHandler) ParseMiddleware() gin.HandlerFunc {
 			switch {
 			case errors.Is(err, jwt.ErrTokenExpired):
 				expired = true
-			case errors.Is(err, jwt.ErrTokenSignatureInvalid):
+			case
+				errors.Is(err, jwt.ErrTokenSignatureInvalid),
+				errors.Is(err, jwt.ErrTokenMalformed):
 				j.log.Error("failed to parse jwt token", zap.Error(err))
 				ctx.AbortWithStatus(http.StatusBadRequest)
 				return
