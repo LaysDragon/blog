@@ -53,5 +53,11 @@ func CtxLoggerMidleware(log *zap.Logger) gin.HandlerFunc {
 }
 
 func GetUserOp(ctx context.Context) perm.ResId {
-	return perm.User(GetUID(ctx))
+	uid := GetUID(ctx)
+	if uid > 0 {
+		return perm.User(GetUID(ctx))
+	} else {
+		return perm.UserAnon()
+	}
+
 }
