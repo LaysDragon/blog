@@ -1,9 +1,24 @@
-package internal
+package config
 
 import (
 	"log"
 
+	"github.com/LaysDragon/blog/apps/server/db"
+	"github.com/LaysDragon/blog/apps/server/perm"
+	"github.com/LaysDragon/blog/apps/server/web"
 	"github.com/spf13/viper"
+	"go.uber.org/fx"
+)
+
+var Module = fx.Module("config",
+	fx.Provide(
+		fx.Annotate(
+			LoadConfig,
+			fx.As(new(db.DbConfig)),
+			fx.As(new(perm.PermConfig)),
+			fx.As(new(web.WebConfig)),
+		),
+	),
 )
 
 // TODO: add config check
@@ -12,6 +27,17 @@ type Config struct {
 	DataSourceName string
 	//TODO: first run auto produce with crypto/rand and overwrite config
 	JwtSecret string
+}
+
+func (c Config) GetDBType() string {
+	return c.DBType
+}
+func (c Config) GetDataSourceName() string {
+	return c.DataSourceName
+}
+
+func (c Config) GetJwtSecret() string {
+	return c.JwtSecret
 }
 
 func LoadConfig() Config {

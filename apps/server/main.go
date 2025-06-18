@@ -2,27 +2,22 @@ package main
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"net"
 	"net/http"
 	"strings"
 	"time"
 
+	"github.com/LaysDragon/blog/apps/server/config"
 	"github.com/LaysDragon/blog/apps/server/db"
 	"github.com/LaysDragon/blog/apps/server/db/pgrepo"
-	"github.com/LaysDragon/blog/apps/server/internal"
 	"github.com/LaysDragon/blog/apps/server/perm"
 	"github.com/LaysDragon/blog/apps/server/usecase"
-	"github.com/LaysDragon/blog/apps/server/utils"
 	"github.com/LaysDragon/blog/apps/server/web"
-	"github.com/Thiht/transactor"
-	stdlibTransactor "github.com/Thiht/transactor/stdlib"
 	ginzap "github.com/gin-contrib/zap"
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
 	prettyconsole "github.com/thessem/zap-prettyconsole"
-	"github.com/volatiletech/sqlboiler/v4/boil"
 	"go.uber.org/fx"
 	"go.uber.org/fx/fxevent"
 	"go.uber.org/zap"
@@ -70,71 +65,39 @@ func StartServer(lc fx.Lifecycle, router *gin.Engine, log *zap.Logger) {
 	})
 }
 
+var LogModule = fx.Module("logger",
+	fx.Provide(
+		func() *zap.Logger {
+			return prettyconsole.NewLogger(zap.DebugLevel)
+		},
+		func(log *zap.Logger) *zap.SugaredLogger {
+			return log.Sugar()
+		},
+	),
+	fx.WithLogger(func(log *zap.Logger) fxevent.Logger {
+		fxlogger := &fxevent.ZapLogger{Logger: log.Named("fx")}
+		fxlogger.UseLogLevel(zap.InfoLevel)
+		return fxlogger
+	}),
+)
+
 func main() {
-	//TODO: refactor with fx module
 	app := fx.New(
+		LogModule,
 		fx.Provide(
-			internal.LoadConfig,
-			func() *zap.Logger {
-				return prettyconsole.NewLogger(zap.DebugLevel)
-			},
-			func(log *zap.Logger) *zap.SugaredLogger {
-				return log.Sugar()
-			},
-			func(config internal.Config) (*sql.DB, error) {
-				db, err := sql.Open(config.DBType, config.DataSourceName)
-				if err != nil {
-					return nil, fmt.Errorf("unable to connect to database, %w", err)
-				}
-				err = db.PingContext(context.Background())
-				if err != nil {
-					return nil, fmt.Errorf("unable to connect to database, %w", err)
-				}
-				return db, nil
-			},
-
-			func(db *sql.DB) boil.ContextExecutor {
-				return db
-			},
-			func(db *sql.DB) (transactor.Transactor, stdlibTransactor.DBGetter) {
-				return stdlibTransactor.NewTransactor(
-					db,
-					stdlibTransactor.NestedTransactionsSavepoints,
-				)
-			},
-
-			func(config internal.Config, log *zap.Logger) *web.JwtHandler {
-				return web.NewJwtHandler(config.JwtSecret, log)
-			},
-			func(config internal.Config, db *sql.DB, log *zap.Logger) (*perm.Perm, error) {
-				return utils.ErrorWrap(perm.New(db, config.DBType, log))("failed to init Permission service, %w")
-			},
-			web.GetValidator,
-			pgrepo.NewPost,
-			pgrepo.NewAccount,
-			pgrepo.NewSite,
-			pgrepo.NewSiteRole,
-			usecase.NewPost,
-			usecase.NewSite,
-			usecase.NewAccount,
-			web.NewPostController,
-			web.NewAccountController,
-			web.NewSiteController,
 			NewServer,
 		),
+		config.Module,
+		db.Module,
+		perm.Module,
+		pgrepo.Module,
+		usecase.Module,
 		//TODO: remove moduletrace and stacktrace field by custom encoder wrapper
 		// https://stackoverflow.com/questions/73469128/hide-sensitive-fields-in-uber-zap-go
-		fx.WithLogger(func(log *zap.Logger) fxevent.Logger {
-			fxlogger := &fxevent.ZapLogger{Logger: log.Named("fx")}
-			fxlogger.UseLogLevel(zap.InfoLevel)
-			return fxlogger
-		}),
+
+		web.Module,
 		fx.Invoke(
-			db.InitDb,
-			perm.InitPerm,
 			db.InitDbData,
-			web.SetupValidation,
-			web.SetupRouter,
 			StartServer,
 		),
 	)

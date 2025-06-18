@@ -5,8 +5,29 @@ import (
 
 	"github.com/LaysDragon/blog/apps/server/perm"
 	"github.com/gin-gonic/gin"
+	"go.uber.org/fx"
 	"go.uber.org/zap"
 )
+
+type WebConfig interface {
+	GetJwtSecret() string
+}
+
+var Module = fx.Module("web",
+	fx.Provide(
+		GetValidator,
+		func(config WebConfig, log *zap.Logger) *JwtHandler {
+			return NewJwtHandler(config.GetJwtSecret(), log)
+		},
+		NewPostController,
+		NewAccountController,
+		NewSiteController,
+	),
+
+	fx.Invoke(
+		SetupValidation,
+		SetupRouter,
+	))
 
 const LOGGER_KEY = "APP_WIDE_LOGGER"
 

@@ -2,6 +2,16 @@ package usecase
 
 import (
 	"fmt"
+
+	"go.uber.org/fx"
+)
+
+var Module = fx.Module("usecase",
+	fx.Provide(
+		NewPost,
+		NewSite,
+		NewAccount,
+	),
 )
 
 type CommonRepo[T any] interface {

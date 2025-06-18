@@ -8,10 +8,27 @@ import (
 	"strings"
 
 	sqladapter "github.com/Blank-Xu/sql-adapter"
+	"github.com/LaysDragon/blog/apps/server/utils"
 	"github.com/casbin/casbin/v2"
 	"github.com/casbin/casbin/v2/model"
 	"github.com/casbin/casbin/v2/util"
+	"go.uber.org/fx"
 	"go.uber.org/zap"
+)
+
+type PermConfig interface {
+	GetDBType() string
+}
+
+var Module = fx.Module("db",
+	fx.Provide(
+		func(config PermConfig, db *sql.DB, log *zap.Logger) (*Perm, error) {
+			return utils.ErrorWrap(New(db, config.GetDBType(), log))("failed to init Permission service, %w")
+		},
+	),
+	fx.Invoke(
+		InitPerm,
+	),
 )
 
 //go:embed model.conf

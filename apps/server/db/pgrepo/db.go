@@ -8,6 +8,16 @@ import (
 	usecase "github.com/LaysDragon/blog/apps/server/usecase"
 	stdlibTransactor "github.com/Thiht/transactor/stdlib"
 	"github.com/lib/pq"
+	"go.uber.org/fx"
+)
+
+var Module = fx.Module("db",
+	fx.Provide(
+		NewPost,
+		NewAccount,
+		NewSite,
+		NewSiteRole,
+	),
 )
 
 type CommonDb[T usecase.CommonRepo[T]] struct {
