@@ -22,5 +22,6 @@ func SetupRouter(router *gin.Engine,
 	authGroup.GET("/sites", site.HandleList)
 
 	authGroup.POST("/posts", post.HandlePost)
+	authGroup.DELETE("/posts/:id", post.HandleDelete)
 
 }

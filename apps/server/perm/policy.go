@@ -45,8 +45,12 @@ func (p *PolicyLogic) AddSite(site *domain.Site, user *domain.Account) error {
 	return nil
 }
 
-func (p *PolicyLogic) AddPost(post *domain.Post) {
-	p.perm.AddResRelation(Site(post.SiteID), Post(post.ID))
+func (p *PolicyLogic) AddPost(post *domain.Post) error {
+	_, err := p.perm.AddResRelation(Site(post.SiteID), Post(post.ID))
+	if err != nil {
+		return fmt.Errorf("add site perm rule failed:%w", err)
+	}
+	return nil
 }
 
 func (p *PolicyLogic) AddComment(comment *domain.Comment) {
