@@ -5,6 +5,7 @@ import (
 
 	"github.com/LaysDragon/blog/apps/server/domain"
 	"github.com/LaysDragon/blog/apps/server/perm"
+	"github.com/Thiht/transactor"
 )
 
 type PostRepo interface {
@@ -16,10 +17,11 @@ type PostRepo interface {
 }
 
 type Post struct {
-	repo PostRepo
-	perm *perm.Perm
+	repo       PostRepo
+	transactor transactor.Transactor
+	perm       *perm.Perm
 }
 
-func NewPost(repo PostRepo, perm *perm.Perm) *Post {
-	return &Post{repo, perm}
+func NewPost(repo PostRepo, transactor transactor.Transactor, perm *perm.Perm) *Post {
+	return &Post{repo, transactor, perm}
 }
