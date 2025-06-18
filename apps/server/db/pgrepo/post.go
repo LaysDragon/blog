@@ -6,9 +6,10 @@ import (
 	"github.com/LaysDragon/blog/apps/server/db/pgrepo/models"
 	"github.com/LaysDragon/blog/apps/server/domain"
 	usecase "github.com/LaysDragon/blog/apps/server/usecase"
+	"github.com/LaysDragon/blog/apps/server/utils"
 	stdlibTransactor "github.com/Thiht/transactor/stdlib"
 	"github.com/volatiletech/sqlboiler/v4/boil"
-	// . "github.com/volatiletech/sqlboiler/v4/queries/qm"
+	. "github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
 type PostDb struct {
@@ -71,4 +72,20 @@ func (r *PostDb) Upsert(ctx context.Context, post *domain.Post) (*domain.Post, e
 func (r *PostDb) Delete(ctx context.Context, id int) error {
 	_, err := models.Posts(models.PostWhere.ID.EQ(id)).DeleteAll(ctx, r.db(ctx), false)
 	return ErrorTranslate(err)
+}
+
+func (r *PostDb) List(ctx context.Context, offset int, limit int, sid int) ([]*domain.Post, error) {
+	queries := []QueryMod{Offset(offset), Limit(limit), OrderBy(models.PostColumns.ID)}
+
+	if sid > 0 {
+		queries = append(queries, models.PostWhere.SiteID.EQ(sid))
+	}
+
+	posts, err := models.Posts(queries...).All(ctx, r.db(ctx))
+	if err != nil {
+		return nil, ErrorTranslate(err)
+	}
+
+	return utils.MappingFunc(posts, r.ToDomain), nil
+
 }

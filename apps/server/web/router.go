@@ -11,6 +11,8 @@ func SetupRouter(router *gin.Engine,
 
 	router.POST("/accounts", account.HandlePost)
 	router.POST("/accounts/login", account.HandleLogin)
+
+	router.GET("/posts", post.HandleList)
 	router.GET("/posts/:id", post.HandleGet)
 
 	authGroup := router.Group("", RequiredAuthMiddware())

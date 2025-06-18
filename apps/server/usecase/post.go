@@ -12,6 +12,7 @@ type PostRepo interface {
 	ById(ctx context.Context, id int) (*domain.Post, error)
 	Upsert(ctx context.Context, post *domain.Post) (*domain.Post, error)
 	Delete(ctx context.Context, id int) error
+	List(ctx context.Context, offset int, limit int, sid int) ([]*domain.Post, error)
 }
 
 type Post struct {
