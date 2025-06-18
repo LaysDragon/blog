@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/LaysDragon/blog/apps/server/perm"
 	"github.com/LaysDragon/blog/apps/server/usecase"
 	"github.com/LaysDragon/blog/apps/server/utils"
 	"github.com/gin-gonic/gin"
@@ -29,6 +30,8 @@ func (c *PostController) HandleList(ctx *gin.Context) {
 		switch {
 		case errors.Is(err, usecase.ItemNotExistedError{}):
 			ctx.Status(http.StatusNotFound)
+		case errors.Is(err, perm.PermissionError{}):
+			ctx.Status(http.StatusForbidden)
 		default:
 			ctx.Status(http.StatusInternalServerError)
 		}
