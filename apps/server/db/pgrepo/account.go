@@ -82,7 +82,10 @@ func (r *AccountDb) Upsert(ctx context.Context, account *domain.Account) (*domai
 }
 
 func (r *AccountDb) Delete(ctx context.Context, id int) error {
-	_, err := models.Accounts(models.AccountWhere.ID.EQ(id)).DeleteAll(ctx, r.db(ctx), false)
+	affRow, err := models.Accounts(models.AccountWhere.ID.EQ(id)).DeleteAll(ctx, r.db(ctx), false)
+	if affRow == 0 {
+		return usecase.ItemNotExistedError{}
+	}
 	return ErrorTranslate(err)
 }
 

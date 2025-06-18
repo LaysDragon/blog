@@ -70,7 +70,10 @@ func (r *PostDb) Upsert(ctx context.Context, post *domain.Post) (*domain.Post, e
 }
 
 func (r *PostDb) Delete(ctx context.Context, id int) error {
-	_, err := models.Posts(models.PostWhere.ID.EQ(id)).DeleteAll(ctx, r.db(ctx), false)
+	affRow, err := models.Posts(models.PostWhere.ID.EQ(id)).DeleteAll(ctx, r.db(ctx), false)
+	if affRow == 0 {
+		return usecase.ItemNotExistedError{}
+	}
 	return ErrorTranslate(err)
 }
 

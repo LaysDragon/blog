@@ -68,7 +68,10 @@ func (r *SiteDb) Upsert(ctx context.Context, site *domain.Site) (*domain.Site, e
 }
 
 func (r *SiteDb) Delete(ctx context.Context, id int) error {
-	_, err := models.Sites(models.SiteWhere.ID.EQ(id)).DeleteAll(ctx, r.db(ctx), false)
+	affRow, err := models.Sites(models.SiteWhere.ID.EQ(id)).DeleteAll(ctx, r.db(ctx), false)
+	if affRow == 0 {
+		return usecase.ItemNotExistedError{}
+	}
 	return ErrorTranslate(err)
 }
 

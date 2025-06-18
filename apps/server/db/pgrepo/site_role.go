@@ -88,7 +88,10 @@ func (r *SiteRoleDb) Upsert(ctx context.Context, role *domain.SiteRole) (*domain
 }
 
 func (r *SiteRoleDb) Delete(ctx context.Context, sid int, uid int) error {
-	_, err := models.SiteRoles(models.SiteRoleWhere.SiteID.EQ(sid), models.SiteRoleWhere.AccountID.EQ(uid)).DeleteAll(ctx, r.db(ctx))
+	affRow, err := models.SiteRoles(models.SiteRoleWhere.SiteID.EQ(sid), models.SiteRoleWhere.AccountID.EQ(uid)).DeleteAll(ctx, r.db(ctx))
+	if affRow == 0 {
+		return usecase.ItemNotExistedError{}
+	}
 	return ErrorTranslate(err)
 }
 
