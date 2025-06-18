@@ -6,11 +6,6 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-type Post struct {
-	Id      int
-	Context string
-}
-
 func ValidateEnum(fl validator.FieldLevel) bool {
 	enum := fl.Field().Interface().(domain.Enum)
 	return enum.IsValid()

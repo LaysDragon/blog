@@ -1,10 +1,8 @@
 package web
 
 import (
-	"database/sql"
-
+	"github.com/LaysDragon/blog/apps/server/domain"
 	"github.com/LaysDragon/blog/apps/server/usecase"
-	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
 
@@ -17,16 +15,16 @@ func NewPostController(usecase *usecase.Post, log *zap.SugaredLogger) *PostContr
 	return &PostController{usecase, log}
 }
 
-func (c *PostController) HandleGet(ctx *gin.Context) {
-	post, err := c.usecase.ById(ctx, 1)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			ctx.Status(404)
-		} else {
-			ctx.String(500, err.Error())
-		}
-		c.log.Error(err)
-		return
+// Post DTO
+type Post struct {
+	Id      int
+	Content string
+}
+
+func (c *PostController) ToDto(post *domain.Post) *Post {
+	return &Post{
+		Id:      post.ID,
+		Content: post.Content,
 	}
-	ctx.JSON(200, post)
+
 }

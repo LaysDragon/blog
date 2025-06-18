@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/LaysDragon/blog/apps/server/domain"
+	"github.com/LaysDragon/blog/apps/server/perm"
 )
 
 type PostRepo interface {
@@ -15,8 +16,9 @@ type PostRepo interface {
 
 type Post struct {
 	repo PostRepo
+	perm *perm.Perm
 }
 
-func NewPost(repo PostRepo) *Post {
-	return &Post{repo}
+func NewPost(repo PostRepo, perm *perm.Perm) *Post {
+	return &Post{repo, perm}
 }
