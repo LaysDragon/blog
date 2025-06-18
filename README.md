@@ -19,10 +19,10 @@
 - [x] List
 
 ### Post
-- [ ] Create
-- [ ] Delete
-- [ ] Get
-- [ ] List
+- [x] Create
+- [x] Delete
+- [x] Get
+- [x] List
 
 ### Site
 部落格的最小單位，與用戶脫鉤
